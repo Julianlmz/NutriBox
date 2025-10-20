@@ -1,0 +1,17 @@
+# Ignorar configuración de PyCharm
+.idea/
+*.iml
+
+# Ignorar archivos de entorno virtual
+venv/
+.env/
+
+# Ignorar archivos temporales
+__pycache__/
+*.py[cod]
+*.log
+
+# Ignorar configuraciones específicas
+*.json
+*.sqlite
+*.sqlite3
