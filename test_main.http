@@ -1,0 +1,41 @@
+### 🟢 Crear un usuario
+POST http://127.0.0.1:8000/usuarios/
+Content-Type: application/json
+Accept: application/json
+
+{
+  "nombre": "Julian",
+  "apellido": "Leal",
+  "localidad": "Kennedy",
+  "edad": 21,
+  "cedula": "1027150615"
+}
+
+
+### 🔵 Obtener todos los usuarios
+GET http://127.0.0.1:8000/usuarios/
+Accept: application/json
+
+
+### 🟣 Obtener usuario por ID
+GET http://127.0.0.1:8000/usuarios/1
+Accept: application/json
+
+
+### 🟠 Actualizar usuario (PUT)
+PUT http://127.0.0.1:8000/usuarios/1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "nombre": "Jorge",
+  "apellido": "Baron",
+  "localidad": "Kennedy Central",
+  "edad": 64,
+  "cedula": "17527277"
+}
+
+
+### 🔴 Eliminar usuario
+DELETE http://127.0.0.1:8000/usuarios/1
+Accept: application/json
