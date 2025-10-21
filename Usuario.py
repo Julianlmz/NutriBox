@@ -5,7 +5,7 @@ from models import Usuario, UsuarioCreate
 router = APIRouter(prefix="/usuarios", tags=["Usuarios"])
 
 @router.post("/", response_model=Usuario, status_code=201 )
-async def create_usuario(new_usuario:UsuarioCreate, session:SessionDep):
+async def crear_usuario(new_usuario:UsuarioCreate, session:SessionDep):
     usuario = Usuario(**new_usuario.model_dump())
     session.add(usuario)
     session.commit()
@@ -13,18 +13,18 @@ async def create_usuario(new_usuario:UsuarioCreate, session:SessionDep):
     return usuario
 
 @router.get("/", response_model=list[Usuario])
-async def get_usuarios(session: SessionDep):
+async def obtener_usuarios(session: SessionDep):
     return session.query(Usuario).all()
 
 @router.get("/{id_usuario}", response_model=Usuario)
-async def get_usuario(id_usuario:int, session:SessionDep):
+async def obtener_usuario(id_usuario:int, session:SessionDep):
     usuario_db = session.get(Usuario, id_usuario)
     if not usuario_db:
         raise HTTPException(status_code=404, detail="Usuario not found")
     return usuario_db
 
 @router.put("/{id_usuario}", response_model=Usuario)
-async def update_usuario(id_usuario:int, new_usuario:UsuarioCreate, session:SessionDep):
+async def actualizar_usuario(id_usuario:int, new_usuario:UsuarioCreate, session:SessionDep):
     usuario_db = session.get(Usuario, id_usuario)
     if not usuario_db:
         raise HTTPException(status_code=404, detail="Usuario not found")
@@ -36,7 +36,7 @@ async def update_usuario(id_usuario:int, new_usuario:UsuarioCreate, session:Sess
     return usuario_db
 
 @router.delete("/{id_usuario}")
-async def delete_usuario(id_usuario:int, session:SessionDep):
+async def eliminar_usuario(id_usuario:int, session:SessionDep):
     usuario_db = session.get(Usuario, id_usuario)
     if not usuario_db:
         raise HTTPException(status_code=404, detail="Usuario not found")
