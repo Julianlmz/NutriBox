@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from db import create_tables
-import Usuario
+import Usuario, Lonchera
 
 app = FastAPI(title="NutriBox API")
 
@@ -9,7 +9,7 @@ def on_startup():
     create_tables(app)
 
 app.include_router(Usuario.router, tags=["Usuarios"], prefix="/usuarios")
-
+app.include_router(Lonchera.router)
 @app.get("/")
 async def root():
     return {"message": "API de NutriBox funcionando"}
