@@ -1,41 +1,703 @@
-### 🟢 Crear un usuario
-POST http://127.0.0.1:8000/usuarios/
-Content-Type: application/json
+### ============================================
+### PRUEBAS COMPLETAS - NutriBox API v2.1.0
+### ============================================
+
+### 🏠 ROOT - Verificar que el servidor funciona
+GET http://127.0.0.1:8000/
 Accept: application/json
 
+###
+
+### 📊 Ver información de modelos
+GET http://127.0.0.1:8000/modelos
+Accept: application/json
+
+###
+
+### 🔗 Ver todas las relaciones del sistema
+GET http://127.0.0.1:8000/relaciones
+Accept: application/json
+
+###
+
+### ============================================
+### 👤 USUARIOS - CRUD Completo
+### ============================================
+
+### Crear usuario (Padre)
+POST http://127.0.0.1:8000/usuarios/
+Content-Type: application/json
+
 {
-  "nombre": "Julian",
-  "apellido": "Leal",
+  "nombre": "Juan",
+  "apellido": "Pérez",
   "localidad": "Kennedy",
-  "edad": 21,
-  "cedula": "1027150615"
+  "edad": 35,
+  "rol": "Padre",
+  "cedula": "1234567890"
 }
 
+###
 
-### 🔵 Obtener todos los usuarios
+### Crear usuario (Hijo)
+POST http://127.0.0.1:8000/usuarios/
+Content-Type: application/json
+
+{
+  "nombre": "María",
+  "apellido": "Pérez",
+  "localidad": "Kennedy",
+  "edad": 8,
+  "rol": "Hijo",
+  "cedula": "9876543210"
+}
+
+###
+
+### Listar todos los usuarios
 GET http://127.0.0.1:8000/usuarios/
 Accept: application/json
 
+###
 
-### 🟣 Obtener usuario por ID
+### Obtener usuario por ID
 GET http://127.0.0.1:8000/usuarios/1
 Accept: application/json
 
+###
 
-### 🟠 Actualizar usuario (PUT)
+### Actualizar usuario
 PUT http://127.0.0.1:8000/usuarios/1
 Content-Type: application/json
-Accept: application/json
 
 {
-  "nombre": "Jorge",
-  "apellido": "Baron",
-  "localidad": "Kennedy Central",
-  "edad": 64,
-  "cedula": "17527277"
+  "nombre": "Juan Carlos",
+  "edad": 36
 }
 
+###
 
-### 🔴 Eliminar usuario
-DELETE http://127.0.0.1:8000/usuarios/1
+### Desactivar usuario (Soft Delete)
+DELETE http://127.0.0.1:8000/usuarios/2?hard_delete=false
+
+###
+
+### Reactivar usuario
+POST http://127.0.0.1:8000/usuarios/2/reactivar
+
+###
+
+### ============================================
+### 👨‍👩‍👧 PERFILES - CRUD Completo (Relación 1:1) ✅ NUEVO
+### ============================================
+
+### Crear perfil para usuario
+POST http://127.0.0.1:8000/perfiles/
+Content-Type: application/json
+
+{
+  "usuario_id": 1,
+  "bio": "Padre de familia preocupado por la nutrición de mis hijos",
+  "telefono": "3001234567",
+  "foto_url": "https://example.com/foto_juan.jpg"
+}
+
+###
+
+### ❌ Intentar crear segundo perfil para el mismo usuario (debe fallar - 1:1)
+POST http://127.0.0.1:8000/perfiles/
+Content-Type: application/json
+
+{
+  "usuario_id": 1,
+  "bio": "Segundo perfil - esto debe fallar",
+  "telefono": "3007654321"
+}
+
+###
+
+### Listar todos los perfiles
+GET http://127.0.0.1:8000/perfiles/
 Accept: application/json
+
+###
+
+### Obtener perfil por ID
+GET http://127.0.0.1:8000/perfiles/1
+Accept: application/json
+
+###
+
+### Obtener perfil de un usuario (Relación 1:1)
+GET http://127.0.0.1:8000/perfiles/usuario/1
+Accept: application/json
+
+###
+
+### Actualizar perfil
+PUT http://127.0.0.1:8000/perfiles/1?bio=Bio actualizada&telefono=3009999999
+
+###
+
+### Obtener perfil completo con info del usuario
+GET http://127.0.0.1:8000/perfiles/1/completo
+Accept: application/json
+
+###
+
+### Eliminar perfil
+DELETE http://127.0.0.1:8000/perfiles/1
+
+###
+
+### ============================================
+### 🍎 ALIMENTOS - CRUD Completo
+### ============================================
+
+### Crear alimento - Manzana
+POST http://127.0.0.1:8000/alimentos/
+Content-Type: application/json
+
+{
+  "nombre": "Manzana",
+  "categoria": "Frutas",
+  "calorias_por_100g": 52,
+  "proteinas_por_100g": 0.3,
+  "carbohidratos_por_100g": 14,
+  "grasas_por_100g": 0.2,
+  "precio_unitario": 500,
+  "stock_inicial": 100
+}
+
+###
+
+### Crear alimento - Pan Integral
+POST http://127.0.0.1:8000/alimentos/
+Content-Type: application/json
+
+{
+  "nombre": "Pan Integral",
+  "categoria": "Cereales",
+  "calorias_por_100g": 247,
+  "proteinas_por_100g": 13,
+  "carbohidratos_por_100g": 41,
+  "grasas_por_100g": 3.4,
+  "precio_unitario": 2000,
+  "stock_inicial": 50
+}
+
+###
+
+### Crear alimento - Yogurt Natural
+POST http://127.0.0.1:8000/alimentos/
+Content-Type: application/json
+
+{
+  "nombre": "Yogurt Natural",
+  "categoria": "Lácteos",
+  "calorias_por_100g": 59,
+  "proteinas_por_100g": 3.5,
+  "carbohidratos_por_100g": 4.7,
+  "grasas_por_100g": 3.3,
+  "precio_unitario": 3000,
+  "stock_inicial": 30
+}
+
+###
+
+### Listar todos los alimentos
+GET http://127.0.0.1:8000/alimentos/
+Accept: application/json
+
+###
+
+### Obtener alimento por ID
+GET http://127.0.0.1:8000/alimentos/1
+Accept: application/json
+
+###
+
+### Actualizar alimento
+PUT http://127.0.0.1:8000/alimentos/1
+Content-Type: application/json
+
+{
+  "nombre": "Manzana Verde",
+  "categoria": "Frutas",
+  "calorias_por_100g": 50,
+  "proteinas_por_100g": 0.3,
+  "carbohidratos_por_100g": 13,
+  "grasas_por_100g": 0.2,
+  "precio_unitario": 550,
+  "stock_inicial": 0
+}
+
+###
+
+### Desactivar alimento
+DELETE http://127.0.0.1:8000/alimentos/3?hard_delete=false
+
+###
+
+### ============================================
+### 🚫 RESTRICCIONES/ALERGIAS - CRUD Completo
+### ============================================
+
+### Crear restricción - Gluten
+POST http://127.0.0.1:8000/restricciones/
+Content-Type: application/json
+
+{
+  "nombre": "Gluten",
+  "descripcion": "Proteína presente en trigo, cebada y centeno",
+  "nivel_severidad": "Alto"
+}
+
+###
+
+### Crear restricción - Lactosa
+POST http://127.0.0.1:8000/restricciones/
+Content-Type: application/json
+
+{
+  "nombre": "Lactosa",
+  "descripcion": "Azúcar presente en la leche y derivados lácteos",
+  "nivel_severidad": "Medio"
+}
+
+###
+
+### Listar restricciones
+GET http://127.0.0.1:8000/restricciones/
+Accept: application/json
+
+###
+
+### Asociar alimento con restricción (N:M)
+POST http://127.0.0.1:8000/restricciones/1/alimentos/2
+
+###
+
+### Asociar otro alimento con restricción
+POST http://127.0.0.1:8000/restricciones/2/alimentos/3
+
+###
+
+### Ver alimentos con una restricción (N:M)
+GET http://127.0.0.1:8000/restricciones/1/alimentos
+Accept: application/json
+
+###
+
+### Ver restricciones de un alimento
+GET http://127.0.0.1:8000/alimentos/2/restricciones
+Accept: application/json
+
+###
+
+### Desasociar alimento de restricción
+DELETE http://127.0.0.1:8000/restricciones/1/alimentos/2
+
+###
+
+### ============================================
+### 🍱 LONCHERAS - CRUD Completo (Relación 1:N y N:M) ✅ MEJORADO
+### ============================================
+
+### Crear lonchera para usuario 1
+POST http://127.0.0.1:8000/loncheras/
+Content-Type: application/json
+
+{
+  "nombre": "Lonchera Saludable",
+  "descripcion": "Lonchera balanceada para el colegio",
+  "calorias": 500,
+  "precio": 10000,
+  "usuario_id": 1
+}
+
+###
+
+### Crear segunda lonchera para el mismo usuario (Relación 1:N)
+POST http://127.0.0.1:8000/loncheras/
+Content-Type: application/json
+
+{
+  "nombre": "Lonchera Deportiva",
+  "descripcion": "Lonchera con más proteínas para deportes",
+  "calorias": 700,
+  "precio": 15000,
+  "usuario_id": 1
+}
+
+###
+
+### Listar todas las loncheras
+GET http://127.0.0.1:8000/loncheras/
+Accept: application/json
+
+###
+
+### Listar loncheras de un usuario específico (Relación 1:N)
+GET http://127.0.0.1:8000/loncheras?usuario_id=1
+Accept: application/json
+
+###
+
+### Obtener lonchera por ID
+GET http://127.0.0.1:8000/loncheras/1
+Accept: application/json
+
+###
+
+### ✅ NUEVO: Agregar alimento a lonchera (Relación N:M)
+POST http://127.0.0.1:8000/loncheras/1/alimentos/1?cantidad_gramos=150
+
+###
+
+### ✅ NUEVO: Agregar más alimentos a la misma lonchera (N:M)
+POST http://127.0.0.1:8000/loncheras/1/alimentos/2?cantidad_gramos=100
+
+###
+
+### ✅ NUEVO: Agregar otro alimento
+POST http://127.0.0.1:8000/loncheras/1/alimentos/3?cantidad_gramos=120
+
+###
+
+### ✅ NUEVO: Ver alimentos de la lonchera con info nutricional (N:M)
+GET http://127.0.0.1:8000/loncheras/1/alimentos
+Accept: application/json
+
+###
+
+### ✅ NUEVO: Agregar el MISMO alimento a otra lonchera (demuestra N:M)
+POST http://127.0.0.1:8000/loncheras/2/alimentos/1?cantidad_gramos=200
+
+###
+
+### ✅ NUEVO: Quitar alimento de lonchera
+DELETE http://127.0.0.1:8000/loncheras/1/alimentos/3
+
+###
+
+### ✅ NUEVO: Ver lonchera completa (usuario + alimentos)
+GET http://127.0.0.1:8000/loncheras/1/completo
+Accept: application/json
+
+###
+
+### Actualizar lonchera
+PUT http://127.0.0.1:8000/loncheras/1
+Content-Type: application/json
+
+{
+  "nombre": "Lonchera Saludable Plus",
+  "descripcion": "Actualizada con más variedad",
+  "calorias": 550,
+  "precio": 12000,
+  "usuario_id": 1
+}
+
+###
+
+### Desactivar lonchera
+DELETE http://127.0.0.1:8000/loncheras/2?hard_delete=false
+
+###
+
+### ============================================
+### 🛍️ PRODUCTOS - CRUD Completo (N:M con Pedidos) ✅ MEJORADO
+### ============================================
+
+### Crear producto
+POST http://127.0.0.1:8000/productos/
+Content-Type: application/json
+
+{
+  "nombre": "Jugo Natural de Naranja",
+  "descripcion": "Jugo 100% natural sin azúcar añadida",
+  "precio": 3500,
+  "stock_actual": 50
+}
+
+###
+
+### Crear otro producto
+POST http://127.0.0.1:8000/productos/
+Content-Type: application/json
+
+{
+  "nombre": "Ensalada de Frutas",
+  "descripcion": "Ensalada fresca con 5 frutas diferentes",
+  "precio": 5000,
+  "stock_actual": 30
+}
+
+###
+
+### Listar todos los productos
+GET http://127.0.0.1:8000/productos/
+Accept: application/json
+
+###
+
+### Listar productos con stock bajo
+GET http://127.0.0.1:8000/productos?stock_bajo=true&limite_stock=10
+Accept: application/json
+
+###
+
+### Obtener producto por ID
+GET http://127.0.0.1:8000/productos/1
+Accept: application/json
+
+###
+
+### ✅ NUEVO: Actualizar producto (PUT)
+PUT http://127.0.0.1:8000/productos/1
+Content-Type: application/json
+
+{
+  "nombre": "Jugo Premium de Naranja",
+  "descripcion": "Jugo 100% natural recién exprimido",
+  "precio": 4000,
+  "stock_actual": 45
+}
+
+###
+
+### ✅ NUEVO: Ajustar stock de producto
+PATCH http://127.0.0.1:8000/productos/1/stock?cantidad=10
+
+###
+
+### ✅ NUEVO: Desactivar producto (Soft Delete)
+DELETE http://127.0.0.1:8000/productos/2?hard_delete=false
+
+###
+
+### ✅ NUEVO: Reactivar producto
+POST http://127.0.0.1:8000/productos/2/reactivar
+
+###
+
+### ✅ NUEVO: Ver estadísticas de productos
+GET http://127.0.0.1:8000/productos/estadisticas/resumen
+Accept: application/json
+
+###
+
+### ============================================
+### 📦 PEDIDOS - CRUD Completo (N:M con Productos)
+### ============================================
+
+### Crear pedido vacío
+POST http://127.0.0.1:8000/pedidos/
+Content-Type: application/json
+
+{
+  "usuario_id": 1
+}
+
+###
+
+### Agregar producto al pedido (N:M)
+POST http://127.0.0.1:8000/pedidos/1/productos/1?cantidad=2
+
+###
+
+### Agregar otro producto al pedido
+POST http://127.0.0.1:8000/pedidos/1/productos/2?cantidad=1
+
+###
+
+### Listar todos los pedidos
+GET http://127.0.0.1:8000/pedidos/
+Accept: application/json
+
+###
+
+### Listar pedidos de un usuario
+GET http://127.0.0.1:8000/pedidos?usuario_id=1
+Accept: application/json
+
+###
+
+### Obtener detalle completo del pedido (muestra N:M)
+GET http://127.0.0.1:8000/pedidos/1/detalle
+Accept: application/json
+
+###
+
+### Ver pedidos que contienen un producto (N:M desde producto)
+GET http://127.0.0.1:8000/productos/1/pedidos
+Accept: application/json
+
+###
+
+### Actualizar estado del pedido
+PUT http://127.0.0.1:8000/pedidos/1/estado?nuevo_estado=Confirmado
+
+###
+
+### Confirmar pedido (descuenta stock)
+POST http://127.0.0.1:8000/pedidos/1/confirmar
+
+###
+
+### Quitar producto del pedido
+DELETE http://127.0.0.1:8000/pedidos/1/productos/2
+
+###
+
+### Cancelar pedido
+DELETE http://127.0.0.1:8000/pedidos/1
+
+###
+
+### ============================================
+### 📊 INVENTARIO - Movimientos de Stock
+### ============================================
+
+### Registrar entrada de inventario
+POST http://127.0.0.1:8000/inventario/movimientos
+Content-Type: application/json
+
+{
+  "alimento_id": 1,
+  "tipo_movimiento": "Entrada",
+  "cantidad": 50,
+  "motivo": "Compra de inventario",
+  "usuario_id": 1
+}
+
+###
+
+### Registrar salida de inventario
+POST http://127.0.0.1:8000/inventario/movimientos
+Content-Type: application/json
+
+{
+  "alimento_id": 1,
+  "tipo_movimiento": "Salida",
+  "cantidad": 10,
+  "motivo": "Venta a cliente",
+  "usuario_id": 1
+}
+
+###
+
+### Listar movimientos de inventario
+GET http://127.0.0.1:8000/inventario/movimientos
+Accept: application/json
+
+###
+
+### Listar movimientos de un alimento específico
+GET http://127.0.0.1:8000/inventario/movimientos?alimento_id=1
+Accept: application/json
+
+###
+
+### Ver alimentos con stock bajo
+GET http://127.0.0.1:8000/inventario/stock-bajo?limite=10
+Accept: application/json
+
+###
+
+### Reporte general de inventario
+GET http://127.0.0.1:8000/inventario/reporte-inventario
+Accept: application/json
+
+###
+
+### ============================================
+### 📜 HISTORIAL - Auditoría de Eliminaciones
+### ============================================
+
+### Listar todo el historial
+GET http://127.0.0.1:8000/historial/
+Accept: application/json
+
+###
+
+### Historial por tabla
+GET http://127.0.0.1:8000/historial?tabla_nombre=usuario
+Accept: application/json
+
+###
+
+### Historial de eliminaciones de un usuario
+GET http://127.0.0.1:8000/historial?usuario_id=1
+Accept: application/json
+
+###
+
+### Obtener datos eliminados
+GET http://127.0.0.1:8000/historial/1/datos
+Accept: application/json
+
+###
+
+### Estadísticas de eliminaciones
+GET http://127.0.0.1:8000/historial/estadisticas/resumen
+Accept: application/json
+
+###
+
+### ============================================
+### 📈 REPORTES - Generación de CSV
+### ============================================
+
+### Generar reporte CSV de usuarios y loncheras
+GET http://127.0.0.1:8000/reportes/usuarios_csv
+Accept: text/csv
+
+###
+
+### ============================================
+### 🧪 TESTS DE RELACIONES
+### ============================================
+
+### TEST 1:1 - Un usuario solo puede tener UN perfil
+# Ya probado arriba con POST /perfiles (segundo intento debe fallar)
+
+###
+
+### TEST 1:N - Un usuario puede tener MUCHAS loncheras
+# Ya probado arriba creando 2 loncheras para usuario_id=1
+
+###
+
+### TEST N:M - Una lonchera puede tener MUCHOS alimentos Y un alimento puede estar en MUCHAS loncheras
+# Ya probado arriba agregando alimentos a loncheras
+
+###
+
+### TEST N:M - Un producto puede estar en MUCHOS pedidos Y un pedido puede tener MUCHOS productos
+# Ya probado arriba con pedidos y productos
+
+###
+
+### ============================================
+### ✅ VERIFICACIÓN FINAL
+### ============================================
+
+### Ver todos los modelos y su estado
+GET http://127.0.0.1:8000/modelos
+Accept: application/json
+
+###
+
+### Ver todas las relaciones explicadas
+GET http://127.0.0.1:8000/relaciones
+Accept: application/json
+
+###
+
+### Health check
+GET http://127.0.0.1:8000/health
+Accept: application/json
+
+###
