@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 from typing import List
-from models import Producto
-from db import SessionDep
+from Datos.models import Producto
+from Aplicacion.db import SessionDep
 
 router = APIRouter(prefix="/productos", tags=["Productos"])
 
