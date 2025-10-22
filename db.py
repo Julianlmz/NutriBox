@@ -3,7 +3,7 @@ from sqlmodel import SQLModel, create_engine, Session
 from typing import Annotated
 
 
-db_name = "usuarios.sqlite3"
+db_name = "NutriBox.sqlite3"
 db_url = f"sqlite:///{db_name}"
 
 engine = create_engine(db_url, echo=True)
