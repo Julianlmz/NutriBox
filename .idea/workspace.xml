@@ -4,15 +4,28 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="75e3c82f-baf3-483d-acc0-ccc84b491d55" name="Changes" comment="Cambio de nombres, para una mejora en los endpoints">
-      <change afterPath="$PROJECT_DIR$/Pedido.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Producto.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Reporte.py" afterDir="false" />
+    <list default="true" id="75e3c82f-baf3-483d-acc0-ccc84b491d55" name="Changes" comment="Se modifica el CRUD de Usuario.py">
+      <change afterPath="$PROJECT_DIR$/Alergias/Historial.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Alergias/Inventario.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Alergias/Pedido.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Alergias/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Aplicacion/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Datos/Alimento.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Datos/Restriccion.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Datos/Usuario.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Datos/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Datos/models.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Usuario.py" beforeDir="false" afterPath="$PROJECT_DIR$/Usuario.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/db.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Lonchera.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datos/Lonchera.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pedido.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Producto.py" beforeDir="false" afterPath="$PROJECT_DIR$/Alergias/Producto.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Reporte.py" beforeDir="false" afterPath="$PROJECT_DIR$/Alergias/Reporte.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Usuario.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/Aplicacion/db.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_main.http" beforeDir="false" afterPath="$PROJECT_DIR$/Alergias/test_main.http" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -99,6 +112,11 @@
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Julian\Documents\SextoSemestre\DesarrolloSoftware\NutriBox" />
     </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Julian\Documents\SextoSemestre\DesarrolloSoftware\NutriBox\Alergias" />
+      <recent name="C:\Users\Julian\Documents\SextoSemestre\DesarrolloSoftware\NutriBox\Datos" />
+      <recent name="C:\Users\Julian\Documents\SextoSemestre\DesarrolloSoftware\NutriBox\Aplicacion" />
+    </key>
   </component>
   <component name="RunDashboard">
     <option name="configurationStatuses">
@@ -146,11 +164,11 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="FastAPI.NutriBox" />
       <item itemvalue="HTTP Request.All in test_main" />
       <item itemvalue="HTTP Request.test_main | Crear un usuario" />
       <item itemvalue="HTTP Request.test_main | Listar usuarios" />
       <item itemvalue="HTTP Request.test_main | Probar que el servidor responde" />
-      <item itemvalue="FastAPI.NutriBox" />
     </list>
     <recent_temporary>
       <list>
@@ -180,6 +198,7 @@
       <workItem from="1760666655483" duration="1502000" />
       <workItem from="1760971749323" duration="25675000" />
       <workItem from="1761079350178" duration="4180000" />
+      <workItem from="1761162547545" duration="3735000" />
     </task>
     <task id="LOCAL-00001" summary="Se crea la tabla usuarios.sqlite3">
       <option name="closed" value="true" />
@@ -277,7 +296,39 @@
       <option name="project" value="LOCAL" />
       <updated>1761008232952</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Se agregan los routers nuevos">
+      <option name="closed" value="true" />
+      <created>1761162606813</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1761162606813</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Se agregan modelos, y se hace una relacion de cada uno">
+      <option name="closed" value="true" />
+      <created>1761162657252</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1761162657252</updated>
+    </task>
+    <task id="LOCAL-00015" summary="Nuevos modelos para una buena relacion con los endpoints">
+      <option name="closed" value="true" />
+      <created>1761162714411</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1761162714411</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Se modifica el CRUD de Usuario.py">
+      <option name="closed" value="true" />
+      <created>1761162755077</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1761162755077</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -307,9 +358,13 @@
     <MESSAGE value="Se agrego el endpoint de Lonchera" />
     <MESSAGE value="Creacion de las clases para el modelo Lonchera.py" />
     <MESSAGE value="Cambio de nombres, para una mejora en los endpoints" />
-    <option name="LAST_COMMIT_MESSAGE" value="Cambio de nombres, para una mejora en los endpoints" />
+    <MESSAGE value="Se agregan los routers nuevos" />
+    <MESSAGE value="Se agregan modelos, y se hace una relacion de cada uno" />
+    <MESSAGE value="Nuevos modelos para una buena relacion con los endpoints" />
+    <MESSAGE value="Se modifica el CRUD de Usuario.py" />
+    <option name="LAST_COMMIT_MESSAGE" value="Se modifica el CRUD de Usuario.py" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/NutriBox$NutriBox.coverage" NAME="NutriBox Coverage Results" MODIFIED="1761083069313" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/NutriBox$NutriBox.coverage" NAME="NutriBox Coverage Results" MODIFIED="1761164928831" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
