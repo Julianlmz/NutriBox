@@ -13,14 +13,12 @@ router = APIRouter(prefix="/alimentos", tags=["Alimentos"])
 
 @router.post("/", response_model=Alimento, status_code=status.HTTP_201_CREATED)
 async def crear_alimento(data: AlimentoCreate, session: SessionDep):
-    """Crea un nuevo alimento y registra el inventario inicial"""
     alimento = Alimento(**data.model_dump(exclude={'stock_inicial'}))
     alimento.stock_actual = data.stock_inicial
     session.add(alimento)
     session.commit()
     session.refresh(alimento)
 
-    # Registrar movimiento inicial
     if data.stock_inicial > 0:
         movimiento = MovimientoInventario(
             alimento_id=alimento.id,
@@ -44,7 +42,6 @@ async def listar_alimentos(
         categoria: str = None,
         stock_bajo: bool = False
 ):
-    """Lista todos los alimentos con filtros opcionales"""
     query = select(Alimento)
 
     if not incluir_inactivos:
@@ -62,7 +59,6 @@ async def listar_alimentos(
 
 @router.get("/{alimento_id}", response_model=Alimento)
 async def obtener_alimento(alimento_id: int, session: SessionDep):
-    """Obtiene un alimento por ID"""
     alimento = session.get(Alimento, alimento_id)
     if not alimento or not alimento.is_active:
         raise HTTPException(
@@ -78,7 +74,6 @@ async def actualizar_alimento(
         data: AlimentoCreate,
         session: SessionDep
 ):
-    """Actualiza un alimento (sin modificar el stock)"""
     alimento = session.get(Alimento, alimento_id)
     if not alimento or not alimento.is_active:
         raise HTTPException(
@@ -102,7 +97,6 @@ async def eliminar_alimento(
         motivo: str = None,
         hard_delete: bool = False
 ):
-    """Elimina un alimento (soft delete por defecto)"""
     alimento = session.get(Alimento, alimento_id)
     if not alimento:
         raise HTTPException(
@@ -132,7 +126,6 @@ async def eliminar_alimento(
 
 @router.get("/{alimento_id}/restricciones")
 async def obtener_restricciones_alimento(alimento_id: int, session: SessionDep):
-    """Obtiene las restricciones/alergias asociadas a un alimento"""
     alimento = session.get(Alimento, alimento_id)
     if not alimento:
         raise HTTPException(

@@ -9,8 +9,6 @@ engine = create_engine(db_url, echo=True)
 
 
 def create_tables(app: FastAPI):
-    """Crea todas las tablas en la base de datos"""
-    # Importar modelos aquí para asegurar que estén registrados
     from Datos.models import (
         Usuario, Lonchera, Perfil, Alimento, Restriccion, RestriccionAlimento,
         LoncheraAlimento, Producto, Pedido, PedidoProducto,

@@ -13,10 +13,6 @@ router = APIRouter(prefix="/inventario", tags=["Inventario"])
 
 @router.post("/movimientos", response_model=MovimientoInventario, status_code=status.HTTP_201_CREATED)
 async def registrar_movimiento(data: MovimientoInventarioCreate, session: SessionDep):
-    """
-    Registra un movimiento de inventario (entrada, salida o ajuste).
-    La cantidad debe ser positiva para entradas y negativa para salidas.
-    """
     alimento = session.get(Alimento, data.alimento_id)
     if not alimento or not alimento.is_active:
         raise HTTPException(
@@ -26,7 +22,6 @@ async def registrar_movimiento(data: MovimientoInventarioCreate, session: Sessio
 
     stock_anterior = alimento.stock_actual
 
-    # Calcular nuevo stock según el tipo de movimiento
     if data.tipo_movimiento == TipoMovimiento.ENTRADA:
         stock_nuevo = stock_anterior + abs(data.cantidad)
     elif data.tipo_movimiento == TipoMovimiento.SALIDA:
@@ -36,7 +31,7 @@ async def registrar_movimiento(data: MovimientoInventarioCreate, session: Sessio
                 detail=f"Stock insuficiente. Disponible: {stock_anterior}"
             )
         stock_nuevo = stock_anterior - abs(data.cantidad)
-    else:  # AJUSTE
+    else:
         stock_nuevo = data.cantidad
 
     if stock_nuevo < 0:
@@ -45,16 +40,13 @@ async def registrar_movimiento(data: MovimientoInventarioCreate, session: Sessio
             detail="El stock no puede ser negativo"
         )
 
-    # Crear movimiento
     movimiento = MovimientoInventario(
         **data.model_dump(),
         stock_anterior=stock_anterior,
         stock_nuevo=stock_nuevo
     )
 
-    # Actualizar stock del alimento
     alimento.stock_actual = stock_nuevo
-
     session.add(movimiento)
     session.add(alimento)
     session.commit()
@@ -71,7 +63,6 @@ async def listar_movimientos(
         fecha_desde: Optional[date] = None,
         fecha_hasta: Optional[date] = None
 ):
-    """Lista movimientos de inventario con filtros opcionales"""
     query = select(MovimientoInventario)
 
     if alimento_id:
@@ -95,7 +86,6 @@ async def listar_movimientos(
 
 @router.get("/movimientos/{movimiento_id}", response_model=MovimientoInventario)
 async def obtener_movimiento(movimiento_id: int, session: SessionDep):
-    """Obtiene un movimiento específico"""
     movimiento = session.get(MovimientoInventario, movimiento_id)
     if not movimiento:
         raise HTTPException(
@@ -107,7 +97,6 @@ async def obtener_movimiento(movimiento_id: int, session: SessionDep):
 
 @router.get("/stock-bajo")
 async def alimentos_stock_bajo(session: SessionDep, limite: int = 10):
-    """Obtiene alimentos con stock bajo"""
     alimentos = session.exec(
         select(Alimento).where(
             Alimento.is_active == True,
@@ -129,7 +118,6 @@ async def alimentos_stock_bajo(session: SessionDep, limite: int = 10):
 
 @router.get("/reporte-inventario")
 async def reporte_inventario(session: SessionDep):
-    """Genera un reporte general del inventario"""
     alimentos = session.exec(
         select(Alimento).where(Alimento.is_active == True)
     ).all()

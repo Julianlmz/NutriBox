@@ -1,6 +1,6 @@
 from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional, List
-from datetime import datetime, date
+from datetime import datetime
 from enum import Enum
 
 class RolUsuario(str, Enum):

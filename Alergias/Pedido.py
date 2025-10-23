@@ -9,8 +9,6 @@ router = APIRouter(prefix="/pedidos", tags=["Pedidos"])
 
 @router.post("/", response_model=Pedido, status_code=status.HTTP_201_CREATED)
 async def crear_pedido(pedido_data: PedidoCreate, session: SessionDep):
-    """Crea un nuevo pedido vacío"""
-    # Verificar que el usuario existe
     usuario = session.get(Usuario, pedido_data.usuario_id)
     if not usuario or not usuario.is_active:
         raise HTTPException(
@@ -32,15 +30,11 @@ async def agregar_producto_a_pedido(
         cantidad: int = 1,
         session: SessionDep = None
 ):
-    """Agrega un producto a un pedido existente"""
-    # Validar cantidad
     if cantidad < 1:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="La cantidad debe ser mayor a 0"
         )
-
-    # Verificar que existen pedido y producto
     pedido = session.get(Pedido, pedido_id)
     producto = session.get(Producto, producto_id)
 
@@ -56,14 +50,12 @@ async def agregar_producto_a_pedido(
             detail="Producto no encontrado o inactivo"
         )
 
-    # Verificar stock disponible
     if producto.stock_actual < cantidad:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Stock insuficiente. Disponible: {producto.stock_actual}"
         )
 
-    # Verificar si el producto ya está en el pedido
     existing = session.exec(
         select(PedidoProducto).where(
             PedidoProducto.pedido_id == pedido_id,
@@ -72,7 +64,6 @@ async def agregar_producto_a_pedido(
     ).first()
 
     if existing:
-        # Actualizar cantidad
         nueva_cantidad = existing.cantidad + cantidad
         if producto.stock_actual < nueva_cantidad:
             raise HTTPException(
@@ -83,7 +74,6 @@ async def agregar_producto_a_pedido(
         existing.subtotal = producto.precio * nueva_cantidad
         session.add(existing)
     else:
-        # Crear nueva asociación
         subtotal = producto.precio * cantidad
         assoc = PedidoProducto(
             pedido_id=pedido_id,
@@ -94,7 +84,6 @@ async def agregar_producto_a_pedido(
         )
         session.add(assoc)
 
-    # Actualizar total del pedido
     pedido.total = sum(
         pp.subtotal for pp in pedido.productos
     ) + (producto.precio * cantidad if not existing else 0)
@@ -118,7 +107,6 @@ async def quitar_producto_de_pedido(
         producto_id: int,
         session: SessionDep
 ):
-    """Quita un producto del pedido"""
     pedido = session.get(Pedido, pedido_id)
     if not pedido:
         raise HTTPException(
@@ -126,7 +114,6 @@ async def quitar_producto_de_pedido(
             detail="Pedido no encontrado"
         )
 
-    # Buscar la asociación
     assoc = session.exec(
         select(PedidoProducto).where(
             PedidoProducto.pedido_id == pedido_id,
@@ -140,10 +127,7 @@ async def quitar_producto_de_pedido(
             detail="Producto no encontrado en el pedido"
         )
 
-    # Eliminar asociación
     session.delete(assoc)
-
-    # Recalcular total del pedido
     pedido.total = sum(pp.subtotal for pp in pedido.productos if pp.producto_id != producto_id)
     session.add(pedido)
     session.commit()
@@ -157,7 +141,7 @@ async def listar_pedidos(
         usuario_id: Optional[int] = None,
         estado: Optional[str] = None
 ):
-    """Lista todos los pedidos con filtros opcionales"""
+
     query = select(Pedido)
 
     if usuario_id:
@@ -173,7 +157,6 @@ async def listar_pedidos(
 
 @router.get("/{pedido_id}", response_model=Pedido)
 async def obtener_pedido(pedido_id: int, session: SessionDep):
-    """Obtiene un pedido específico con sus productos"""
     pedido = session.get(Pedido, pedido_id)
     if not pedido:
         raise HTTPException(
@@ -185,7 +168,6 @@ async def obtener_pedido(pedido_id: int, session: SessionDep):
 
 @router.get("/{pedido_id}/detalle")
 async def obtener_detalle_pedido(pedido_id: int, session: SessionDep):
-    """Obtiene el detalle completo de un pedido con información de productos"""
     pedido = session.get(Pedido, pedido_id)
     if not pedido:
         raise HTTPException(
@@ -221,10 +203,7 @@ async def actualizar_estado_pedido(
         nuevo_estado: str,
         session: SessionDep
 ):
-    """
-    Actualiza el estado de un pedido.
-    Estados válidos: Pendiente, Confirmado, Entregado, Cancelado
-    """
+
     estados_validos = ["Pendiente", "Confirmado", "Entregado", "Cancelado"]
 
     if nuevo_estado not in estados_validos:
@@ -250,10 +229,7 @@ async def actualizar_estado_pedido(
 
 @router.post("/{pedido_id}/confirmar", response_model=Pedido)
 async def confirmar_pedido(pedido_id: int, session: SessionDep):
-    """
-    Confirma un pedido y descuenta el stock de los productos.
-    Solo se puede confirmar un pedido en estado 'Pendiente'
-    """
+
     pedido = session.get(Pedido, pedido_id)
     if not pedido:
         raise HTTPException(
@@ -267,7 +243,6 @@ async def confirmar_pedido(pedido_id: int, session: SessionDep):
             detail=f"Solo se pueden confirmar pedidos pendientes. Estado actual: {pedido.estado}"
         )
 
-    # Verificar y descontar stock
     for pp in pedido.productos:
         producto = session.get(Producto, pp.producto_id)
         if producto.stock_actual < pp.cantidad:
@@ -276,11 +251,9 @@ async def confirmar_pedido(pedido_id: int, session: SessionDep):
                 detail=f"Stock insuficiente para {producto.nombre}. Disponible: {producto.stock_actual}"
             )
 
-        # Descontar stock
         producto.stock_actual -= pp.cantidad
         session.add(producto)
 
-    # Cambiar estado
     pedido.estado = "Confirmado"
     session.add(pedido)
     session.commit()
@@ -291,7 +264,6 @@ async def confirmar_pedido(pedido_id: int, session: SessionDep):
 
 @router.delete("/{pedido_id}", status_code=status.HTTP_200_OK)
 async def cancelar_pedido(pedido_id: int, session: SessionDep):
-    """Cancela un pedido (cambia estado a Cancelado)"""
     pedido = session.get(Pedido, pedido_id)
     if not pedido:
         raise HTTPException(

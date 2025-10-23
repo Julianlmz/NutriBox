@@ -10,7 +10,6 @@ router = APIRouter(prefix="/reportes", tags=["Reportes"])
 
 @router.get("/usuarios_csv")
 async def usuarios_con_loncheras_csv(session: SessionDep):
-    # Obtener usuarios activos
     usuarios = session.exec(select(Usuario).where(Usuario.is_active==True)).all()
     rows = []
     for u in usuarios:

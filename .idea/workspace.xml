@@ -4,12 +4,20 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="75e3c82f-baf3-483d-acc0-ccc84b491d55" name="Changes" comment="Requerimientos usados en el proyecto">
-      <change afterPath="$PROJECT_DIR$/Datos/Perfil.py" afterDir="false" />
+    <list default="true" id="75e3c82f-baf3-483d-acc0-ccc84b491d55" name="Changes" comment="Diagramas UML">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Alergias/Historial.py" beforeDir="false" afterPath="$PROJECT_DIR$/Alergias/Historial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Alergias/Inventario.py" beforeDir="false" afterPath="$PROJECT_DIR$/Alergias/Inventario.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Alergias/Pedido.py" beforeDir="false" afterPath="$PROJECT_DIR$/Alergias/Pedido.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Alergias/Producto.py" beforeDir="false" afterPath="$PROJECT_DIR$/Alergias/Producto.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Alergias/test_main.http" beforeDir="false" afterPath="$PROJECT_DIR$/Alergias/test_main.http" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Alergias/Reporte.py" beforeDir="false" afterPath="$PROJECT_DIR$/Alergias/Reporte.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Aplicacion/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/Aplicacion/db.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Datos/Alimento.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datos/Alimento.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Datos/Lonchera.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datos/Lonchera.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Datos/Perfil.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datos/Perfil.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Datos/Restriccion.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datos/Restriccion.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Datos/Usuario.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datos/Usuario.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Datos/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datos/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -64,6 +72,7 @@
     "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
     "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "FastAPI.NutriBox.executor": "Run",
+    "HTTP Request.All in test_main (1).executor": "Run",
     "HTTP Request.All in test_main.executor": "Run",
     "HTTP Request.test_main | #11.executor": "Run",
     "HTTP Request.test_main | Crear un usuario.executor": "Run",
@@ -111,9 +120,9 @@
           <value>
             <map>
               <entry key="All in test_main" value="STOPPED" />
+              <entry key="All in test_main (1)" value="STOPPED" />
               <entry key="test_main | #11" value="STOPPED" />
               <entry key="test_main | Crear un usuario" value="STOPPED" />
-              <entry key="test_main | Listar usuarios" value="STOPPED" />
               <entry key="test_main | Probar que el servidor responde" value="STOPPED" />
             </map>
           </value>
@@ -122,13 +131,13 @@
     </option>
   </component>
   <component name="RunManager" selected="FastAPI.NutriBox">
+    <configuration name="All in test_main (1)" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" path="$PROJECT_DIR$/Alergias/test_main.http">
+      <method v="2" />
+    </configuration>
     <configuration name="All in test_main" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" path="$PROJECT_DIR$/test_main.http">
       <method v="2" />
     </configuration>
     <configuration name="test_main | Crear un usuario" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$PROJECT_DIR$/test_main.http" executionIdentifier="Crear un usuario" index="2" runType="Run single request">
-      <method v="2" />
-    </configuration>
-    <configuration name="test_main | Listar usuarios" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$PROJECT_DIR$/test_main.http" executionIdentifier="Listar usuarios" index="3" runType="Run single request">
       <method v="2" />
     </configuration>
     <configuration name="test_main | Probar que el servidor responde" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$PROJECT_DIR$/test_main.http" executionIdentifier="Probar que el servidor responde" runType="Run single request">
@@ -155,19 +164,19 @@
     </configuration>
     <list>
       <item itemvalue="FastAPI.NutriBox" />
+      <item itemvalue="HTTP Request.All in test_main (1)" />
       <item itemvalue="HTTP Request.test_main | #11" />
       <item itemvalue="HTTP Request.All in test_main" />
       <item itemvalue="HTTP Request.test_main | Crear un usuario" />
-      <item itemvalue="HTTP Request.test_main | Listar usuarios" />
       <item itemvalue="HTTP Request.test_main | Probar que el servidor responde" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="HTTP Request.All in test_main (1)" />
         <item itemvalue="HTTP Request.test_main | #11" />
         <item itemvalue="HTTP Request.All in test_main" />
         <item itemvalue="HTTP Request.test_main | Crear un usuario" />
         <item itemvalue="HTTP Request.test_main | Probar que el servidor responde" />
-        <item itemvalue="HTTP Request.test_main | Listar usuarios" />
       </list>
     </recent_temporary>
   </component>
@@ -190,7 +199,7 @@
       <workItem from="1760666655483" duration="1502000" />
       <workItem from="1760971749323" duration="25675000" />
       <workItem from="1761079350178" duration="4180000" />
-      <workItem from="1761162547545" duration="5886000" />
+      <workItem from="1761162547545" duration="10911000" />
     </task>
     <task id="LOCAL-00001" summary="Se crea la tabla usuarios.sqlite3">
       <option name="closed" value="true" />
@@ -368,7 +377,39 @@
       <option name="project" value="LOCAL" />
       <updated>1761171035428</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="Se crearon la relaciones de 1:1, 1:N y N:M">
+      <option name="closed" value="true" />
+      <created>1761173689969</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1761173689969</updated>
+    </task>
+    <task id="LOCAL-00024" summary="Cambios en la presentacion de los endpoints">
+      <option name="closed" value="true" />
+      <created>1761173712603</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1761173712603</updated>
+    </task>
+    <task id="LOCAL-00025" summary="Tests">
+      <option name="closed" value="true" />
+      <created>1761173727924</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1761173727924</updated>
+    </task>
+    <task id="LOCAL-00026" summary="Diagramas UML">
+      <option name="closed" value="true" />
+      <created>1761190853747</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1761190853747</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -386,7 +427,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Se crea la tabla usuarios.sqlite3" />
     <MESSAGE value="Creacion de main.py, se despliega en el Localhost" />
     <MESSAGE value="modelos de Usuario" />
     <MESSAGE value="CRUD de el modelo Usuario" />
@@ -408,9 +448,13 @@
     <MESSAGE value="Mejora en el codigo por error en los endpoints" />
     <MESSAGE value="Actualizacion del main, por la creacion de mas modelos" />
     <MESSAGE value="Requerimientos usados en el proyecto" />
-    <option name="LAST_COMMIT_MESSAGE" value="Requerimientos usados en el proyecto" />
+    <MESSAGE value="Se crearon la relaciones de 1:1, 1:N y N:M" />
+    <MESSAGE value="Cambios en la presentacion de los endpoints" />
+    <MESSAGE value="Tests" />
+    <MESSAGE value="Diagramas UML" />
+    <option name="LAST_COMMIT_MESSAGE" value="Diagramas UML" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/NutriBox$NutriBox.coverage" NAME="NutriBox Coverage Results" MODIFIED="1761173352813" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/NutriBox$NutriBox.coverage" NAME="NutriBox Coverage Results" MODIFIED="1761176432846" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

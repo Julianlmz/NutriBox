@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
-from typing import List, Optional
+from typing import List
 from Datos.models import Producto, ProductoCreate
 from Aplicacion.db import SessionDep
 
@@ -18,10 +18,6 @@ router = APIRouter(prefix="/productos", tags=["Productos"])
 
 @router.post("/", response_model=Producto, status_code=status.HTTP_201_CREATED)
 async def crear_producto(producto: ProductoCreate, session: SessionDep):
-    """
-    Crea un nuevo producto.
-    Los productos se pueden agregar a pedidos (RELACIÓN N:M).
-    """
     nuevo_producto = Producto(**producto.model_dump())
     session.add(nuevo_producto)
     session.commit()
@@ -36,9 +32,7 @@ async def listar_productos(
         stock_bajo: bool = False,
         limite_stock: int = 10
 ):
-    """
-    Lista todos los productos con filtros opcionales.
-    """
+
     query = select(Producto)
 
     if not incluir_inactivos:
@@ -53,7 +47,6 @@ async def listar_productos(
 
 @router.get("/{producto_id}", response_model=Producto)
 async def obtener_producto(producto_id: int, session: SessionDep):
-    """Obtiene un producto por ID"""
     producto = session.get(Producto, producto_id)
     if not producto or not producto.is_active:
         raise HTTPException(
@@ -69,10 +62,7 @@ async def actualizar_producto(
         data: ProductoCreate,
         session: SessionDep
 ):
-    """
-    Actualiza un producto existente.
-    ✅ NUEVO: Endpoint PUT agregado para completar el CRUD.
-    """
+
     producto = session.get(Producto, producto_id)
     if not producto or not producto.is_active:
         raise HTTPException(
@@ -80,7 +70,6 @@ async def actualizar_producto(
             detail="Producto no encontrado o inactivo"
         )
 
-    # Actualizar campos
     for key, value in data.model_dump(exclude_unset=True).items():
         setattr(producto, key, value)
 
@@ -96,10 +85,7 @@ async def actualizar_stock(
         cantidad: int,
         session: SessionDep
 ):
-    """
-    Actualiza el stock de un producto (suma o resta la cantidad).
-    Útil para ajustes de inventario.
-    """
+
     producto = session.get(Producto, producto_id)
     if not producto or not producto.is_active:
         raise HTTPException(
@@ -133,15 +119,6 @@ async def eliminar_producto(
         session: SessionDep,
         hard_delete: bool = False
 ):
-    """
-    Elimina un producto (soft delete por defecto).
-    ✅ NUEVO: Endpoint DELETE agregado para completar el CRUD.
-
-    - hard_delete=False: Desactiva el producto (soft delete) - RECOMENDADO
-    - hard_delete=True: Elimina físicamente el registro
-
-    NOTA: Los productos con pedidos asociados NO se pueden eliminar físicamente.
-    """
     producto = session.get(Producto, producto_id)
     if not producto:
         raise HTTPException(
@@ -150,7 +127,6 @@ async def eliminar_producto(
         )
 
     if hard_delete:
-        # Verificar si tiene pedidos asociados (RELACIÓN N:M)
         if len(producto.pedidos) > 0:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -159,7 +135,6 @@ async def eliminar_producto(
         session.delete(producto)
         mensaje = "Producto eliminado permanentemente"
     else:
-        # Soft delete - solo desactivar
         producto.is_active = False
         session.add(producto)
         mensaje = "Producto desactivado correctamente"
@@ -170,7 +145,6 @@ async def eliminar_producto(
 
 @router.post("/{producto_id}/reactivar", response_model=Producto)
 async def reactivar_producto(producto_id: int, session: SessionDep):
-    """Reactiva un producto previamente desactivado"""
     producto = session.get(Producto, producto_id)
     if not producto:
         raise HTTPException(
@@ -187,10 +161,6 @@ async def reactivar_producto(producto_id: int, session: SessionDep):
 
 @router.get("/{producto_id}/pedidos")
 async def obtener_pedidos_producto(producto_id: int, session: SessionDep):
-    """
-    Obtiene todos los pedidos que contienen este producto.
-    Muestra la RELACIÓN N:M entre Producto y Pedido.
-    """
     producto = session.get(Producto, producto_id)
     if not producto:
         raise HTTPException(
@@ -223,7 +193,6 @@ async def obtener_pedidos_producto(producto_id: int, session: SessionDep):
 
 @router.get("/estadisticas/resumen")
 async def estadisticas_productos(session: SessionDep):
-    """Genera estadísticas generales de productos"""
     productos = session.exec(
         select(Producto).where(Producto.is_active == True)
     ).all()

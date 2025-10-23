@@ -9,7 +9,6 @@ router = APIRouter(prefix="/restricciones", tags=["Restricciones y Alergias"])
 
 @router.post("/", response_model=Restriccion, status_code=status.HTTP_201_CREATED)
 async def crear_restriccion(data: RestriccionCreate, session: SessionDep):
-    """Crea una nueva restricción/alergia"""
     restriccion = Restriccion(**data.model_dump())
     session.add(restriccion)
     try:
@@ -26,14 +25,12 @@ async def crear_restriccion(data: RestriccionCreate, session: SessionDep):
 
 @router.get("/", response_model=List[Restriccion])
 async def listar_restricciones(session: SessionDep):
-    """Lista todas las restricciones"""
     restricciones = session.exec(select(Restriccion)).all()
     return restricciones
 
 
 @router.get("/{restriccion_id}", response_model=Restriccion)
 async def obtener_restriccion(restriccion_id: int, session: SessionDep):
-    """Obtiene una restricción por ID"""
     restriccion = session.get(Restriccion, restriccion_id)
     if not restriccion:
         raise HTTPException(
@@ -49,7 +46,6 @@ async def asociar_alimento_restriccion(
         alimento_id: int,
         session: SessionDep
 ):
-    """Asocia un alimento con una restricción/alergia"""
     restriccion = session.get(Restriccion, restriccion_id)
     alimento = session.get(Alimento, alimento_id)
 
@@ -59,7 +55,6 @@ async def asociar_alimento_restriccion(
             detail="Restricción o Alimento no encontrado"
         )
 
-    # Verificar si ya existe la asociación
     existe = session.exec(
         select(RestriccionAlimento).where(
             RestriccionAlimento.restriccion_id == restriccion_id,
@@ -88,7 +83,6 @@ async def desasociar_alimento_restriccion(
         alimento_id: int,
         session: SessionDep
 ):
-    """Elimina la asociación entre un alimento y una restricción"""
     asociacion = session.exec(
         select(RestriccionAlimento).where(
             RestriccionAlimento.restriccion_id == restriccion_id,
@@ -109,7 +103,6 @@ async def desasociar_alimento_restriccion(
 
 @router.get("/{restriccion_id}/alimentos")
 async def listar_alimentos_con_restriccion(restriccion_id: int, session: SessionDep):
-    """Lista todos los alimentos que tienen una restricción específica"""
     restriccion = session.get(Restriccion, restriccion_id)
     if not restriccion:
         raise HTTPException(
@@ -130,7 +123,6 @@ async def listar_alimentos_con_restriccion(restriccion_id: int, session: Session
 
 @router.delete("/{restriccion_id}", status_code=status.HTTP_200_OK)
 async def eliminar_restriccion(restriccion_id: int, session: SessionDep):
-    """Elimina una restricción"""
     restriccion = session.get(Restriccion, restriccion_id)
     if not restriccion:
         raise HTTPException(

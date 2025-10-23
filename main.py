@@ -34,7 +34,7 @@ app.add_middleware(
 
 @app.on_event("startup")
 def on_startup():
-    """Crea las tablas al iniciar la aplicación"""
+
     create_tables(app)
     print("✅ Base de datos inicializada con 12 modelos")
     print("📊 Modelos registrados:")
@@ -51,11 +51,6 @@ def on_startup():
     print("   11. MovimientoInventario (Gestión de inventario)")
     print("   12. HistorialEliminacion (Auditoría)")
 
-# ========================================
-# INCLUIR TODOS LOS ROUTERS
-# ========================================
-
-# Routers de modelos principales
 app.include_router(UsuarioRouter.router)
 app.include_router(PerfilRouter.router)
 app.include_router(LoncheraRouter.router)
@@ -64,17 +59,12 @@ app.include_router(RestriccionRouter.router)
 app.include_router(ProductoRouter.router)
 app.include_router(PedidoRouter.router)
 
-# Routers de funcionalidades
 app.include_router(InventarioRouter.router)
 app.include_router(HistorialRouter.router)
 app.include_router(ReporteRouter.router)
 
 @app.get("/", tags=["Root"])
 async def root():
-    """
-    Endpoint raíz de la API.
-    Muestra todos los endpoints disponibles organizados por tipo de relación.
-    """
     return {
         "message": "🎉 API de NutriBox funcionando correctamente",
         "version": "2.1.0",
@@ -113,13 +103,11 @@ async def root():
 
 @app.get("/hello/{name}", tags=["Root"])
 async def say_hello(name: str):
-    """Saludo personalizado"""
     return {"message": f"👋 Hola {name}, bienvenido a NutriBox API v2.1.0"}
 
 
 @app.get("/health", tags=["Health"])
 async def health_check():
-    """Verifica el estado de la API"""
     return {
         "status": "healthy",
         "service": "NutriBox API",
@@ -132,10 +120,6 @@ async def health_check():
 
 @app.get("/relaciones", tags=["Documentación"])
 async def explicar_relaciones():
-    """
-    Explica las relaciones entre los modelos del sistema.
-    Útil para entender la estructura de la base de datos.
-    """
     return {
         "relaciones_1_a_1": {
             "descripcion": "Un registro en una tabla se relaciona con exactamente un registro en otra tabla",

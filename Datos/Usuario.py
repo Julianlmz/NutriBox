@@ -11,7 +11,6 @@ router = APIRouter(prefix="/usuarios", tags=["Usuarios"])
 
 @router.post("/", response_model=Usuario, status_code=status.HTTP_201_CREATED)
 async def crear_usuario(new_usuario: UsuarioCreate, session: SessionDep):
-    """Crea un nuevo usuario"""
     usuario = Usuario(**new_usuario.model_dump())
     session.add(usuario)
     try:
@@ -37,7 +36,6 @@ async def obtener_usuarios(
         session: SessionDep,
         incluir_inactivos: bool = False
 ):
-    """Obtiene todos los usuarios. Por defecto solo muestra activos."""
     query = select(Usuario)
     if not incluir_inactivos:
         query = query.where(Usuario.is_active == True)
@@ -53,7 +51,6 @@ async def obtener_usuarios(
 
 @router.get("/{id_usuario}", response_model=Usuario)
 async def obtener_usuario(id_usuario: int, session: SessionDep):
-    """Obtiene un usuario por ID"""
     usuario_db = session.get(Usuario, id_usuario)
     if not usuario_db or not usuario_db.is_active:
         raise HTTPException(
@@ -69,7 +66,6 @@ async def actualizar_usuario(
         new_usuario: UsuarioUpdate,
         session: SessionDep
 ):
-    """Actualiza un usuario existente"""
     usuario_db = session.get(Usuario, id_usuario)
     if not usuario_db or not usuario_db.is_active:
         raise HTTPException(
@@ -77,7 +73,6 @@ async def actualizar_usuario(
             detail="Usuario no encontrado"
         )
 
-    # Solo actualiza los campos que se enviaron
     for key, value in new_usuario.model_dump(exclude_unset=True).items():
         setattr(usuario_db, key, value)
 
@@ -109,11 +104,6 @@ async def eliminar_usuario(
         motivo: str = None,
         hard_delete: bool = False
 ):
-    """
-    Elimina un usuario (soft delete por defecto).
-    - hard_delete=False: Desactiva el usuario (soft delete)
-    - hard_delete=True: Elimina físicamente el registro
-    """
     usuario_db = session.get(Usuario, id_usuario)
     if not usuario_db:
         raise HTTPException(
@@ -122,7 +112,6 @@ async def eliminar_usuario(
         )
 
     if hard_delete:
-        # Guardar en historial antes de eliminar
         historial = HistorialEliminacion(
             tabla_nombre="usuario",
             registro_id=usuario_db.id,
@@ -153,7 +142,6 @@ async def eliminar_usuario(
 
 @router.post("/{id_usuario}/reactivar", response_model=Usuario)
 async def reactivar_usuario(id_usuario: int, session: SessionDep):
-    """Reactiva un usuario previamente desactivado"""
     usuario_db = session.get(Usuario, id_usuario)
     if not usuario_db:
         raise HTTPException(

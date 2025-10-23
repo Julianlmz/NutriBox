@@ -8,7 +8,6 @@ import json
 
 router = APIRouter(prefix="/historial", tags=["Historial de Eliminaciones"])
 
-
 @router.get("/", response_model=List[HistorialEliminacion])
 async def listar_historial(
         session: SessionDep,
@@ -17,24 +16,16 @@ async def listar_historial(
         fecha_hasta: Optional[date] = None,
         usuario_id: Optional[int] = None
 ):
-    """
-    Lista el historial de eliminaciones con filtros opcionales.
-    - tabla_nombre: usuario, lonchera, alimento, producto, etc.
-    - fecha_desde/fecha_hasta: rango de fechas
-    - usuario_id: ID del usuario que realizó la eliminación
-    """
+
     query = select(HistorialEliminacion)
 
     if tabla_nombre:
         query = query.where(HistorialEliminacion.tabla_nombre == tabla_nombre)
-
     if usuario_id:
         query = query.where(HistorialEliminacion.usuario_eliminador_id == usuario_id)
-
     if fecha_desde:
         fecha_desde_dt = datetime.combine(fecha_desde, datetime.min.time())
         query = query.where(HistorialEliminacion.fecha_eliminacion >= fecha_desde_dt)
-
     if fecha_hasta:
         fecha_hasta_dt = datetime.combine(fecha_hasta, datetime.max.time())
         query = query.where(HistorialEliminacion.fecha_eliminacion <= fecha_hasta_dt)
@@ -46,7 +37,6 @@ async def listar_historial(
 
 @router.get("/{historial_id}", response_model=HistorialEliminacion)
 async def obtener_registro_historial(historial_id: int, session: SessionDep):
-    """Obtiene un registro específico del historial"""
     registro = session.get(HistorialEliminacion, historial_id)
     if not registro:
         raise HTTPException(
@@ -58,7 +48,6 @@ async def obtener_registro_historial(historial_id: int, session: SessionDep):
 
 @router.get("/{historial_id}/datos")
 async def obtener_datos_eliminados(historial_id: int, session: SessionDep):
-    """Obtiene los datos del registro eliminado en formato JSON"""
     registro = session.get(HistorialEliminacion, historial_id)
     if not registro:
         raise HTTPException(
@@ -84,7 +73,6 @@ async def obtener_datos_eliminados(historial_id: int, session: SessionDep):
 
 @router.get("/por-tabla/{tabla_nombre}")
 async def historial_por_tabla(tabla_nombre: str, session: SessionDep):
-    """Obtiene el historial de una tabla específica"""
     historial = session.exec(
         select(HistorialEliminacion)
         .where(HistorialEliminacion.tabla_nombre == tabla_nombre)
@@ -96,19 +84,16 @@ async def historial_por_tabla(tabla_nombre: str, session: SessionDep):
 
 @router.get("/estadisticas/resumen")
 async def estadisticas_eliminaciones(session: SessionDep):
-    """Obtiene estadísticas generales de eliminaciones"""
     registros = session.exec(select(HistorialEliminacion)).all()
 
     por_tabla = {}
     por_usuario = {}
 
     for r in registros:
-        # Contar por tabla
         if r.tabla_nombre not in por_tabla:
             por_tabla[r.tabla_nombre] = 0
         por_tabla[r.tabla_nombre] += 1
 
-        # Contar por usuario
         if r.usuario_eliminador_id:
             if r.usuario_eliminador_id not in por_usuario:
                 por_usuario[r.usuario_eliminador_id] = 0
@@ -124,10 +109,6 @@ async def estadisticas_eliminaciones(session: SessionDep):
 
 @router.delete("/{historial_id}", status_code=status.HTTP_200_OK)
 async def eliminar_registro_historial(historial_id: int, session: SessionDep):
-    """
-    Elimina un registro del historial (usar con precaución).
-    Esto elimina permanentemente el registro de auditoría.
-    """
     registro = session.get(HistorialEliminacion, historial_id)
     if not registro:
         raise HTTPException(
