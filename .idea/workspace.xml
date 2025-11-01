@@ -4,11 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="75e3c82f-baf3-483d-acc0-ccc84b491d55" name="Changes" comment="Cambios y mejoras en su estructura">
-      <change beforePath="$PROJECT_DIR$/Diagrama Casos de Uso.pdf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Diagrama de Clases.pdf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/MAPA_RELACIONES.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Mapa De Endpoints.xlsx" beforeDir="false" />
+    <list default="true" id="75e3c82f-baf3-483d-acc0-ccc84b491d55" name="Changes" comment="Actualizacion de .gitignore">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Aplicacion/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/Aplicacion/database.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -201,7 +199,7 @@
       <workItem from="1761415034102" duration="776000" />
       <workItem from="1761495515697" duration="464000" />
       <workItem from="1761845342346" duration="208000" />
-      <workItem from="1762011802886" duration="4604000" />
+      <workItem from="1762011802886" duration="7251000" />
     </task>
     <task id="LOCAL-00001" summary="Se crea la tabla usuarios.sqlite3">
       <option name="closed" value="true" />
@@ -507,7 +505,23 @@
       <option name="project" value="LOCAL" />
       <updated>1762016132944</updated>
     </task>
-    <option name="localTasksCounter" value="39" />
+    <task id="LOCAL-00039" summary="Eliminacion para mejor estructura">
+      <option name="closed" value="true" />
+      <created>1762016597383</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1762016597383</updated>
+    </task>
+    <task id="LOCAL-00040" summary="Actualizacion de .gitignore">
+      <option name="closed" value="true" />
+      <created>1762016721669</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1762016721669</updated>
+    </task>
+    <option name="localTasksCounter" value="41" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -525,8 +539,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Nuevos modelos para una buena relacion con los endpoints" />
-    <MESSAGE value="Se modifica el CRUD de Usuario.py" />
     <MESSAGE value="Creacion de __init__.py para que se reconozcan las carpetas como paquetes" />
     <MESSAGE value="Mejoras del codigo" />
     <MESSAGE value="Se movieron para mejorar la estructura por paquetes" />
@@ -550,7 +562,9 @@
     <MESSAGE value="Cálculos automáticos, recalcula calorías y precio al agregar/quitar alimentos" />
     <MESSAGE value="Movido a carpeta de Datos" />
     <MESSAGE value="Cambios y mejoras en su estructura" />
-    <option name="LAST_COMMIT_MESSAGE" value="Cambios y mejoras en su estructura" />
+    <MESSAGE value="Eliminacion para mejor estructura" />
+    <MESSAGE value="Actualizacion de .gitignore" />
+    <option name="LAST_COMMIT_MESSAGE" value="Actualizacion de .gitignore" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/NutriBox$NutriBox.coverage" NAME="NutriBox Coverage Results" MODIFIED="1762016190160" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
