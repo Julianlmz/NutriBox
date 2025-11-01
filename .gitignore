@@ -5,13 +5,9 @@
 # Ignorar archivos de entorno virtual
 venv/
 .env/
+*.db
 
 # Ignorar archivos temporales
 __pycache__/
 *.py[cod]
 *.log
-
-# Ignorar configuraciones específicas
-*.json
-*.sqlite
-*.sqlite3
