@@ -19,7 +19,7 @@ else:
 engine = create_engine(DATABASE_URL, connect_args=connect_args)
 
 def create_tables():
-    SQLModel.metadata.create_all(engine)
+    SQLModel.metadata.create_all(engine, checkfirst=True)
 
 
 def get_session():
