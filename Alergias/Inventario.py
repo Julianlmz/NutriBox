@@ -5,7 +5,7 @@ from Datos.models import (
     MovimientoInventario, MovimientoInventarioCreate,
     Alimento, TipoMovimiento
 )
-from Aplicacion.db import SessionDep
+from Aplicacion.database import SessionDep
 from datetime import datetime, date
 
 router = APIRouter(prefix="/inventario", tags=["Inventario"])

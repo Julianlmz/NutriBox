@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 from typing import List, Optional
 from Datos.models import Perfil, Usuario
-from Aplicacion.db import SessionDep
+from Aplicacion.database import SessionDep
 
 router = APIRouter(prefix="/perfiles", tags=["Perfiles"])
 
