@@ -4,18 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="75e3c82f-baf3-483d-acc0-ccc84b491d55" name="Changes" comment="Eliminado por organizacion en el proyecto">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Alergias/Historial.py" beforeDir="false" afterPath="$PROJECT_DIR$/Alergias/Historial.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Alergias/Inventario.py" beforeDir="false" afterPath="$PROJECT_DIR$/Alergias/Inventario.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Alergias/Pedido.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datos/Pedido.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Alergias/Producto.py" beforeDir="false" afterPath="$PROJECT_DIR$/Alergias/Producto.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Alergias/Reporte.py" beforeDir="false" afterPath="$PROJECT_DIR$/Alergias/Reporte.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Datos/Alimento.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datos/Alimento.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Datos/Lonchera.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datos/Lonchera.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Datos/Perfil.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datos/Perfil.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Datos/Restriccion.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datos/Restriccion.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Datos/Usuario.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datos/Usuario.py" afterDir="false" />
+    <list default="true" id="75e3c82f-baf3-483d-acc0-ccc84b491d55" name="Changes" comment="Cambios y mejoras en su estructura">
+      <change beforePath="$PROJECT_DIR$/Diagrama Casos de Uso.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Diagrama de Clases.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MAPA_RELACIONES.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Mapa De Endpoints.xlsx" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -208,7 +201,7 @@
       <workItem from="1761415034102" duration="776000" />
       <workItem from="1761495515697" duration="464000" />
       <workItem from="1761845342346" duration="208000" />
-      <workItem from="1762011802886" duration="4075000" />
+      <workItem from="1762011802886" duration="4604000" />
     </task>
     <task id="LOCAL-00001" summary="Se crea la tabla usuarios.sqlite3">
       <option name="closed" value="true" />
@@ -466,7 +459,55 @@
       <option name="project" value="LOCAL" />
       <updated>1762015854844</updated>
     </task>
-    <option name="localTasksCounter" value="33" />
+    <task id="LOCAL-00033" summary="Limpio y funcional sin la libreria sqlalchemy.exec">
+      <option name="closed" value="true" />
+      <created>1762015934471</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1762015934471</updated>
+    </task>
+    <task id="LOCAL-00034" summary="Historial sin JSON ahora usa string simple con los datos principales">
+      <option name="closed" value="true" />
+      <created>1762015989287</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1762015989287</updated>
+    </task>
+    <task id="LOCAL-00035" summary="PATCH añadido, actualización parcial de restricciones">
+      <option name="closed" value="true" />
+      <created>1762016035052</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1762016035052</updated>
+    </task>
+    <task id="LOCAL-00036" summary="Cálculos automáticos, recalcula calorías y precio al agregar/quitar alimentos">
+      <option name="closed" value="true" />
+      <created>1762016069247</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1762016069247</updated>
+    </task>
+    <task id="LOCAL-00037" summary="Movido a carpeta de Datos">
+      <option name="closed" value="true" />
+      <created>1762016103278</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1762016103278</updated>
+    </task>
+    <task id="LOCAL-00038" summary="Cambios y mejoras en su estructura">
+      <option name="closed" value="true" />
+      <created>1762016132944</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1762016132944</updated>
+    </task>
+    <option name="localTasksCounter" value="39" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -484,12 +525,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Creacion del Modelo Lonchera.py" />
-    <MESSAGE value="Se agrego el endpoint de Lonchera" />
-    <MESSAGE value="Creacion de las clases para el modelo Lonchera.py" />
-    <MESSAGE value="Cambio de nombres, para una mejora en los endpoints" />
-    <MESSAGE value="Se agregan los routers nuevos" />
-    <MESSAGE value="Se agregan modelos, y se hace una relacion de cada uno" />
     <MESSAGE value="Nuevos modelos para una buena relacion con los endpoints" />
     <MESSAGE value="Se modifica el CRUD de Usuario.py" />
     <MESSAGE value="Creacion de __init__.py para que se reconozcan las carpetas como paquetes" />
@@ -509,9 +544,15 @@
     <MESSAGE value="Validadores actualizados en models.py" />
     <MESSAGE value="Codigo mas limpio y legible en database.py" />
     <MESSAGE value="Eliminado por organizacion en el proyecto" />
-    <option name="LAST_COMMIT_MESSAGE" value="Eliminado por organizacion en el proyecto" />
+    <MESSAGE value="Limpio y funcional sin la libreria sqlalchemy.exec" />
+    <MESSAGE value="Historial sin JSON ahora usa string simple con los datos principales" />
+    <MESSAGE value="PATCH añadido, actualización parcial de restricciones" />
+    <MESSAGE value="Cálculos automáticos, recalcula calorías y precio al agregar/quitar alimentos" />
+    <MESSAGE value="Movido a carpeta de Datos" />
+    <MESSAGE value="Cambios y mejoras en su estructura" />
+    <option name="LAST_COMMIT_MESSAGE" value="Cambios y mejoras en su estructura" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/NutriBox$NutriBox.coverage" NAME="NutriBox Coverage Results" MODIFIED="1761845433261" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/NutriBox$NutriBox.coverage" NAME="NutriBox Coverage Results" MODIFIED="1762016190160" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
