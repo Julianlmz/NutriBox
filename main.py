@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+import os
 from Aplicacion.database import create_tables
 from Datos import Usuario, Alimento, Lonchera, Restriccion, Pedido
 
@@ -23,3 +24,9 @@ async def root():
         "docs": "/docs",
         "redoc": "/redoc"
     }
+
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
