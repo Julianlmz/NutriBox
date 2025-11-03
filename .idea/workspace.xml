@@ -4,9 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="75e3c82f-baf3-483d-acc0-ccc84b491d55" name="Changes" comment="Actualizacion de .gitignore">
+    <list default="true" id="75e3c82f-baf3-483d-acc0-ccc84b491d55" name="Changes" comment="Corrige create_all para que revise primero (checkfirst=True)">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Aplicacion/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/Aplicacion/database.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -152,12 +152,12 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="FastAPI.NutriBox" />
       <item itemvalue="HTTP Request.All in test_main (1)" />
       <item itemvalue="HTTP Request.All in test_main" />
       <item itemvalue="HTTP Request.test_main | Crear un usuario" />
       <item itemvalue="HTTP Request.test_main | Probar que el servidor responde" />
       <item itemvalue="HTTP Request.test_main | #11" />
+      <item itemvalue="FastAPI.NutriBox" />
     </list>
     <recent_temporary>
       <list>
@@ -199,7 +199,7 @@
       <workItem from="1761415034102" duration="776000" />
       <workItem from="1761495515697" duration="464000" />
       <workItem from="1761845342346" duration="208000" />
-      <workItem from="1762011802886" duration="7251000" />
+      <workItem from="1762011802886" duration="12188000" />
     </task>
     <task id="LOCAL-00001" summary="Se crea la tabla usuarios.sqlite3">
       <option name="closed" value="true" />
@@ -521,7 +521,39 @@
       <option name="project" value="LOCAL" />
       <updated>1762016721669</updated>
     </task>
-    <option name="localTasksCounter" value="41" />
+    <task id="LOCAL-00041" summary="Conecta la app al Add-on de Clever Cloud">
+      <option name="closed" value="true" />
+      <created>1762022721883</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1762022721883</updated>
+    </task>
+    <task id="LOCAL-00042" summary="Elimina pandas para un build más rápido">
+      <option name="closed" value="true" />
+      <created>1762023449287</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1762023449287</updated>
+    </task>
+    <task id="LOCAL-00043" summary="Corrige el driver de postgres a psycopg2-binary">
+      <option name="closed" value="true" />
+      <created>1762023725881</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1762023725881</updated>
+    </task>
+    <task id="LOCAL-00044" summary="Corrige create_all para que revise primero (checkfirst=True)">
+      <option name="closed" value="true" />
+      <created>1762023977566</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1762023977566</updated>
+    </task>
+    <option name="localTasksCounter" value="45" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -539,10 +571,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Creacion de __init__.py para que se reconozcan las carpetas como paquetes" />
-    <MESSAGE value="Mejoras del codigo" />
-    <MESSAGE value="Se movieron para mejorar la estructura por paquetes" />
-    <MESSAGE value="Mejora en el codigo por error en los endpoints" />
     <MESSAGE value="Actualizacion del main, por la creacion de mas modelos" />
     <MESSAGE value="Requerimientos usados en el proyecto" />
     <MESSAGE value="Se crearon la relaciones de 1:1, 1:N y N:M" />
@@ -564,9 +592,13 @@
     <MESSAGE value="Cambios y mejoras en su estructura" />
     <MESSAGE value="Eliminacion para mejor estructura" />
     <MESSAGE value="Actualizacion de .gitignore" />
-    <option name="LAST_COMMIT_MESSAGE" value="Actualizacion de .gitignore" />
+    <MESSAGE value="Conecta la app al Add-on de Clever Cloud" />
+    <MESSAGE value="Elimina pandas para un build más rápido" />
+    <MESSAGE value="Corrige el driver de postgres a psycopg2-binary" />
+    <MESSAGE value="Corrige create_all para que revise primero (checkfirst=True)" />
+    <option name="LAST_COMMIT_MESSAGE" value="Corrige create_all para que revise primero (checkfirst=True)" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/NutriBox$NutriBox.coverage" NAME="NutriBox Coverage Results" MODIFIED="1762016190160" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/NutriBox$NutriBox.coverage" NAME="NutriBox Coverage Results" MODIFIED="1762024118852" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
