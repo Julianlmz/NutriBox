@@ -12,7 +12,6 @@ if DATABASE_URL is None:
     connect_args = {"check_same_thread": False}
 else:
     print("MODO PRODUCCIÓN: Conectando a base de datos de Clever Cloud")
-    # SQLModel prefiere "postgresql://" en lugar de "postgres://"
     if DATABASE_URL.startswith("postgres://"):
         DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
