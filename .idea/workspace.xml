@@ -4,9 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="75e3c82f-baf3-483d-acc0-ccc84b491d55" name="Changes" comment="Corrige create_all para que revise primero (checkfirst=True)">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    <list default="true" id="75e3c82f-baf3-483d-acc0-ccc84b491d55" name="Changes" comment="Actualizacion del .gitignore">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Aplicacion/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/Aplicacion/database.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clevercloud/run.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,6 +73,7 @@
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;SHELLCHECK.PATH&quot;: &quot;C:\\Users\\Julian\\AppData\\Roaming\\JetBrains\\PyCharm2025.2\\plugins\\Shell Script\\shellcheck.exe&quot;,
     &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultAutoModeForALLUsers.v1&quot;: &quot;true&quot;,
     &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;master&quot;,
@@ -82,12 +85,13 @@
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;configurable.group.python.group.settings&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
     &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
   &quot;keyToStringList&quot;: {
     &quot;DatabaseDriversLRU&quot;: [
+      &quot;postgresql&quot;,
       &quot;sqlite&quot;
     ]
   }
@@ -142,6 +146,9 @@
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="POSTGRESQL_ADDON_URI" value="postgresql://usoywdhry25zzhscklly:PLiqNZLboDSKWNpTORJzzMukkTL7Pp@bhau5vtkrvudk6vyzuid-postgresql.services.clever-cloud.com:50013/bhau5vtkrvudk6vyzuid" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -152,12 +159,12 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="FastAPI.NutriBox" />
       <item itemvalue="HTTP Request.All in test_main (1)" />
       <item itemvalue="HTTP Request.All in test_main" />
       <item itemvalue="HTTP Request.test_main | Crear un usuario" />
       <item itemvalue="HTTP Request.test_main | Probar que el servidor responde" />
       <item itemvalue="HTTP Request.test_main | #11" />
-      <item itemvalue="FastAPI.NutriBox" />
     </list>
     <recent_temporary>
       <list>
@@ -200,6 +207,18 @@
       <workItem from="1761495515697" duration="464000" />
       <workItem from="1761845342346" duration="208000" />
       <workItem from="1762011802886" duration="12188000" />
+      <workItem from="1762177671875" duration="8404000" />
+      <workItem from="1762193845038" duration="1339000" />
+      <workItem from="1762195212702" duration="2952000" />
+      <workItem from="1762198204123" duration="318000" />
+      <workItem from="1762267694277" duration="889000" />
+      <workItem from="1762343909226" duration="1796000" />
+      <workItem from="1762360937904" duration="41000" />
+      <workItem from="1762361494059" duration="928000" />
+      <workItem from="1762375334930" duration="954000" />
+      <workItem from="1762438694753" duration="43000" />
+      <workItem from="1762872439823" duration="1075000" />
+      <workItem from="1762899327337" duration="960000" />
     </task>
     <task id="LOCAL-00001" summary="Se crea la tabla usuarios.sqlite3">
       <option name="closed" value="true" />
@@ -553,7 +572,15 @@
       <option name="project" value="LOCAL" />
       <updated>1762023977566</updated>
     </task>
-    <option name="localTasksCounter" value="45" />
+    <task id="LOCAL-00045" summary="Actualizacion del .gitignore">
+      <option name="closed" value="true" />
+      <created>1762177710598</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1762177710598</updated>
+    </task>
+    <option name="localTasksCounter" value="46" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -571,7 +598,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Actualizacion del main, por la creacion de mas modelos" />
     <MESSAGE value="Requerimientos usados en el proyecto" />
     <MESSAGE value="Se crearon la relaciones de 1:1, 1:N y N:M" />
     <MESSAGE value="Cambios en la presentacion de los endpoints" />
@@ -596,9 +622,10 @@
     <MESSAGE value="Elimina pandas para un build más rápido" />
     <MESSAGE value="Corrige el driver de postgres a psycopg2-binary" />
     <MESSAGE value="Corrige create_all para que revise primero (checkfirst=True)" />
-    <option name="LAST_COMMIT_MESSAGE" value="Corrige create_all para que revise primero (checkfirst=True)" />
+    <MESSAGE value="Actualizacion del .gitignore" />
+    <option name="LAST_COMMIT_MESSAGE" value="Actualizacion del .gitignore" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/NutriBox$NutriBox.coverage" NAME="NutriBox Coverage Results" MODIFIED="1762024118852" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/NutriBox$NutriBox.coverage" NAME="NutriBox Coverage Results" MODIFIED="1762361496950" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
