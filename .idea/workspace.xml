@@ -4,11 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="75e3c82f-baf3-483d-acc0-ccc84b491d55" name="Changes" comment="Modificacion de la rama principal del proyecto">
-      <change afterPath="$PROJECT_DIR$/frontend/css/style.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/login.html" afterDir="false" />
+    <list default="true" id="75e3c82f-baf3-483d-acc0-ccc84b491d55" name="Changes" comment="Construye la página de inicio">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/js/login.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/js/login.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/js/register.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/js/register.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/register.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,8 +20,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Python Script" />
-        <option value="JavaScript File" />
         <option value="HTML File" />
+        <option value="JavaScript File" />
       </list>
     </option>
   </component>
@@ -221,7 +222,7 @@
       <workItem from="1762375334930" duration="954000" />
       <workItem from="1762438694753" duration="43000" />
       <workItem from="1762872439823" duration="1075000" />
-      <workItem from="1762899327337" duration="5847000" />
+      <workItem from="1762899327337" duration="8872000" />
     </task>
     <task id="LOCAL-00001" summary="Se crea la tabla usuarios.sqlite3">
       <option name="closed" value="true" />
@@ -599,7 +600,23 @@
       <option name="project" value="LOCAL" />
       <updated>1762900366880</updated>
     </task>
-    <option name="localTasksCounter" value="48" />
+    <task id="LOCAL-00048" summary="Define estilos base y de marca para el proyecto">
+      <option name="closed" value="true" />
+      <created>1762905985914</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1762905985914</updated>
+    </task>
+    <task id="LOCAL-00049" summary="Construye la página de inicio">
+      <option name="closed" value="true" />
+      <created>1762906032070</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1762906032070</updated>
+    </task>
+    <option name="localTasksCounter" value="50" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -617,8 +634,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Cambios en la presentacion de los endpoints" />
-    <MESSAGE value="Tests" />
     <MESSAGE value="Diagramas UML" />
     <MESSAGE value="Cambios para mejorar los endpoints" />
     <MESSAGE value="Diagramas sobre Nutribox" />
@@ -642,7 +657,9 @@
     <MESSAGE value="Actualizacion del .gitignore" />
     <MESSAGE value="Actualizacion de la base de datos" />
     <MESSAGE value="Modificacion de la rama principal del proyecto" />
-    <option name="LAST_COMMIT_MESSAGE" value="Modificacion de la rama principal del proyecto" />
+    <MESSAGE value="Define estilos base y de marca para el proyecto" />
+    <MESSAGE value="Construye la página de inicio" />
+    <option name="LAST_COMMIT_MESSAGE" value="Construye la página de inicio" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/NutriBox$NutriBox.coverage" NAME="NutriBox Coverage Results" MODIFIED="1762902235404" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
