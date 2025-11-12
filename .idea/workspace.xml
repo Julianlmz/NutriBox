@@ -4,11 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="75e3c82f-baf3-483d-acc0-ccc84b491d55" name="Changes" comment="Actualizacion del .gitignore">
+    <list default="true" id="75e3c82f-baf3-483d-acc0-ccc84b491d55" name="Changes" comment="Modificacion de la rama principal del proyecto">
+      <change afterPath="$PROJECT_DIR$/frontend/css/style.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/index.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/login.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Aplicacion/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/Aplicacion/database.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clevercloud/run.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,6 +19,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Python Script" />
+        <option value="JavaScript File" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -57,45 +59,46 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;FastAPI.NutriBox.executor&quot;: &quot;Run&quot;,
-    &quot;HTTP Request.All in test_main (1).executor&quot;: &quot;Run&quot;,
-    &quot;HTTP Request.All in test_main.executor&quot;: &quot;Run&quot;,
-    &quot;HTTP Request.test_main | #11.executor&quot;: &quot;Run&quot;,
-    &quot;HTTP Request.test_main | Crear un usuario.executor&quot;: &quot;Run&quot;,
-    &quot;HTTP Request.test_main | Listar usuarios.executor&quot;: &quot;Run&quot;,
-    &quot;HTTP Request.test_main | Probar que el servidor responde.executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;SHELLCHECK.PATH&quot;: &quot;C:\\Users\\Julian\\AppData\\Roaming\\JetBrains\\PyCharm2025.2\\plugins\\Shell Script\\shellcheck.exe&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultAutoModeForALLUsers.v1&quot;: &quot;true&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Julian/Documents/SextoSemestre/DesarrolloSoftware/NutriBox&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "DefaultHtmlFileTemplate": "HTML File",
+    "FastAPI.NutriBox.executor": "Run",
+    "HTTP Request.All in test_main (1).executor": "Run",
+    "HTTP Request.All in test_main.executor": "Run",
+    "HTTP Request.test_main | #11.executor": "Run",
+    "HTTP Request.test_main | Crear un usuario.executor": "Run",
+    "HTTP Request.test_main | Listar usuarios.executor": "Run",
+    "HTTP Request.test_main | Probar que el servidor responde.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "SHELLCHECK.PATH": "C:\\Users\\Julian\\AppData\\Roaming\\JetBrains\\PyCharm2025.2\\plugins\\Shell Script\\shellcheck.exe",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultAutoModeForALLUsers.v1": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "front",
+    "ignore.virus.scanning.warn.message": "true",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "C:/Users/Julian/Documents/SextoSemestre/DesarrolloSoftware/NutriBox",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;postgresql&quot;,
-      &quot;sqlite&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql",
+      "sqlite"
     ]
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Julian\Documents\SextoSemestre\DesarrolloSoftware\NutriBox" />
@@ -218,7 +221,7 @@
       <workItem from="1762375334930" duration="954000" />
       <workItem from="1762438694753" duration="43000" />
       <workItem from="1762872439823" duration="1075000" />
-      <workItem from="1762899327337" duration="960000" />
+      <workItem from="1762899327337" duration="5847000" />
     </task>
     <task id="LOCAL-00001" summary="Se crea la tabla usuarios.sqlite3">
       <option name="closed" value="true" />
@@ -580,7 +583,23 @@
       <option name="project" value="LOCAL" />
       <updated>1762177710598</updated>
     </task>
-    <option name="localTasksCounter" value="46" />
+    <task id="LOCAL-00046" summary="Actualizacion de la base de datos">
+      <option name="closed" value="true" />
+      <created>1762900331068</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1762900331068</updated>
+    </task>
+    <task id="LOCAL-00047" summary="Modificacion de la rama principal del proyecto">
+      <option name="closed" value="true" />
+      <created>1762900366880</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1762900366880</updated>
+    </task>
+    <option name="localTasksCounter" value="48" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -598,8 +617,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Requerimientos usados en el proyecto" />
-    <MESSAGE value="Se crearon la relaciones de 1:1, 1:N y N:M" />
     <MESSAGE value="Cambios en la presentacion de los endpoints" />
     <MESSAGE value="Tests" />
     <MESSAGE value="Diagramas UML" />
@@ -623,9 +640,11 @@
     <MESSAGE value="Corrige el driver de postgres a psycopg2-binary" />
     <MESSAGE value="Corrige create_all para que revise primero (checkfirst=True)" />
     <MESSAGE value="Actualizacion del .gitignore" />
-    <option name="LAST_COMMIT_MESSAGE" value="Actualizacion del .gitignore" />
+    <MESSAGE value="Actualizacion de la base de datos" />
+    <MESSAGE value="Modificacion de la rama principal del proyecto" />
+    <option name="LAST_COMMIT_MESSAGE" value="Modificacion de la rama principal del proyecto" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/NutriBox$NutriBox.coverage" NAME="NutriBox Coverage Results" MODIFIED="1762361496950" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/NutriBox$NutriBox.coverage" NAME="NutriBox Coverage Results" MODIFIED="1762902235404" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
