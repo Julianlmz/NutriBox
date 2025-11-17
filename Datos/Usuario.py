@@ -1,9 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
 from Aplicacion.database import SessionDep
-from Datos.models import (
-    Usuario, UsuarioCreate, UsuarioUpdate, UsuarioConRelaciones,
-    RolUsuario, Perfil, PerfilCreate, PerfilUpdate
-)
+from Datos.models import (Usuario, UsuarioCreate, UsuarioUpdate, UsuarioConRelaciones, Perfil, PerfilCreate, PerfilUpdate)
 from typing import List
 from datetime import datetime
 from Aplicacion.seguridad import hashear_password
@@ -37,25 +34,12 @@ async def crear_usuario(nuevo_usuario: UsuarioCreate, session: SessionDep):
 
     password_hasheado = hashear_password(nuevo_usuario.password)
 
-    datos_db = nuevo_usuario.model_dump(exclude={"password"})
+    datos_db = nuevo_usuario.model_dump(exclude={"password", "rol"})
 
     usuario = Usuario(
         **datos_db,
         hashed_password=password_hasheado,
-        rol=RolUsuario.Padre
         )
-    # Verificar si la cédula ya existe
-    if nuevo_usuario.cedula:
-        usuarios = session.query(Usuario).filter(Usuario.cedula == nuevo_usuario.cedula).all()
-        if usuarios:
-            raise HTTPException(
-                status_code=409,
-                detail=f"Ya existe un usuario con la cédula '{nuevo_usuario.cedula}'")
-
-        session.add(usuario)
-        session.commit()
-        session.refresh(usuario)
-        return usuario
     password_hasheado = hashear_password(nuevo_usuario.password)
     usuario_data = nuevo_usuario.model_dump(exclude={"password"})
     usuario = Usuario(**usuario_data, hashed_password=password_hasheado)
@@ -68,9 +52,7 @@ async def crear_usuario(nuevo_usuario: UsuarioCreate, session: SessionDep):
 
 @router.get("/", response_model=List[Usuario])
 async def listar_usuarios(
-        rol: RolUsuario = Query(default=None),
         activo: bool = Query(default=None),
-        localidad: str = Query(default=""),
         session: SessionDep = None
 ):
     """
@@ -93,12 +75,8 @@ async def listar_usuarios(
     """
     query = session.query(Usuario)
 
-    if rol:
-        query = query.filter(Usuario.rol == rol)
     if activo is not None:
         query = query.filter(Usuario.is_active == activo)
-    if localidad:
-        query = query.filter(Usuario.localidad.contains(localidad))
 
     usuarios = query.all()
     return usuarios
@@ -150,26 +128,10 @@ async def actualizar_usuario(
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-    # Verificar cédula duplicada solo si cambió
-    if usuario.cedula != datos_actualizados.cedula:
-        usuarios_existentes = session.query(Usuario).filter(
-            Usuario.cedula == datos_actualizados.cedula
-        ).all()
-        if usuarios_existentes:
-            raise HTTPException(
-                status_code=409,
-                detail=f"La cédula '{datos_actualizados.cedula}' ya está en uso"
-            )
-
     # Actualizar campos
     usuario.nombre = datos_actualizados.nombre
     usuario.apellido = datos_actualizados.apellido
-    usuario.localidad = datos_actualizados.localidad
-    usuario.edad = datos_actualizados.edad
-    usuario.rol = datos_actualizados.rol
-    usuario.cedula = datos_actualizados.cedula
     usuario.email = datos_actualizados.email
-    usuario.fecha_modificacion = datetime.now()
 
     session.commit()
     session.refresh(usuario)
@@ -213,8 +175,6 @@ async def actualizar_parcial_usuario(
     for key, value in update_data.items():
         setattr(usuario, key, value)
 
-    usuario.fecha_modificacion = datetime.now()
-
     session.commit()
     session.refresh(usuario)
     return usuario
@@ -244,7 +204,6 @@ async def eliminar_usuario(usuario_id: int, session: SessionDep):
 
     # Soft delete: solo marcar como inactivo
     usuario.is_active = False
-    usuario.fecha_modificacion = datetime.now()
 
     session.commit()
     return
