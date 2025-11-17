@@ -6,17 +6,6 @@ from pydantic import field_validator
 import re
 
 
-class RolUsuario(str, Enum):
-    """
-    Roles disponibles para usuarios del sistema.
-
-    - PADRE: Usuario padre/tutor con permisos completos
-    - HIJO: Usuario hijo/estudiante con permisos limitados
-    """
-    PADRE = "Padre"
-    HIJO = "Hijo"
-
-
 class TipoMovimiento(str, Enum):
     """
     Tipos de movimientos de inventario.
@@ -82,10 +71,6 @@ class UsuarioBase(SQLModel):
     """
     nombre: str = Field(min_length=3, max_length=50, description="Nombre del usuario")
     apellido: str = Field(min_length=3, max_length=50, description="Apellido del usuario")
-    localidad: Optional[str] = Field(default=None, min_length=3, max_length=100, description="Localidad del usuario")
-    edad: Optional[int] = Field(default=None, ge=1, le=120, description="Edad del usuario")
-    rol: Optional[RolUsuario] = Field(default=None, description="Rol del usuario (Padre o Hijo)")
-    cedula: Optional[str] = Field(default=None, unique=True, index=True, min_length=6, max_length=15, description="Cédula del usuario")
     email: Optional[str] = Field(default=None, max_length=100, description="Email del usuario")
 
     @field_validator('nombre', 'apellido')
@@ -95,15 +80,6 @@ class UsuarioBase(SQLModel):
         patron = r"^[a-zA-ZñÑáéíóúÁÉÍÓÚüÜ\s]+$"
         if not re.match(patron, v):
             raise ValueError(f"El campo debe contener solo letras y espacios. Valor recibido: '{v}'")
-        return v.strip()
-
-    @field_validator('cedula')
-    @classmethod
-    def validar_cedula(cls, v: str) -> str:
-        """Valida formato de cédula (solo números y guiones)."""
-        patron = r"^[0-9\-]+$"
-        if not re.match(patron, v):
-            raise ValueError(f"La cédula debe contener solo números y guiones. Valor recibido: '{v}'")
         return v.strip()
 
 
@@ -126,8 +102,6 @@ class Usuario(UsuarioBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     hashed_password: str = Field(index=True)
     is_active: bool = Field(default=True, description="Indica si el usuario está activo")
-    fecha_creacion: datetime = Field(default_factory=datetime.now)
-    fecha_modificacion: Optional[datetime] = Field(default=None)
 
     # Relaciones
     loncheras: List["Lonchera"] = Relationship(back_populates="usuario")
@@ -151,9 +125,6 @@ class UsuarioUpdate(SQLModel):
     """
     nombre: Optional[str] = Field(default=None, min_length=3, max_length=50)
     apellido: Optional[str] = Field(default=None, min_length=3, max_length=50)
-    localidad: Optional[str] = Field(default=None, min_length=3, max_length=100)
-    edad: Optional[int] = Field(default=None, ge=1, le=120)
-    rol: Optional[RolUsuario] = None
     email: Optional[str] = Field(default=None, max_length=100)
 
     @field_validator('nombre', 'apellido')
@@ -175,7 +146,6 @@ class UsuarioResumen(SQLModel):
     id: int
     nombre: str
     apellido: str
-    rol: RolUsuario
     is_active: bool
 
 
@@ -185,7 +155,6 @@ class UsuarioConRelaciones(UsuarioBase):
     """
     id: int
     is_active: bool
-    fecha_creacion: datetime
     loncheras: List["LoncheraResumen"] = []
 
 
