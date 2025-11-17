@@ -1,55 +1,81 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, File, UploadFile, Form, Depends
 from Core.database import SessionDep
 from Modulos.models import (
-    Alimento, AlimentoCreate, AlimentoUpdate, MovimientoInventario, TipoMovimiento, CategoriaAlimento, HistorialEliminacion)
-from typing import List
+    Alimento, AlimentoCreate, AlimentoUpdate, MovimientoInventario,
+    TipoMovimiento, CategoriaAlimento, HistorialEliminacion
+)
+from Core.supabase_client import upload_to_bucket
+from typing import List, Optional
+import json
 
 router = APIRouter(tags=["Alimentos"], prefix="/alimento")
 
 
 @router.post("/", response_model=Alimento, status_code=201)
-async def crear_alimento(data: AlimentoCreate, session: SessionDep):
+async def crear_alimento(
+        session: SessionDep,
+        # --- ⭐️ ¡CORRECCIÓN! Usamos tipos primitivos para Form() ⭐️
+        nombre: str = Form(...),
+        categoria: str = Form(...),  # <-- Ahora es str
+        calorias_por_100g: float = Form(...),
+        proteinas_por_100g: float = Form(...),
+        carbohidratos_por_100g: float = Form(...),
+        grasas_por_100g: float = Form(...),
+        precio_unitario: float = Form(...),
+        stock_inicial: int = Form(0),
+        imagen: Optional[UploadFile] = File(None)
+):
     """
-    Crea un nuevo alimento en el sistema con stock inicial.
-
-    Args:
-        data: Servicios del alimento (nombre, categoría, valores nutricionales, precio, stock_inicial)
-        session: Sesión de base de datos
-
-    Returns:
-        Alimento: Alimento creado con su ID asignado
-
-    Raises:
-        HTTPException 409: Si ya existe un alimento con el mismo nombre
-        HTTPException 400: Si los datos son inválidos
+    Crea un nuevo alimento. Recibe datos de formulario y una imagen opcional.
     """
-    # Verificar si ya existe alimento con ese nombre
-    alimentos_existentes = session.query(Alimento).filter(
-        Alimento.nombre == data.nombre
-    ).all()
-    if alimentos_existentes:
+
+    # 1. Subir la imagen a Supabase (si existe)
+    imagen_url = None
+    if imagen and imagen.filename:
+        imagen_url = await upload_to_bucket(imagen)
+
+    # 2. Verificar si ya existe el alimento
+    alimento_existente = session.query(Alimento).filter(Alimento.nombre == nombre).first()
+    if alimento_existente:
         raise HTTPException(
             status_code=409,
-            detail=f"Ya existe un alimento con el nombre '{data.nombre}'"
+            detail=f"Ya existe un alimento con el nombre '{nombre}'"
         )
 
-    # Crear alimento sin stock_inicial (no está en el modelo Alimento)
-    alimento = Alimento(**data.model_dump(exclude={'stock_inicial'}))
-    alimento.stock_actual = data.stock_inicial
+    # 3. Validar y crear el objeto AlimentoCreate (Pydantic valida el Enum aquí)
+    try:
+        alimento_data = AlimentoCreate(
+            nombre=nombre,
+            categoria=categoria,  # <- Pydantic lo convertirá de str a Enum
+            calorias_por_100g=calorias_por_100g,
+            proteinas_por_100g=proteinas_por_100g,
+            carbohidratos_por_100g=carbohidratos_por_100g,
+            grasas_por_100g=grasas_por_100g,
+            precio_unitario=precio_unitario,
+            stock_inicial=stock_inicial
+        )
+    except Exception as e:
+        # Esto captura errores si el float/int no es correcto o si la categoría no es válida
+        raise HTTPException(status_code=400, detail=f"Error de validación: {e}")
+
+    # 4. Crear la instancia de la tabla y asignar la URL de la imagen
+    alimento = Alimento.model_validate(alimento_data)
+    alimento.imagen_url = imagen_url
+    alimento.stock_actual = stock_inicial
 
     session.add(alimento)
     session.commit()
     session.refresh(alimento)
 
-    # Registrar movimiento de inventario si hay stock inicial
-    if data.stock_inicial > 0:
+    # 5. Registrar el movimiento de inventario (tu lógica original)
+    if stock_inicial > 0:
         movimiento = MovimientoInventario(
             alimento_id=alimento.id,
             tipo_movimiento=TipoMovimiento.ENTRADA,
-            cantidad=data.stock_inicial,
+            cantidad=stock_inicial,
             motivo="Stock inicial del alimento",
             stock_anterior=0,
-            stock_nuevo=data.stock_inicial,
+            stock_nuevo=stock_inicial,
             usuario_id=None
         )
         session.add(movimiento)
@@ -68,22 +94,6 @@ async def listar_alimentos(
 ):
     """
     Lista alimentos con filtros opcionales.
-
-    Args:
-        incluir_inactivos: Incluir alimentos desactivados
-        categoria: Filtrar por categoría específica
-        stock_bajo: Mostrar solo alimentos con stock bajo
-        stock_minimo: Umbral para considerar stock bajo (default: 10)
-        session: Sesión de base de datos
-
-    Returns:
-        List[Alimento]: Lista de alimentos que cumplen los filtros
-
-    Examples:
-        - GET /alimento/ - Alimentos activos
-        - GET /alimento/?categoria=Frutas - Solo frutas
-        - GET /alimento/?stock_bajo=true - Alimentos con stock bajo
-        - GET /alimento/?incluir_inactivos=true - Todos los alimentos
     """
     query = session.query(Alimento)
 
@@ -104,16 +114,6 @@ async def listar_alimentos(
 async def obtener_alimento(alimento_id: int, session: SessionDep):
     """
     Obtiene un alimento por ID.
-
-    Args:
-        alimento_id: ID del alimento
-        session: Sesión de base de datos
-
-    Returns:
-        Alimento: Servicios completos del alimento
-
-    Raises:
-        HTTPException 404: Si el alimento no existe o está inactivo
     """
     alimento = session.get(Alimento, alimento_id)
     if not alimento or not alimento.is_active:
@@ -129,18 +129,6 @@ async def actualizar_alimento(
 ):
     """
     Actualiza completamente un alimento (PUT).
-
-    Args:
-        alimento_id: ID del alimento
-        data: Nuevos datos del alimento
-        session: Sesión de base de datos
-
-    Returns:
-        Alimento: Alimento actualizado
-
-    Raises:
-        HTTPException 404: Si el alimento no existe
-        HTTPException 409: Si el nuevo nombre ya está en uso
     """
     alimento = session.get(Alimento, alimento_id)
     if not alimento or not alimento.is_active:
@@ -161,6 +149,7 @@ async def actualizar_alimento(
     for key, value in data.model_dump(exclude={'stock_inicial'}).items():
         setattr(alimento, key, value)
 
+    session.add(alimento)
     session.commit()
     session.refresh(alimento)
     return alimento
@@ -174,18 +163,6 @@ async def actualizar_parcial_alimento(
 ):
     """
     Actualiza parcialmente un alimento (PATCH).
-
-    Args:
-        alimento_id: ID del alimento
-        data: Campos a actualizar
-        session: Sesión de base de datos
-
-    Returns:
-        Alimento: Alimento actualizado
-
-    Raises:
-        HTTPException 404: Si el alimento no existe
-        HTTPException 400: Si no se proporcionan datos
     """
     alimento = session.get(Alimento, alimento_id)
     if not alimento or not alimento.is_active:
@@ -214,6 +191,7 @@ async def actualizar_parcial_alimento(
     for key, value in update_data.items():
         setattr(alimento, key, value)
 
+    session.add(alimento)
     session.commit()
     session.refresh(alimento)
     return alimento
@@ -228,38 +206,36 @@ async def eliminar_alimento(
 ):
     """
     Elimina o desactiva un alimento.
-
-    Args:
-        alimento_id: ID del alimento
-        session: Sesión de base de datos
-        motivo: Motivo de la eliminación (opcional)
-        hard_delete: Si es True, elimina permanentemente. Si es False, solo desactiva
-
-    Returns:
-        None: Respuesta vacía con código 204
-
-    Raises:
-        HTTPException 404: Si el alimento no existe
     """
     alimento = session.get(Alimento, alimento_id)
     if not alimento:
         raise HTTPException(status_code=404, detail="Alimento no encontrado")
 
     if hard_delete:
-        # Guardar en historial antes de eliminar
-        datos_str = f"nombre={alimento.nombre},categoria={alimento.categoria},stock={alimento.stock_actual}"
-        historial = HistorialEliminacion(
-            tabla_nombre="alimento",
-            registro_id=alimento.id,
-            datos_json=datos_str,
-            motivo=motivo or "Eliminación permanente",
-            usuario_eliminador_id=None
-        )
-        session.add(historial)
+        # Guardar en historial antes de eliminar (asumiendo que HistorialEliminacion y Usuario existen)
+        try:
+            datos_str = json.dumps({
+                "nombre": alimento.nombre,
+                "categoria": str(alimento.categoria),
+                "stock": alimento.stock_actual
+            })
+            historial = HistorialEliminacion(
+                tabla_nombre="alimento",
+                registro_id=alimento.id,
+                datos_json=datos_str,
+                motivo=motivo or "Eliminación permanente",
+                usuario_eliminador_id=None
+            )
+            session.add(historial)
+        except NameError:
+            # Si HistorialEliminacion no está importado o definido, ignoramos el historial en hard delete.
+            pass
+
         session.delete(alimento)
     else:
         # Soft delete: solo desactivar
         alimento.is_active = False
+        session.add(alimento)
 
     session.commit()
     return
@@ -269,16 +245,6 @@ async def eliminar_alimento(
 async def obtener_restricciones_alimento(alimento_id: int, session: SessionDep):
     """
     Obtiene todas las restricciones/alergias asociadas a un alimento.
-
-    Args:
-        alimento_id: ID del alimento
-        session: Sesión de base de datos
-
-    Returns:
-        list: Lista de restricciones con sus detalles
-
-    Raises:
-        HTTPException 404: Si el alimento no existe
     """
     alimento = session.get(Alimento, alimento_id)
     if not alimento:
@@ -311,17 +277,6 @@ async def obtener_movimientos_alimento(
 ):
     """
     Obtiene el historial de movimientos de inventario de un alimento.
-
-    Args:
-        alimento_id: ID del alimento
-        session: Sesión de base de datos
-        limite: Número máximo de movimientos a retornar
-
-    Returns:
-        dict: Información del alimento y su historial de movimientos
-
-    Raises:
-        HTTPException 404: Si el alimento no existe
     """
     alimento = session.get(Alimento, alimento_id)
     if not alimento:
@@ -367,21 +322,6 @@ async def ajustar_stock_alimento(
 ):
     """
     Ajusta el stock de un alimento y registra el movimiento.
-
-    Args:
-        alimento_id: ID del alimento
-        tipo_movimiento: Tipo de movimiento (ENTRADA, SALIDA, AJUSTE)
-        cantidad: Cantidad a ajustar
-        motivo: Motivo del ajuste
-        usuario_id: ID del usuario que realiza el ajuste
-        session: Sesión de base de datos
-
-    Returns:
-        Alimento: Alimento con stock actualizado
-
-    Raises:
-        HTTPException 404: Si el alimento no existe
-        HTTPException 400: Si el stock resultante es negativo
     """
     alimento = session.get(Alimento, alimento_id)
     if not alimento or not alimento.is_active:
@@ -419,6 +359,32 @@ async def ajustar_stock_alimento(
     )
 
     session.add(movimiento)
+    session.add(alimento)
+    session.commit()
+    session.refresh(alimento)
+
+    return alimento
+
+
+# --- ⭐️ ¡ENDPOINT DE IMAGEN DE ALIMENTO (PATCH) ⭐️ ---
+@router.post("/{alimento_id}/upload-image", response_model=Alimento)
+async def subir_imagen_alimento(
+        alimento_id: int,
+        session: SessionDep,
+        imagen: UploadFile = File(...)
+):
+    """
+    Sube una imagen para un alimento existente.
+    """
+    # 1. Busca el alimento
+    alimento = obtener_alimento(alimento_id, session)
+
+    # 2. Sube la imagen a Supabase (usando tu lógica Core/supabase_client)
+    imagen_url = await upload_to_bucket(imagen)
+
+    # 3. Actualiza la base de datos
+    alimento.imagen_url = imagen_url
+    session.add(alimento)
     session.commit()
     session.refresh(alimento)
 

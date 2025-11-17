@@ -253,9 +253,9 @@ class Alimento(AlimentoBase, table=True):
     - One-to-Many con MovimientoInventario (historial de stock)
     """
     id: Optional[int] = Field(default=None, primary_key=True)
+    imagen_url: Optional[str] = Field(default=None, description="URL de la imagen del alimento")
     stock_actual: int = Field(default=0, ge=0, description="Stock disponible")
     is_active: bool = Field(default=True)
-    fecha_creacion: datetime = Field(default_factory=datetime.now)
 
     restricciones: List["RestriccionAlimento"] = Relationship(back_populates="alimento")
     loncheras: List["LoncheraAlimento"] = Relationship(back_populates="alimento")
