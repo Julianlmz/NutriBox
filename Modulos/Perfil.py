@@ -135,9 +135,5 @@ async def obtener_perfil_completo(perfil_id: int, session: SessionDep):
             "id": perfil.usuario.id,
             "nombre": perfil.usuario.nombre,
             "apellido": perfil.usuario.apellido,
-            "cedula": perfil.usuario.cedula,
-            "edad": perfil.usuario.edad,
-            "localidad": perfil.usuario.localidad,
-            "rol": perfil.usuario.rol
         }
     }

@@ -19,25 +19,21 @@ async def usuarios_con_loncheras_csv(session: SessionDep):
                 rows.append({
                     "usuario_id": u.id,
                     "nombre_usuario": f"{u.nombre} {u.apellido}",
-                    "cedula": u.cedula,
                     "lonchera_id": l.id,
                     "lonchera_nombre": l.nombre,
                     "lonchera_descripcion": l.descripcion,
                     "lonchera_precio": l.precio,
                     "lonchera_calorias": l.calorias,
-                    "fecha_creacion": l.fecha_creacion
                 })
         else:
             rows.append({
                 "usuario_id": u.id,
                 "nombre_usuario": f"{u.nombre} {u.apellido}",
-                "cedula": u.cedula,
                 "lonchera_id": None,
                 "lonchera_nombre": None,
                 "lonchera_descripcion": None,
                 "lonchera_precio": None,
                 "lonchera_calorias": None,
-                "fecha_creacion": None
             })
     df = pd.DataFrame(rows)
     stream = io.StringIO()

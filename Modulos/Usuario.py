@@ -20,19 +20,18 @@ async def read_users_me(current_user: Annotated[Usuario, Depends(get_current_use
 @router.post("/", response_model=Usuario, status_code=201)
 async def crear_usuario(nuevo_usuario: UsuarioCreate, session: SessionDep):
     """
-    Crea un nuevo usuario en el sistema.
+        Crea un nuevo usuario en el sistema.
 
-    Args:
-        nuevo_usuario: Servicios del usuario (nombre, apellido, edad, rol, cédula)
-        session: Sesión de base de datos
+        Args:
+            nuevo_usuario: Servicios del usuario (nombre, apellido, email, password) <-- LIMPIO
+            session: Sesión de base de datos
 
-    Returns:
-        Usuario: Usuario creado con su ID asignado
+        Returns:
+            Usuario: Usuario creado con su ID asignado
 
-    Raises:
-        HTTPException 409: Si la cédula ya está registrada
-        HTTPException 400: Si los datos son inválidos
-    """
+        Raises:
+            HTTPException 409: Si el email ya está registrado
+        """
 
     usuario_existente = session.query(Usuario).filter(Usuario.email == nuevo_usuario.email).first()
     if usuario_existente:
@@ -61,23 +60,20 @@ async def listar_usuarios(
         session: SessionDep = None
 ):
     """
-    Lista usuarios con filtros opcionales.
+        Lista usuarios con filtros opcionales.
 
-    Args:
-        rol: Filtrar por rol (Padre o Hijo)
-        activo: Filtrar por estado activo/inactivo
-        localidad: Filtrar por localidad (búsqueda parcial)
-        session: Sesión de base de datos
+        Args:
+            activo: Filtrar por estado activo/inactivo
+            session: Sesión de base de datos
 
-    Returns:
-        List[Usuario]: Lista de usuarios que cumplen los filtros
+        Returns:
+            List[Usuario]: Lista de usuarios que cumplen los filtros
 
-    Examples:
-        - GET /usuario/ - Todos los usuarios
-        - GET /usuario/?rol=Padre - Solo padres
-        - GET /usuario/?activo=true - Solo usuarios activos
-        - GET /usuario/?localidad=Bogotá - Usuarios de Bogotá
-    """
+        Examples:
+            - GET /usuario/ - Todos los usuarios
+            - GET /usuario/?activo=true - Solo usuarios activos
+
+        """
     query = session.query(Usuario)
 
     if activo is not None:
