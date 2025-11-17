@@ -1,11 +1,11 @@
 from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 from typing import List, Optional
-from Datos.models import (
+from Modulos.models import (
     MovimientoInventario, MovimientoInventarioCreate,
     Alimento, TipoMovimiento
 )
-from Aplicacion.database import SessionDep
+from Core.database import SessionDep
 from datetime import datetime, date
 
 router = APIRouter(prefix="/inventario", tags=["Inventario"])

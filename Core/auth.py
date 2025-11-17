@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from typing import Annotated
 from datetime import datetime, timedelta, timezone
-from jose import JWTError, jwt
+from jose import jwt
 from sqlmodel import Session, select
 
-from Aplicacion.database import SessionDep
-from Aplicacion.seguridad import verificar_password
-from Datos.models import Usuario
+from Core.database import SessionDep
+from Core.seguridad import verificar_password
+from Modulos.models import Usuario
 
 # --- Configuración de Seguridad para los Tokens ---
 
@@ -77,7 +77,7 @@ async def login_para_access_token(
     """
     Endpoint de login. Recibe 'username' (email) y 'password' desde un formulario.
     """
-    # Tu frontend usa 'email' para el login, pero OAuth2 usa 'username'
+    # Tu Frontend usa 'email' para el login, pero OAuth2 usa 'username'
     # Así que, tratamos 'form_data.username' como si fuera el email
     email = form_data.username
     password = form_data.password

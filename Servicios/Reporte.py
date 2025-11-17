@@ -3,8 +3,8 @@ import pandas as pd
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from sqlmodel import select
-from Aplicacion.database import SessionDep
-from Datos.models import Usuario, Lonchera
+from Core.database import SessionDep
+from Modulos.models import Usuario, Lonchera
 
 router = APIRouter(prefix="/reportes", tags=["Reportes"])
 

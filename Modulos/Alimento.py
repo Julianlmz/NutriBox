@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
-from Aplicacion.database import SessionDep
-from Datos.models import (
+from Core.database import SessionDep
+from Modulos.models import (
     Alimento, AlimentoCreate, AlimentoUpdate, MovimientoInventario, TipoMovimiento, CategoriaAlimento, HistorialEliminacion)
 from typing import List
 
@@ -13,7 +13,7 @@ async def crear_alimento(data: AlimentoCreate, session: SessionDep):
     Crea un nuevo alimento en el sistema con stock inicial.
 
     Args:
-        data: Datos del alimento (nombre, categoría, valores nutricionales, precio, stock_inicial)
+        data: Servicios del alimento (nombre, categoría, valores nutricionales, precio, stock_inicial)
         session: Sesión de base de datos
 
     Returns:
@@ -110,7 +110,7 @@ async def obtener_alimento(alimento_id: int, session: SessionDep):
         session: Sesión de base de datos
 
     Returns:
-        Alimento: Datos completos del alimento
+        Alimento: Servicios completos del alimento
 
     Raises:
         HTTPException 404: Si el alimento no existe o está inactivo

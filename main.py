@@ -1,7 +1,7 @@
 from fastapi import FastAPI
-from Aplicacion.database import create_tables
-from Datos import Usuario, Alimento, Lonchera, Restriccion, Pedido
-from Aplicacion import auth
+from Core.database import create_tables
+from Modulos import Usuario, Alimento, Lonchera, Pedido, Restriccion
+from Core import auth
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(

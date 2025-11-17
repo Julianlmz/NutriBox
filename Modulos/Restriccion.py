@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException, Query
-from Aplicacion.database import SessionDep
-from Datos.models import (Restriccion, RestriccionCreate, RestriccionUpdate, RestriccionAlimento, Alimento, NivelSeveridad)
+from Core.database import SessionDep
+from Modulos.models import (Restriccion, RestriccionCreate, RestriccionUpdate, RestriccionAlimento, Alimento, NivelSeveridad)
 from typing import List
 
-router = APIRouter(tags=["Restricciones y Alergias"], prefix="/restriccion")
+router = APIRouter(tags=["Restricciones y Modulos"], prefix="/restriccion")
 
 
 @router.post("/", response_model=Restriccion, status_code=201)
@@ -12,7 +12,7 @@ async def crear_restriccion(data: RestriccionCreate, session: SessionDep):
     Crea una nueva restricción alimentaria o alergia.
 
     Args:
-        data: Datos de la restricción (nombre, descripción, nivel_severidad)
+        data: Servicios de la restricción (nombre, descripción, nivel_severidad)
         session: Sesión de base de datos
 
     Returns:
@@ -78,7 +78,7 @@ async def obtener_restriccion(restriccion_id: int, session: SessionDep):
         session: Sesión de base de datos
 
     Returns:
-        Restriccion: Datos de la restricción
+        Restriccion: Servicios de la restricción
 
     Raises:
         HTTPException 404: Si la restricción no existe

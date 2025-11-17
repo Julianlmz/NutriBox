@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
-from Aplicacion.database import SessionDep
-from Datos.models import (Lonchera, LoncheraCreate, LoncheraUpdate, LoncheraAlimento, AgregarAlimento, Usuario, Alimento, RestriccionAlimento)
+from Core.database import SessionDep
+from Modulos.models import (Lonchera, LoncheraCreate, LoncheraUpdate, LoncheraAlimento, AgregarAlimento, Usuario, Alimento, RestriccionAlimento)
 from typing import List
 
 router = APIRouter(tags=["Loncheras"], prefix="/lonchera")
@@ -12,7 +12,7 @@ async def crear_lonchera(data: LoncheraCreate, session: SessionDep):
     Crea una nueva lonchera para un usuario.
 
     Args:
-        data: Datos de la lonchera (nombre, descripción, usuario_id)
+        data: Servicios de la lonchera (nombre, descripción, usuario_id)
         session: Sesión de base de datos
 
     Returns:
@@ -79,7 +79,7 @@ async def obtener_lonchera(lonchera_id: int, session: SessionDep):
         session: Sesión de base de datos
 
     Returns:
-        Lonchera: Datos de la lonchera
+        Lonchera: Servicios de la lonchera
 
     Raises:
         HTTPException 404: Si la lonchera no existe o está inactiva
@@ -177,7 +177,7 @@ async def agregar_alimento(
 
     Args:
         lonchera_id: ID de la lonchera
-        data: Datos del alimento (alimento_id, cantidad_gramos)
+        data: Servicios del alimento (alimento_id, cantidad_gramos)
         session: Sesión de base de datos
 
     Returns:

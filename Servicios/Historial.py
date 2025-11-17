@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 from typing import List, Optional
-from Datos.models import HistorialEliminacion
-from Aplicacion.database import SessionDep
+from Modulos.models import HistorialEliminacion
+from Core.database import SessionDep
 import json
 
 router = APIRouter(prefix="/historial", tags=["Historial de Eliminaciones"])

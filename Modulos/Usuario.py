@@ -1,9 +1,8 @@
 from fastapi import APIRouter, HTTPException, Query
-from Aplicacion.database import SessionDep
-from Datos.models import (Usuario, UsuarioCreate, UsuarioUpdate, UsuarioConRelaciones, Perfil, PerfilCreate, PerfilUpdate)
+from Core.database import SessionDep
+from Modulos.models import (Usuario, UsuarioCreate, UsuarioUpdate, UsuarioConRelaciones, Perfil, PerfilCreate, PerfilUpdate)
 from typing import List
-from datetime import datetime
-from Aplicacion.seguridad import hashear_password
+from Core.seguridad import hashear_password
 
 router = APIRouter(tags=["Usuarios"], prefix="/usuario")
 
@@ -14,7 +13,7 @@ async def crear_usuario(nuevo_usuario: UsuarioCreate, session: SessionDep):
     Crea un nuevo usuario en el sistema.
 
     Args:
-        nuevo_usuario: Datos del usuario (nombre, apellido, edad, rol, cédula)
+        nuevo_usuario: Servicios del usuario (nombre, apellido, edad, rol, cédula)
         session: Sesión de base de datos
 
     Returns:
@@ -220,7 +219,7 @@ async def crear_perfil(
 
     Args:
         usuario_id: ID del usuario
-        perfil_data: Datos del perfil (bio, teléfono, foto)
+        perfil_data: Servicios del perfil (bio, teléfono, foto)
         session: Sesión de base de datos
 
     Returns:
@@ -259,7 +258,7 @@ async def actualizar_perfil(
 
     Args:
         usuario_id: ID del usuario
-        perfil_data: Datos a actualizar
+        perfil_data: Servicios a actualizar
         session: Sesión de base de datos
 
     Returns:
