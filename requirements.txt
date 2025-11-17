@@ -4,3 +4,5 @@ sqlmodel==0.0.14
 python-multipart==0.0.6
 psycopg2-binary
 passlib[bcrypt]
+python-jose[cryptography]
+python-multipart
