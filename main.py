@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from Aplicacion.database import create_tables
 from Datos import Usuario, Alimento, Lonchera, Restriccion, Pedido
+from Aplicacion import auth
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
@@ -18,6 +19,7 @@ app.add_middleware(
 
 #create_tables()
 
+app.include_router(auth.router)
 app.include_router(Usuario.router)
 app.include_router(Alimento.router)
 app.include_router(Lonchera.router)
