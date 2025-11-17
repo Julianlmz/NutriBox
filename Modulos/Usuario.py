@@ -1,11 +1,21 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from Core.database import SessionDep
 from Modulos.models import (Usuario, UsuarioCreate, UsuarioUpdate, UsuarioConRelaciones, Perfil, PerfilCreate, PerfilUpdate)
-from typing import List
+from typing import List, Annotated
 from Core.seguridad import hashear_password
+from Core.auth import get_current_user
 
 router = APIRouter(tags=["Usuarios"], prefix="/usuario")
 
+
+@router.get("/me", response_model=Usuario)
+async def read_users_me(current_user: Annotated[Usuario, Depends(get_current_user)]):
+    """
+    Obtiene los datos del usuario que está actualmente autenticado.
+
+    Requiere un Token de Acceso (Bearer Token).
+    """
+    return current_user
 
 @router.post("/", response_model=Usuario, status_code=201)
 async def crear_usuario(nuevo_usuario: UsuarioCreate, session: SessionDep):
@@ -27,21 +37,17 @@ async def crear_usuario(nuevo_usuario: UsuarioCreate, session: SessionDep):
     usuario_existente = session.query(Usuario).filter(Usuario.email == nuevo_usuario.email).first()
     if usuario_existente:
         raise HTTPException(
-                status_code=409,
-                detail=f"Ya existe un usuario con el email '{nuevo_usuario.email}'"
+            status_code=409,
+            detail=f"Ya existe un usuario con el email '{nuevo_usuario.email}'"
         )
 
     password_hasheado = hashear_password(nuevo_usuario.password)
-
     datos_db = nuevo_usuario.model_dump(exclude={"password", "rol"})
 
     usuario = Usuario(
         **datos_db,
-        hashed_password=password_hasheado,
-        )
-    password_hasheado = hashear_password(nuevo_usuario.password)
-    usuario_data = nuevo_usuario.model_dump(exclude={"password"})
-    usuario = Usuario(**usuario_data, hashed_password=password_hasheado)
+        hashed_password=password_hasheado
+    )
 
     session.add(usuario)
     session.commit()

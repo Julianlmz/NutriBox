@@ -1,21 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from typing import Annotated
 from datetime import datetime, timedelta, timezone
-from jose import jwt
+from jose import JWTError, jwt
 from sqlmodel import Session, select
-
 from Core.database import SessionDep
 from Core.seguridad import verificar_password
 from Modulos.models import Usuario
 
-# --- Configuración de Seguridad para los Tokens ---
 
-# ¡SECRETO! Cambia esto por una cadena larga y aleatoria.
-# Puedes generar una con: openssl rand -hex 32
 SECRET_KEY = "A]m42[GBVb.59=!"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30  # Duración del token
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 # Creamos un router solo para la autenticación
 router = APIRouter(
@@ -100,3 +96,35 @@ async def login_para_access_token(
 
     # Esto es lo que recibe tu login.js
     return {"access_token": access_token, "token_type": "bearer"}
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
+
+async def get_current_user(
+        session: SessionDep,
+        token: Annotated[str, Depends(oauth2_scheme)]
+) -> Usuario:
+    """
+    Dependencia para obtener el usuario actual a partir de un token JWT.
+    """
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="No se pudieron validar las credenciales",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+    try:
+        # Decodifica el token
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        # Extrae el email del "subject" (sub) del token
+        email: str = payload.get("sub")
+        if email is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+
+    # Busca al usuario en la BD
+    usuario = get_user(session, email=email)
+    if usuario is None:
+        raise credentials_exception
+
+    return usuario
