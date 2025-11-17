@@ -82,10 +82,10 @@ class UsuarioBase(SQLModel):
     """
     nombre: str = Field(min_length=3, max_length=50, description="Nombre del usuario")
     apellido: str = Field(min_length=3, max_length=50, description="Apellido del usuario")
-    localidad: str = Field(min_length=3, max_length=100, description="Localidad del usuario")
-    edad: int = Field(ge=1, le=120, description="Edad del usuario")
-    rol: RolUsuario = Field(description="Rol del usuario (Padre o Hijo)")
-    cedula: str = Field(unique=True, index=True, min_length=6, max_length=15, description="Cédula del usuario")
+    localidad: Optional[str] = Field(default=None, min_length=3, max_length=100, description="Localidad del usuario")
+    edad: Optional[int] = Field(default=None, ge=1, le=120, description="Edad del usuario")
+    rol: Optional[RolUsuario] = Field(default=None, description="Rol del usuario (Padre o Hijo)")
+    cedula: Optional[str] = Field(default=None, unique=True, index=True, min_length=6, max_length=15, description="Cédula del usuario")
     email: Optional[str] = Field(default=None, max_length=100, description="Email del usuario")
 
     @field_validator('nombre', 'apellido')
