@@ -4,7 +4,7 @@
 
 # Ignorar archivos de entorno virtual
 venv/
-.env/
+.env
 *.db
 *.json
 
