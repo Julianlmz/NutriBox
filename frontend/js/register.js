@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         // 7. Definir la URL de tu backend (¡IMPORTANTE!)
         // Asumiendo que tu backend FastAPI corre en el puerto 8000
-        const backendURL = "https://nutribox.onrender.com/usuarios/";
+        const backendURL = "https://nutribox.onrender.com/usuario/";
 
         // 8. Usar fetch() para enviar los datos (el "mensajero")
         fetch(backendURL, {

@@ -27,6 +27,23 @@ async def crear_usuario(nuevo_usuario: UsuarioCreate, session: SessionDep):
         HTTPException 409: Si la cédula ya está registrada
         HTTPException 400: Si los datos son inválidos
     """
+
+    usuario_existente = session.query(Usuario).filter(Usuario.email == nuevo_usuario.email).first()
+    if usuario_existente:
+        raise HTTPException(
+                status_code=409,
+                detail=f"Ya existe un usuario con el email '{nuevo_usuario.email}'"
+        )
+
+    password_hasheado = hashear_password(nuevo_usuario.password)
+
+    datos_db = nuevo_usuario.model_dump(exclude={"password"})
+
+    usuario = Usuario(
+        **datos_db,
+        hashed_password=password_hasheado,
+        rol=RolUsuario.Padre
+        )
     # Verificar si la cédula ya existe
     if nuevo_usuario.cedula:
         usuarios = session.query(Usuario).filter(Usuario.cedula == nuevo_usuario.cedula).all()
@@ -35,6 +52,10 @@ async def crear_usuario(nuevo_usuario: UsuarioCreate, session: SessionDep):
                 status_code=409,
                 detail=f"Ya existe un usuario con la cédula '{nuevo_usuario.cedula}'")
 
+        session.add(usuario)
+        session.commit()
+        session.refresh(usuario)
+        return usuario
     password_hasheado = hashear_password(nuevo_usuario.password)
     usuario_data = nuevo_usuario.model_dump(exclude={"password"})
     usuario = Usuario(**usuario_data, hashed_password=password_hasheado)
