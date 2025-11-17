@@ -17,7 +17,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-#create_tables()
+create_tables()
 
 app.include_router(auth.router)
 app.include_router(Usuario.router)
