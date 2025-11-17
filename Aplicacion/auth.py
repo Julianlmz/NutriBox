@@ -13,7 +13,7 @@ from Datos.models import Usuario
 
 # ¡SECRETO! Cambia esto por una cadena larga y aleatoria.
 # Puedes generar una con: openssl rand -hex 32
-SECRET_KEY = "tu_clave_secreta_aqui_debe_ser_larga_y_aleatoria"
+SECRET_KEY = "A]m42[GBVb.59=!"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30  # Duración del token
 
