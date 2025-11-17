@@ -4,12 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="75e3c82f-baf3-483d-acc0-ccc84b491d55" name="Changes" comment="Construye la página de inicio">
+    <list default="true" id="75e3c82f-baf3-483d-acc0-ccc84b491d55" name="Changes" comment="Hace opcionales los campos de perfil de usuario">
+      <change afterPath="$PROJECT_DIR$/Aplicacion/seguridad.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/js/login.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/js/login.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/js/register.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/js/register.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/login.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/register.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Datos/Usuario.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datos/Usuario.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Datos/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datos/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,9 +19,9 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Python Script" />
         <option value="HTML File" />
         <option value="JavaScript File" />
+        <option value="Python Script" />
       </list>
     </option>
   </component>
@@ -89,7 +89,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
     "to.speed.mode.migration.done": "true",
     "vue.rearranger.settings.migration": "true"
   },
@@ -109,23 +109,6 @@
       <recent name="C:\Users\Julian\Documents\SextoSemestre\DesarrolloSoftware\NutriBox\Alergias" />
       <recent name="C:\Users\Julian\Documents\SextoSemestre\DesarrolloSoftware\NutriBox\Aplicacion" />
     </key>
-  </component>
-  <component name="RunDashboard">
-    <option name="configurationStatuses">
-      <map>
-        <entry key="HttpClient.HttpRequestRunConfigurationType">
-          <value>
-            <map>
-              <entry key="All in test_main" value="STOPPED" />
-              <entry key="All in test_main (1)" value="STOPPED" />
-              <entry key="test_main | #11" value="STOPPED" />
-              <entry key="test_main | Crear un usuario" value="STOPPED" />
-              <entry key="test_main | Probar que el servidor responde" value="STOPPED" />
-            </map>
-          </value>
-        </entry>
-      </map>
-    </option>
   </component>
   <component name="RunManager" selected="FastAPI.NutriBox">
     <configuration name="All in test_main (1)" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" path="$PROJECT_DIR$/Alergias/test_main.http">
@@ -223,14 +206,6 @@
       <workItem from="1762438694753" duration="43000" />
       <workItem from="1762872439823" duration="1075000" />
       <workItem from="1762899327337" duration="8872000" />
-    </task>
-    <task id="LOCAL-00001" summary="Se crea la tabla usuarios.sqlite3">
-      <option name="closed" value="true" />
-      <created>1760983139937</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1760983139937</updated>
     </task>
     <task id="LOCAL-00002" summary="Creacion de main.py, se despliega en el Localhost">
       <option name="closed" value="true" />
@@ -616,7 +591,15 @@
       <option name="project" value="LOCAL" />
       <updated>1762906032070</updated>
     </task>
-    <option name="localTasksCounter" value="50" />
+    <task id="LOCAL-00050" summary="Hace opcionales los campos de perfil de usuario">
+      <option name="closed" value="true" />
+      <created>1763382789569</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1763382789569</updated>
+    </task>
+    <option name="localTasksCounter" value="51" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -634,9 +617,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Diagramas UML" />
-    <MESSAGE value="Cambios para mejorar los endpoints" />
-    <MESSAGE value="Diagramas sobre Nutribox" />
     <MESSAGE value="Modificacion de archivos" />
     <MESSAGE value="Estructura actualizada en main.py" />
     <MESSAGE value="Validadores actualizados en models.py" />
@@ -659,9 +639,12 @@
     <MESSAGE value="Modificacion de la rama principal del proyecto" />
     <MESSAGE value="Define estilos base y de marca para el proyecto" />
     <MESSAGE value="Construye la página de inicio" />
-    <option name="LAST_COMMIT_MESSAGE" value="Construye la página de inicio" />
+    <MESSAGE value="Modificacion en el Usuario" />
+    <MESSAGE value="Modificacion en el registro del usuario" />
+    <MESSAGE value="Hace opcionales los campos de perfil de usuario" />
+    <option name="LAST_COMMIT_MESSAGE" value="Hace opcionales los campos de perfil de usuario" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/NutriBox$NutriBox.coverage" NAME="NutriBox Coverage Results" MODIFIED="1762902235404" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/NutriBox$NutriBox.coverage" NAME="NutriBox Coverage Results" MODIFIED="1763381540782" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

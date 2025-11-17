@@ -6,6 +6,7 @@ from Datos.models import (
 )
 from typing import List
 from datetime import datetime
+from Aplicacion.seguridad import hashear_password
 
 router = APIRouter(tags=["Usuarios"], prefix="/usuario")
 
@@ -27,14 +28,17 @@ async def crear_usuario(nuevo_usuario: UsuarioCreate, session: SessionDep):
         HTTPException 400: Si los datos son inválidos
     """
     # Verificar si la cédula ya existe
-    usuarios = session.query(Usuario).filter(Usuario.cedula == nuevo_usuario.cedula).all()
-    if usuarios:
-        raise HTTPException(
-            status_code=409,
-            detail=f"Ya existe un usuario con la cédula '{nuevo_usuario.cedula}'"
-        )
+    if nuevo_usuario.cedula:
+        usuarios = session.query(Usuario).filter(Usuario.cedula == nuevo_usuario.cedula).all()
+        if usuarios:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Ya existe un usuario con la cédula '{nuevo_usuario.cedula}'")
 
-    usuario = Usuario.model_validate(nuevo_usuario)
+    password_hasheado = hashear_password(nuevo_usuario.password)
+    usuario_data = nuevo_usuario.model_dump(exclude={"password"})
+    usuario = Usuario(**usuario_data, hashed_password=password_hasheado)
+
     session.add(usuario)
     session.commit()
     session.refresh(usuario)

@@ -124,6 +124,7 @@ class Usuario(UsuarioBase, table=True):
         fecha_modificacion: Última fecha de modificación
     """
     id: Optional[int] = Field(default=None, primary_key=True)
+    hashed_password: str = Field(index=True)
     is_active: bool = Field(default=True, description="Indica si el usuario está activo")
     fecha_creacion: datetime = Field(default_factory=datetime.now)
     fecha_modificacion: Optional[datetime] = Field(default=None)
@@ -140,7 +141,7 @@ class UsuarioCreate(UsuarioBase):
     Esquema para crear un nuevo usuario.
     Hereda todas las validaciones de UsuarioBase.
     """
-    pass
+    password: str
 
 
 class UsuarioUpdate(SQLModel):
