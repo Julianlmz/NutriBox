@@ -701,3 +701,30 @@ GET http://127.0.0.1:8000/health
 Accept: application/json
 
 ###
+
+### ============================================
+### 🔒 PRUEBAS DE AUTENTICACIÓN
+### ============================================
+
+### 1. REGISTRAR UN NUEVO USUARIO
+# (Nota: la URL es /usuario/ en singular, como en tu router)
+POST http://127.0.0.1:8000/usuario/
+Content-Type: application/json
+
+{
+  "nombre": "Test",
+  "apellido": "Usuario",
+  "email": "test@usuario.com",
+  "password": "PasswordSeguro123"
+}
+
+###
+
+### 2. INICIAR SESIÓN CON ESE USUARIO
+# (Esto simula exactamente tu login.js)
+POST http://127.0.0.1:8000/auth/token
+Content-Type: application/x-www-form-urlencoded
+
+username=test@usuario.com&password=PasswordSeguro123
+
+###
