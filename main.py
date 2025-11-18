@@ -1,4 +1,8 @@
+from dotenv import load_dotenv
+load_dotenv()
 from fastapi import FastAPI
+from starlette.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from Core.database import create_tables
 from Modulos import Usuario, Alimento, Lonchera, Pedido, Restriccion
 from Core import auth
@@ -27,10 +31,4 @@ app.include_router(Restriccion.router)
 app.include_router(Pedido.router)
 
 
-@app.get("/", tags=["Root"])
-async def root():
-    return {
-        "message": "Bienvenido a NutriBox API",
-        "docs": "/docs",
-        "redoc": "/redoc"
-    }
+app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend_static")
