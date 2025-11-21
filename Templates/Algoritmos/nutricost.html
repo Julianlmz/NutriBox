@@ -1,10 +1,244 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algoritmo NutriCost - NutriBox</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+    <link rel="stylesheet" href="/static/css/style.css">
+
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #f8f9fa; }
+
+        /* Navbar */
+        .navbar { padding: 15px 0; }
+        .btn-pill { border-radius: 50px; font-weight: 600; }
+
+        /* Header */
+        .algo-hero {
+            background: white;
+            padding: 60px 0;
+            border-bottom: 1px solid #e9ecef;
+            text-align: center;
+        }
+        .tech-badge {
+            background-color: #fff3e0;
+            color: #e65100;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        /* Diagrama y Código */
+        .diagram-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            text-align: center;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #dee2e6;
+        }
+
+        .code-window {
+            background: #2d2d2d;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .code-header {
+            background: #1e1e1e;
+            padding: 10px 15px;
+            display: flex;
+            gap: 8px;
+        }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .dot-red { background: #ff5f56; }
+        .dot-yellow { background: #ffbd2e; }
+        .dot-green { background: #27c93f; }
+
+        /* Listas */
+        .feature-list li {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: start;
+        }
+        .check-icon {
+            color: #ff9800;
+            margin-right: 15px;
+            margin-top: 4px;
+        }
+    </style>
 </head>
 <body>
-$END$
+
+    <header class="bg-white sticky-top shadow-sm">
+        <div class="container">
+            <nav class="navbar navbar-expand-lg navbar-light">
+                <div class="container-fluid px-0">
+                    <a class="navbar-brand text-primary-nb fw-bold fs-2 d-flex align-items-center" href="/">
+                        <img src="https://i.pinimg.com/736x/2d/46/a7/2d46a70bbd931232f4b9afc799aaf977.jpg"
+                             alt="NutriBox Logo"
+                             style="height: 85px;"
+                             class="me-2">
+                        NutriBox
+                    </a>
+
+                    <div class="ms-auto">
+                        <a class="btn btn-outline-secondary btn-pill btn-sm" href="/">
+                            <i class="fas fa-arrow-left me-2"></i> Volver al Inicio
+                        </a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <section class="algo-hero">
+        <div class="container">
+            <span class="tech-badge"><i class="fas fa-coins me-2"></i>Voraz Clásico: Costo-Beneficio</span>
+            <h1 class="display-4 fw-bold text-dark mb-3">NutriCost-Greedy</h1>
+            <p class="lead text-muted mx-auto" style="max-width: 700px;">
+                Optimización inteligente para maximizar el valor nutricional de la lonchera ajustándose a un presupuesto estricto.
+            </p>
+            <div class="mt-4 d-flex justify-content-center gap-3 text-secondary small">
+                <span><i class="fas fa-clock me-1"></i> Complejidad: <strong>O(n log n)</strong></span>
+                <span><i class="fas fa-bolt me-1"></i> Estrategia: <strong>Heurística Voraz</strong></span>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5">
+        <div class="container">
+            <div class="row g-5">
+
+                <div class="col-lg-5">
+                    <h3 class="fw-bold mb-4">¿Por qué es óptimo?</h3>
+                    <p class="text-muted mb-4">
+                        Este algoritmo resuelve el problema de la "Mochila Fraccionaria" aplicado a la nutrición: obtener la mayor cantidad de "Score Nutricional" por cada peso gastado.
+                    </p>
+                    <ul class="list-unstyled feature-list">
+                        <li>
+                            <i class="fas fa-check-circle check-icon"></i>
+                            <div>
+                                <strong>Enfoque Costo-Beneficio:</strong>
+                                <p class="small text-muted mb-0">Selecciona en cada paso el alimento con mejor relación nutrición/costo. Garantiza rapidez y buenos resultados.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle check-icon"></i>
+                            <div>
+                                <strong>Velocidad vs. Fuerza Bruta:</strong>
+                                <p class="small text-muted mb-0">Un algoritmo de programación dinámica sería muy lento (costoso) para este propósito en tiempo real.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle check-icon"></i>
+                            <div>
+                                <strong>Flexibilidad:</strong>
+                                <p class="small text-muted mb-0">Permite a los usuarios optimizar su lonchera ya sea por presupuesto financiero o tiempo de preparación.</p>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div class="alert alert-warning bg-warning bg-opacity-10 border-0 mt-4">
+                        <h6 class="fw-bold text-warning"><i class="fas fa-user-clock me-2"></i>Caso de Uso Real</h6>
+                        <p class="small mb-0 text-dark opacity-75">
+                            Un padre tiene un presupuesto de <strong>$20.000</strong> para la semana. El algoritmo llena la lonchera priorizando los alimentos más nutritivos que sean más baratos primero.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-lg-7">
+
+                    <ul class="nav nav-pills mb-3 justify-content-end" id="pills-tab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active rounded-pill" id="pills-diagram-tab" data-bs-toggle="pill" data-bs-target="#pills-diagram" type="button">Diagrama de Flujo</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link rounded-pill" id="pills-code-tab" data-bs-toggle="pill" data-bs-target="#pills-code" type="button">Ver Código</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="pills-tabContent">
+
+                        <div class="tab-pane fade show active" id="pills-diagram" role="tabpanel">
+                            <div class="diagram-container">
+                                <img src="/static/img/Diagrama_Flujo_NutriCost.jpg"
+                                     class="img-fluid rounded shadow-sm"
+                                     alt="Diagrama de Flujo NutriCost"
+                                     style="max-height: 600px;">
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="pills-code" role="tabpanel">
+                            <div class="code-window">
+                                <div class="code-header">
+                                    <div class="dot dot-red"></div>
+                                    <div class="dot dot-yellow"></div>
+                                    <div class="dot dot-green"></div>
+                                    <span class="ms-2 text-muted small font-monospace">nutricost_greedy.py</span>
+                                </div>
+                                <pre><code class="language-python">
+def nutricost_greedy(alimentos, presupuesto):
+    alimentos = sorted(alimentos, key=lambda x: x["score"] / x["costo"], reverse=True)
+
+    seleccion, costo_total, score_total = [], 0, 0
+
+    for a in alimentos:
+        if costo_total + a["costo"] <= presupuesto:
+            seleccion.append(a)
+            costo_total += a["costo"]
+            score_total += a["score"]
+
+    return seleccion, score_total
+
+
+alimentos = [
+    {"name": "Salmón", "score": 95, "costo": 12},
+    {"name": "Quinoa", "score": 88, "costo": 8},
+    {"name": "Yogurt", "score": 70, "costo": 5},
+    {"name": "Aguacate", "score": 90, "costo": 10},
+    {"name": "Manzana", "score": 80, "costo": 4}
+]
+
+menu, score = nutricost_greedy(alimentos, presupuesto=20)
+
+print("Menú propuesto:")
+for a in menu:
+    print(f"- {a['name']}")
+
+print("Puntaje total:", score)
+                                </code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-light text-center py-4 mt-5 border-top">
+        <p class="mb-0 text-muted small">&copy; 2025 NutriBox Algoritmos. Documentación interna.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
 </body>
 </html>
