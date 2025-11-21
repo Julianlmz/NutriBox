@@ -1,5 +1,3 @@
-// --- COPIA Y PEGA TODO ESTE CÓDIGO EN frontend/js/alimentos.js ---
-
 document.addEventListener("DOMContentLoaded", function() {
 
     // 1. Setup inicial
@@ -21,15 +19,14 @@ document.addEventListener("DOMContentLoaded", function() {
     const formCrearAlimento = document.getElementById("form-crear-alimento");
     const formEditarAlimento = document.getElementById("form-editar-alimento");
 
-    // Datos de la categoría (simulamos el Enum del backend)
+    // Datos de la categoría
     const CATEGORIAS = [
         "Frutas", "Vegetales", "Proteínas", "Lácteos", "Cereales", "Snacks", "Bebidas"
     ];
 
-    // CORRECCIÓN: Llenamos selectores inmediatamente
+    // Llenamos selectores inmediatamente
     llenarSelectoresCategoria();
 
-    // Llenar los selectores de Categoría
     function llenarSelectoresCategoria() {
         const selects = [
             document.getElementById("alimento-categoria"),
@@ -47,14 +44,15 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // Llamada inicial para cargar el nombre del usuario y la lista de alimentos
+    // Carga inicial
     fetch("http://127.0.0.1:8000/usuario/me", { method: 'GET', headers: AUTH_HEADERS })
         .then(response => {
             if (response.ok) { return response.json(); }
             else { throw new Error('Token inválido o expirado.'); }
         })
         .then(usuario => {
-            document.getElementById("alimentos-loading").textContent = `Bienvenido, ${usuario.nombre}. Cargando alimentos...`;
+            const loadingElem = document.getElementById("alimentos-loading");
+            if(loadingElem) loadingElem.textContent = `Cargando alimentos...`;
             cargarAlimentos();
         })
         .catch(gestionarErrorDeAutenticacion);
@@ -77,39 +75,37 @@ document.addEventListener("DOMContentLoaded", function() {
             if (loadingText) { loadingText.style.display = "none"; }
 
             if (alimentos.length === 0) {
-                listaDiv.innerHTML = '<p class="text-muted text-center">Aún no hay alimentos en el inventario.</p>';
+                listaDiv.innerHTML = '<div class="text-center text-muted p-4">No hay alimentos aún.</div>';
                 return;
             }
 
             alimentos.forEach(alimento => {
                 const card = document.createElement('div');
-                card.className = 'card mb-3';
+                card.className = 'card-alimento-item';
 
-                // ⭐️ LÓGICA DE IMAGEN Y ESTRUCTURA CORREGIDA ⭐️
-                const imageUrl = alimento.imagen_url || 'https://via.placeholder.com/60/4CAF50/FFFFFF?text=N';
+                const imageUrl = alimento.imagen_url || 'https://via.placeholder.com/60/E8F5E9/4CAF50?text=Nb';
 
+                // AQUÍ ESTÁ EL CAMBIO: Se eliminó la línea de Stock y Precio
                 card.innerHTML = `
-                    <div class="card-body d-flex align-items-center p-3">
-                        <img src="${imageUrl}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;" class="me-3" alt="${alimento.nombre}">
-                        
-                        <div class="flex-grow-1">
-                            <h5 class="card-title mb-0">${alimento.nombre}</h5>
-                            <p class="card-text small text-muted mb-1">
-                                <i class="fas fa-tag me-1"></i>${alimento.categoria} | 
-                                <i class="fas fa-fire me-1"></i>${alimento.calorias_por_100g} Cal
-                            </p>
-                            <p class="card-text small mb-0">Stock: ${alimento.stock_actual} | Precio: $${alimento.precio_unitario}</p>
+                    <img src="${imageUrl}" class="alimento-img" alt="${alimento.nombre}">
+                    
+                    <div class="flex-grow-1">
+                        <h6 class="mb-0 fw-bold text-dark">${alimento.nombre}</h6>
+                        <div class="small text-muted mt-1">
+                            <span class="badge bg-light text-secondary border me-1">${alimento.categoria}</span>
+                            <span><i class="fas fa-fire text-warning me-1"></i>${alimento.calorias_por_100g} kcal</span>
                         </div>
-                        
-                        <div class="ms-auto btn-group">
-                            <button class="btn btn-sm btn-outline-primary btn-editar-alimento me-2" 
-                                    data-id="${alimento.id}">
-                                Editar
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger btn-borrar-alimento" data-id="${alimento.id}">
-                                Borrar
-                            </button>
-                        </div>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-primary btn-editar-alimento border-0 bg-light text-primary" 
+                                data-id="${alimento.id}" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger btn-borrar-alimento border-0 bg-light text-danger" 
+                                data-id="${alimento.id}" title="Borrar">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
                     </div>
                 `;
                 listaDiv.appendChild(card);
@@ -122,7 +118,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // ==============================================
-    // FUNCIÓN 3: Crear Alimento (Create) - USANDO FORM DATA
+    // FUNCIÓN 3: Crear Alimento (Create)
     // ==============================================
     formCrearAlimento.addEventListener("submit", function(event) {
         event.preventDefault();
@@ -135,8 +131,10 @@ document.addEventListener("DOMContentLoaded", function() {
         formData.append("proteinas_por_100g", document.getElementById("alimento-proteinas").value);
         formData.append("carbohidratos_por_100g", document.getElementById("alimento-carbohidratos").value);
         formData.append("grasas_por_100g", document.getElementById("alimento-grasas").value);
-        formData.append("precio_unitario", document.getElementById("alimento-precio").value);
-        formData.append("stock_inicial", document.getElementById("alimento-stock").value);
+
+        // Campos ocultos (se envían como 0 para evitar error en backend)
+        formData.append("precio_unitario", document.getElementById("alimento-precio").value || 0);
+        formData.append("stock_inicial", document.getElementById("alimento-stock").value || 0);
 
         const fileInput = document.getElementById("alimento-imagen");
         if (fileInput.files.length > 0) {
@@ -157,29 +155,40 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         })
         .then(nuevoAlimento => {
-            Swal.fire('¡Creado!', `Se ha añadido ${nuevoAlimento.nombre} al inventario.`, 'success');
+            Swal.fire({
+                icon: 'success',
+                title: '¡Guardado!',
+                text: `${nuevoAlimento.nombre} añadido correctamente.`,
+                timer: 1500,
+                showConfirmButton: false,
+                confirmButtonColor: '#4CAF50'
+            });
             formCrearAlimento.reset();
             cargarAlimentos();
         })
         .catch(error => {
-            Swal.fire('Oops...', `No se pudo crear el alimento: ${error.message}`, 'error');
+            Swal.fire('Error', error.message, 'error');
         });
     });
 
 
     // ==============================================
-    // FUNCIÓN 4: Borrar Alimento (Delete)
+    // FUNCIÓN 4: Borrar Alimento
     // ==============================================
     listaDiv.addEventListener("click", function(event) {
-        if (event.target.classList.contains("btn-borrar-alimento")) {
-            const alimentoId = event.target.dataset.id;
+        const btnBorrar = event.target.closest(".btn-borrar-alimento");
+        if (btnBorrar) {
+            const alimentoId = btnBorrar.dataset.id;
 
             Swal.fire({
-                title: '¿Estás seguro?',
-                text: "Esto desactivará el alimento. No podrás revertirlo.",
+                title: '¿Borrar alimento?',
+                text: "Esta acción no se puede deshacer.",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Sí, ¡desactivar!'
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#f8f9fa',
+                cancelButtonText: '<span style="color: #555">Cancelar</span>',
+                confirmButtonText: 'Sí, borrar'
             }).then((result) => {
                 if (result.isConfirmed) {
                     fetch(`${ALIMENTO_BASE_URL}${alimentoId}`, {
@@ -188,58 +197,61 @@ document.addEventListener("DOMContentLoaded", function() {
                     })
                     .then(response => {
                         if (response.status === 204) {
-                            Swal.fire('¡Desactivado!', 'El alimento ha sido removido de la lista.', 'success');
+                            Swal.fire({
+                                icon: 'success',
+                                title: '¡Borrado!',
+                                text: 'El alimento ha sido eliminado.',
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
                             cargarAlimentos();
                         } else {
-                            throw new Error('Error al desactivar el alimento.');
+                            throw new Error('Error al borrar.');
                         }
                     })
                     .catch(error => {
-                        Swal.fire('Oops...', 'No se pudo desactivar el alimento.', 'error');
+                        Swal.fire('Error', 'No se pudo borrar el alimento.', 'error');
                     });
                 }
             });
         }
-    });
 
-    // ==============================================
-    // FUNCIÓN 5: Editar Alimento (Update)
-    // ==============================================
-
-    // 5.1 Click en el botón Editar
-    listaDiv.addEventListener("click", function(event) {
-        if (event.target.classList.contains("btn-editar-alimento")) {
-            const alimentoId = event.target.dataset.id;
-
-            // 1. Obtener los datos del backend (GET)
-            fetch(`${ALIMENTO_BASE_URL}${alimentoId}`, { method: 'GET', headers: AUTH_HEADERS })
-                .then(response => response.json())
-                .then(alimento => {
-                    // 2. Rellenar el modal con los datos
-                    document.getElementById("edit-alimento-id").value = alimento.id;
-                    document.getElementById("edit-alimento-nombre").value = alimento.nombre;
-                    document.getElementById("edit-alimento-categoria").value = alimento.categoria;
-                    document.getElementById("edit-alimento-calorias").value = alimento.calorias_por_100g;
-                    document.getElementById("edit-alimento-proteinas").value = alimento.proteinas_por_100g;
-                    document.getElementById("edit-alimento-carbohidratos").value = alimento.carbohidratos_por_100g;
-                    document.getElementById("edit-alimento-grasas").value = alimento.grasas_por_100g;
-                    document.getElementById("edit-alimento-precio").value = alimento.precio_unitario;
-                    document.getElementById("edit-alimento-stock").value = alimento.stock_actual;
-
-                    // 3. Mostrar imagen actual
-                    const preview = document.getElementById("edit-alimento-imagen-preview");
-                    preview.src = alimento.imagen_url || 'https://via.placeholder.com/150/4CAF50/FFFFFF?text=Sin+Imagen';
-
-                    // 4. Mostrar el modal
-                    modalEditar.show();
-                })
-                .catch(error => {
-                    Swal.fire('Error', 'No se pudieron cargar los datos del alimento.', 'error');
-                });
+        const btnEditar = event.target.closest(".btn-editar-alimento");
+        if (btnEditar) {
+            const alimentoId = btnEditar.dataset.id;
+            abrirModalEditar(alimentoId);
         }
     });
 
-    // 5.2 Enviar el formulario de Edición (PATCH + POST para imagen)
+    // ==============================================
+    // FUNCIÓN 5: Editar Alimento
+    // ==============================================
+    function abrirModalEditar(alimentoId) {
+        fetch(`${ALIMENTO_BASE_URL}${alimentoId}`, { method: 'GET', headers: AUTH_HEADERS })
+            .then(response => response.json())
+            .then(alimento => {
+                document.getElementById("edit-alimento-id").value = alimento.id;
+                document.getElementById("edit-alimento-nombre").value = alimento.nombre;
+                document.getElementById("edit-alimento-categoria").value = alimento.categoria;
+                document.getElementById("edit-alimento-calorias").value = alimento.calorias_por_100g;
+                document.getElementById("edit-alimento-proteinas").value = alimento.proteinas_por_100g;
+                document.getElementById("edit-alimento-carbohidratos").value = alimento.carbohidratos_por_100g;
+                document.getElementById("edit-alimento-grasas").value = alimento.grasas_por_100g;
+
+                // Campos ocultos
+                document.getElementById("edit-alimento-precio").value = alimento.precio_unitario;
+                document.getElementById("edit-alimento-stock").value = alimento.stock_actual;
+
+                const preview = document.getElementById("edit-alimento-imagen-preview");
+                preview.src = alimento.imagen_url || 'https://via.placeholder.com/150/E8F5E9/4CAF50?text=Sin+Imagen';
+
+                modalEditar.show();
+            })
+            .catch(error => {
+                Swal.fire('Error', 'No se pudo cargar el alimento.', 'error');
+            });
+    }
+
     formEditarAlimento.addEventListener("submit", function(event) {
         event.preventDefault();
 
@@ -247,7 +259,6 @@ document.addEventListener("DOMContentLoaded", function() {
         const fileInput = document.getElementById("edit-alimento-imagen-file");
         const newFile = fileInput.files[0];
 
-        // 1. Datos de texto (Usamos el mismo Content-Type que en loncheras para PATCH)
         const datosTexto = {
             nombre: document.getElementById("edit-alimento-nombre").value,
             categoria: document.getElementById("edit-alimento-categoria").value,
@@ -255,11 +266,10 @@ document.addEventListener("DOMContentLoaded", function() {
             proteinas_por_100g: parseFloat(document.getElementById("edit-alimento-proteinas").value),
             carbohidratos_por_100g: parseFloat(document.getElementById("edit-alimento-carbohidratos").value),
             grasas_por_100g: parseFloat(document.getElementById("edit-alimento-grasas").value),
-            precio_unitario: parseFloat(document.getElementById("edit-alimento-precio").value),
-            stock_actual: parseInt(document.getElementById("edit-alimento-stock").value)
+            precio_unitario: parseFloat(document.getElementById("edit-alimento-precio").value || 0),
+            stock_actual: parseInt(document.getElementById("edit-alimento-stock").value || 0)
         };
 
-        // 2. Ejecutar la actualización de texto
         fetch(`${ALIMENTO_BASE_URL}${alimentoId}`, {
             method: 'PATCH',
             headers: AUTH_HEADERS,
@@ -267,31 +277,33 @@ document.addEventListener("DOMContentLoaded", function() {
         })
         .then(response => {
             if (!response.ok) {
-                return response.json().then(error => { throw new Error(error.detail || 'Error al actualizar texto.'); });
+                return response.json().then(error => { throw new Error(error.detail || 'Error al actualizar.'); });
             }
             return response.json();
         })
         .then(async () => {
-            // 3. Si hay un archivo nuevo, subirlo (POST a /upload-image)
             if (newFile) {
-                // Creamos un FormData solo para la imagen
                 const imageFormData = new FormData();
                 imageFormData.append("imagen", newFile);
-
                 await fetch(`${ALIMENTO_BASE_URL}${alimentoId}/upload-image`, {
                     method: 'POST',
                     body: imageFormData,
                     headers: { 'Authorization': `Bearer ${TOKEN}` }
                 });
             }
-
-            // 4. Éxito final
             modalEditar.hide();
-            Swal.fire('¡Actualizado!', 'Alimento guardado con éxito.', 'success');
+            Swal.fire({
+                icon: 'success',
+                title: '¡Actualizado!',
+                text: 'Cambios guardados correctamente.',
+                timer: 1500,
+                showConfirmButton: false,
+                confirmButtonColor: '#4CAF50'
+            });
             cargarAlimentos();
         })
         .catch(error => {
-            Swal.fire('Oops...', `No se pudo actualizar: ${error.message}`, 'error');
+            Swal.fire('Error', error.message, 'error');
         });
     });
 });
