@@ -1,35 +1,48 @@
 import os
-from sqlmodel import Session, create_engine, SQLModel
-from fastapi import Depends
+from dotenv import load_dotenv
+from sqlmodel import SQLModel
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
 from typing import Annotated
+from fastapi import Depends
 
-DATABASE_URL = os.environ.get("POSTGRESQL_ADDON_URI")
-connect_args = {} # Se inicializa vacío
+# Carga las variables del archivo .env
+load_dotenv()
 
-if DATABASE_URL is None:
-    # MODO DESARROLLO (SQLite)
-    print("MODO DESARROLLO: Conectando a base de datos SQLite local (NutriBox.db)")
-    DATABASE_URL = "sqlite:///./NutriBox.db"
-    connect_args = {"check_same_thread": False}
+# Obtener URL de base de datos
+DATABASE_URL = os.getenv("POSTGRESQL_ADDON_URI")
+
+# Lógica para ajustar la URL
+if not DATABASE_URL:
+    # Usamos aiosqlite para local (es la versión async de sqlite)
+    print("ADVERTENCIA: No se encontró POSTGRESQL_ADDON_URI, usando SQLite local")
+    DATABASE_URL = "sqlite+aiosqlite:///./NutriBox.db"
 else:
-    # MODO PRODUCCIÓN (Azure PostgreSQL)
-    print("MODO PRODUCCIÓN: Conectando a base de datos en Azure")
-
-    # Asegura que se use el driver 'postgresql://'
+    # Corrección para SQLAlchemy (requiere postgresql+asyncpg://)
     if DATABASE_URL.startswith("postgres://"):
-        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
+    elif DATABASE_URL.startswith("postgresql://"):
+        DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
-    # ¡Importante! Azure requiere conexiones SSL
-    connect_args = {"sslmode": "require"}
+# 1. Crear el motor ASÍNCRONO
+engine = create_async_engine(DATABASE_URL, echo=True)
 
-# Crea el 'engine' con los argumentos de conexión correctos (ya sea para SQLite o Azure)
-engine = create_engine(DATABASE_URL, connect_args=connect_args)
+# 2. Crear la fábrica de sesiones ASÍNCRONAS
+async_session_maker = sessionmaker(
+    engine,
+    class_=AsyncSession,
+    expire_on_commit=False
+)
 
-def create_tables():
-    SQLModel.metadata.create_all(engine, checkfirst=True)
+# 3. Función para crear tablas (ahora es async)
+async def create_tables():
+    async with engine.begin() as conn:
+        await conn.run_sync(SQLModel.metadata.create_all)
 
-def get_session():
-    with Session(engine) as session:
+# 4. Dependencia para obtener la sesión
+async def get_session() -> AsyncSession:
+    async with async_session_maker() as session:
         yield session
 
-SessionDep = Annotated[Session, Depends(get_session)]
+# Definir el tipo para inyección de dependencias
+SessionDep = Annotated[AsyncSession, Depends(get_session)]
