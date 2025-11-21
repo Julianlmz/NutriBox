@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // El endpoint base para Alimentos
+    // El endpoint base para Alimentos (Ruta relativa correcta)
     const ALIMENTO_BASE_URL = "/alimento/";
 
     // Referencias a elementos del DOM
@@ -44,8 +44,10 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // Carga inicial
-    fetch("http://127.0.0.1:8000/usuario/me", { method: 'GET', headers: AUTH_HEADERS })
+    // --- CORRECCIÓN CRÍTICA AQUÍ ---
+    // Antes decía: fetch("http://127.0.0.1:8000/usuario/me", ...)
+    // Ahora usa ruta relativa para que funcione en Render:
+    fetch("/usuario/me", { method: 'GET', headers: AUTH_HEADERS })
         .then(response => {
             if (response.ok) { return response.json(); }
             else { throw new Error('Token inválido o expirado.'); }
@@ -85,7 +87,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
                 const imageUrl = alimento.imagen_url || 'https://via.placeholder.com/60/E8F5E9/4CAF50?text=Nb';
 
-                // AQUÍ ESTÁ EL CAMBIO: Se eliminó la línea de Stock y Precio
                 card.innerHTML = `
                     <img src="${imageUrl}" class="alimento-img" alt="${alimento.nombre}">
                     
@@ -132,7 +133,6 @@ document.addEventListener("DOMContentLoaded", function() {
         formData.append("carbohidratos_por_100g", document.getElementById("alimento-carbohidratos").value);
         formData.append("grasas_por_100g", document.getElementById("alimento-grasas").value);
 
-        // Campos ocultos (se envían como 0 para evitar error en backend)
         formData.append("precio_unitario", document.getElementById("alimento-precio").value || 0);
         formData.append("stock_inicial", document.getElementById("alimento-stock").value || 0);
 
@@ -238,7 +238,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 document.getElementById("edit-alimento-carbohidratos").value = alimento.carbohidratos_por_100g;
                 document.getElementById("edit-alimento-grasas").value = alimento.grasas_por_100g;
 
-                // Campos ocultos
                 document.getElementById("edit-alimento-precio").value = alimento.precio_unitario;
                 document.getElementById("edit-alimento-stock").value = alimento.stock_actual;
 
