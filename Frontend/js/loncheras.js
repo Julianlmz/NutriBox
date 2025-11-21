@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if (loadingText) { loadingText.style.display = "block"; }
         listaDiv.innerHTML = "";
 
-        fetch(`http://127.0.0.1:8000/lonchera/`, {
+        fetch(`/lonchera/`, {
             method: 'GET',
             headers: AUTH_HEADERS
         })

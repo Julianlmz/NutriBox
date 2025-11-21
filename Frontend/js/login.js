@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         // 6. Definir la URL de tu backend
         // Esta suele ser diferente a la de crear usuario
-        const backendURL = "http://127.0.0.1:8000/auth/token";
+        const backendURL = "/auth/token";
 
         // 7. Usar fetch() para enviar los datos
         fetch(backendURL, {

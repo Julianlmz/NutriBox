@@ -322,7 +322,7 @@
             setupLogoutButton();
 
             // Cargar datos
-            fetch("http://127.0.0.1:8000/usuario/me", {
+            fetch("/usuario/me", {
                 method: 'GET',
                 headers: AUTH_HEADERS
             })

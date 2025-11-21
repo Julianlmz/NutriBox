@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // El endpoint base para Alimentos
-    const ALIMENTO_BASE_URL = "http://127.0.0.1:8000/alimento/";
+    const ALIMENTO_BASE_URL = "/alimento/";
 
     // Referencias a elementos del DOM
     const listaDiv = document.getElementById("lista-alimentos");

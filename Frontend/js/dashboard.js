@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // 2. Buscar los datos del usuario para el "Bienvenido"
-    fetch("http://127.0.0.1:8000/usuario/me", {
+    fetch("/usuario/me", {
         method: 'GET',
         headers: AUTH_HEADERS
     })
