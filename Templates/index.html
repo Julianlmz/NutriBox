@@ -4,92 +4,284 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NutriBox - Loncheras Escolares Saludables</title>
-    <!-- Bootstrap (CDN, no necesita cambios) -->
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- ESTILOS LOCALES (Jinja2) -->
-    <!-- FastAPI buscará esto en Frontend/css/style.css -->
-    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/static/css/style.css">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            padding-top: 15px;
+            padding-bottom: 15px;
+        }
+        .nav-link {
+            font-weight: 500;
+            color: #555;
+            margin: 0 10px;
+            transition: color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #4CAF50 !important;
+            font-weight: 700;
+            background-color: transparent !important;
+        }
+        .btn-pill {
+            border-radius: 50px;
+            padding-left: 30px;
+            padding-right: 30px;
+            font-weight: 600;
+        }
+
+        /* HERO SECTION (Centrado) */
+        .hero-section {
+            padding-top: 80px;
+            padding-bottom: 100px;
+            background: linear-gradient(to bottom, #ffffff 0%, #f8fdf8 100%); /* Degradado sutil hacia abajo */
+            text-align: center; /* Todo centrado */
+        }
+
+        .hero-title {
+            font-size: 3.5rem; /* Texto más grande */
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: #6c757d;
+            max-width: 700px;
+            margin: 0 auto 40px auto; /* Centrado horizontal */
+        }
+
+        .hero-img-container {
+            margin-top: 50px;
+            position: relative;
+        }
+
+        .hero-img {
+            border-radius: 25px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15); /* Sombra más elegante */
+            max-width: 90%; /* Que no ocupe todo el ancho si es muy grande */
+            width: 800px; /* Ancho ideal */
+            transition: transform 0.3s ease;
+        }
+
+        .hero-img:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Tarjetas */
+        .hover-card {
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            border: 1px solid #f1f1f1;
+        }
+        .hover-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(76, 175, 80, 0.1);
+            border-color: transparent;
+        }
+        .icon-box {
+            width: 80px;
+            height: 80px;
+            background-color: #f1f8e9;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: #4CAF50;
+            font-size: 2rem;
+        }
+    </style>
 </head>
-<body class="bg-light">
-<header class="bg-white shadow-sm sticky-top">
-    <div class="container">
-        <nav class="navbar navbar-expand-lg">
-            <a class="navbar-brand text-primary-nb fw-bold fs-1 d-flex align-items-center" href="/">
-                <!-- IMAGEN (Si tienes el logo en Frontend/img/, usa esta línea) -->
-                <!-- <img src="{{ url_for('static', path='img/logo.jpg') }}" alt="NutriBox Logo" style="height: 120px;" class="me-2"> -->
+<body class="bg-white d-flex flex-column min-vh-100">
 
-                <!-- Por ahora dejamos la imagen externa que tenías -->
-                <img src="https://i.pinimg.com/736x/2d/46/a7/2d46a70bbd931232f4b9afc799aaf977.jpg" alt="NutriBox Logo" style="height: 120px;" class="me-2">
-                NutriBox
-            </a>
+<header class="bg-white sticky-top">
+        <div class="container">
+            <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm rounded-4 px-4 mt-3">
+                <div class="container-fluid px-0">
 
-            <div class="d-flex ms-auto">
-                <!-- OJO: Aquí luego cambiaremos los href por rutas de FastAPI -->
-                <a href="login.html" class="btn btn-outline-primary-nb me-2">Iniciar Sesión</a>
-                <a href="register.html" class="btn btn-primary-nb">Registrarse</a>
-            </div>
-        </nav>
-    </div>
-</header>
+                    <a class="navbar-brand text-primary-nb fw-bold fs-2 d-flex align-items-center" href="/">
+                        <img src="https://i.pinimg.com/736x/2d/46/a7/2d46a70bbd931232f4b9afc799aaf977.jpg"
+                             alt="NutriBox Logo"
+                             style="height: 85px;"
+                             class="me-2">
+                        NutriBox
+                    </a>
 
-<section class="py-5 text-center bg-white border-bottom">
-    <div class="container">
-        <h1 class="display-6 fw-bold mb-3 text-dark">
-            <i class="fas fa-utensils text-primary-nb me-3"></i>Loncheras Escolares Nutritivas
-        </h1>
-        <p class="lead text-muted mb-4">Planifica, personaliza y entrega loncheras saludables para tus hijos</p>
-        <a href="register.html" class="btn btn-primary-nb btn-lg">Comenzar Gratis</a>
-    </div>
-</section>
+                    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNutriBox">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
 
-<section class="py-5">
-    <div class="container">
-        <h2 class="text-center mb-5 fw-bold">¿Por qué elegir NutriBox?</h2>
-        <!-- Tarjetas informativas (Sin cambios) -->
-        <div class="row row-cols-1 row-cols-md-3 g-4">
-            <div class="col">
-                <div class="card p-4 text-center card-shadow h-100">
-                    <div class="text-primary-nb mb-3" style="font-size: 3rem;"><i class="fas fa-apple-alt"></i></div>
-                    <h3 class="h5 fw-bold">Nutrición Balanceada</h3>
-                    <p class="text-muted">Información nutricional detallada de cada lonchera.</p>
+                    <div class="collapse navbar-collapse" id="navbarNutriBox">
+                        <ul class="navbar-nav mx-auto mb-2 mb-lg-0 align-items-center">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="/">Inicio</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/#beneficios">Beneficios</a>
+                            </li>
+
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    Algoritmos <i class="fas fa-microchip ms-1 small text-muted"></i>
+                                </a>
+                                <ul class="dropdown-menu border-0 shadow-sm rounded-4">
+
+                                    <li>
+                                        <a class="dropdown-item d-flex justify-content-between align-items-center" href="/algoritmos/nutrisort">
+                                            NutriSort - Multiclave
+                                            <i class="fas fa-chevron-right small text-muted"></i>
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item d-flex justify-content-between align-items-center" href="/algoritmos/nutricost">
+                                            NutriCost-Greedy
+                                            <i class="fas fa-chevron-right small text-muted"></i>
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item d-flex justify-content-between align-items-center" href="/algoritmos/sugeridor">
+                                            Sugeridor Inteligente
+                                            <i class="fas fa-chevron-right small text-muted"></i>
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item d-flex justify-content-between align-items-center" href="/algoritmos/nutribucket">
+                                            NutriBucket-Adapt
+                                            <i class="fas fa-chevron-right small text-muted"></i>
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item d-flex justify-content-between" href="/algoritmos/nutritop">
+                                            NutriTop-k
+                                            <i class="fas fa-chevron-right small text-muted"></i>
+                                        </a>
+                                    </li>
+
+                                </ul>
+                            </li>
+                        </ul>
+
+                        <div class="d-flex gap-2">
+                            <a href="login.html" class="btn btn-outline-success btn-pill">Ingresar</a>
+                            <a href="register.html" class="btn btn-success btn-pill shadow-sm">Registrarse</a>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="col">
-                <div class="card p-4 text-center card-shadow h-100">
-                    <div class="text-primary-nb mb-3" style="font-size: 3rem;"><i class="fas fa-shield-alt"></i></div>
-                    <h3 class="h5 fw-bold">Restricciones Alimentarias</h3>
-                    <p class="text-muted">Gestiona alergias y preferencias de tus hijos.</p>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card p-4 text-center card-shadow h-100">
-                    <div class="text-primary-nb mb-3" style="font-size: 3rem;"><i class="fas fa-truck"></i></div>
-                    <h3 class="h5 fw-bold">Entrega a Domicilio</h3>
-                    <p class="text-muted">Configura múltiples direcciones de entrega.</p>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+
+                    <h1 class="hero-title text-dark">
+                        Loncheras ricas,<br>
+                        <span style="color: #4CAF50;">niños felices.</span>
+                    </h1>
+
+                    <p class="hero-subtitle">
+                        Olvídate del estrés para armar loncheras. Planificamos y entregamos nutrición balanceada directamente a tus manos.
+                    </p>
+
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="register.html" class="btn btn-success btn-lg btn-pill shadow hover-scale px-5 py-3">
+                            Comenzar Gratis
+                        </a>
+                    </div>
+
+                    <div class="hero-img-container">
+                        <img src="../Frontend/img/Gemini_Generated_Image_hul3pmhul3pmhul3.png"
+                             alt="Lonchera saludable NutriBox"
+                             class="img-fluid hero-img">
+                    </div>
+
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<footer class="bg-dark text-white py-4 mt-5">
-    <div class="container text-center">
-        <p class="mb-1">&copy; 2025 NutriBox. Todos los derechos reservados.</p>
-    </div>
-</footer>
+    <section class="py-5 bg-white" id="beneficios">
+        <div class="container py-4">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold display-6">¿Por qué elegir NutriBox?</h2>
+                <p class="text-muted">Cuidamos cada detalle de la alimentación de tus hijos</p>
+            </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                <div class="col">
+                    <div class="card p-4 text-center hover-card h-100 bg-white border-0 shadow-sm">
+                        <div class="icon-box">
+                            <i class="fas fa-apple-alt"></i>
+                        </div>
+                        <h3 class="h5 fw-bold">100% Balanceado</h3>
+                        <p class="text-muted small">Menús diseñados por nutricionistas pediátricos certificados.</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card p-4 text-center hover-card h-100 bg-white border-0 shadow-sm">
+                        <div class="icon-box">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3 class="h5 fw-bold">Seguridad Total</h3>
+                        <p class="text-muted small">Filtros estrictos para alergias y restricciones alimentarias.</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card p-4 text-center hover-card h-100 bg-white border-0 shadow-sm">
+                        <div class="icon-box">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <h3 class="h5 fw-bold">Entrega Puntual</h3>
+                        <p class="text-muted small">Rastreo en tiempo real hasta la puerta de tu casa o colegio.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<!-- SCRIPTS LOCALES -->
-<!-- Comentados porque no existen en tu carpeta Frontend/js/ actualmente -->
-<!-- Cuando crees estos archivos, descomenta estas líneas -->
+    <footer class="bg-success text-white py-5 mt-auto shadow-lg" style="border-top-left-radius: 40px; border-top-right-radius: 40px;">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                    <h4 class="fw-bold d-flex align-items-center justify-content-center justify-content-md-start">
+                        <i class="fas fa-leaf me-2"></i> NutriBox
+                    </h4>
+                    <p class="mb-0 opacity-75">Alimentando el futuro con amor.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <div class="social-icons">
+                        <a href="#" class="text-white me-3 fs-4"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-white me-3 fs-4"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-white fs-4"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4 opacity-25">
+            <div class="text-center small opacity-75">
+                &copy; 2025 NutriBox. Todos los derechos reservados.
+            </div>
+        </div>
+    </footer>
 
-<!-- <script src="{{ url_for('static', path='js/config.js') }}"></script> -->
-<!-- <script src="{{ url_for('static', path='js/utils.js') }}"></script> -->
-<!-- <script src="{{ url_for('static', path='js/api.js') }}"></script> -->
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

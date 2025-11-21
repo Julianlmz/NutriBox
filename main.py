@@ -7,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from Core.database import create_tables
-from Modulos import Usuario, Alimento, Lonchera, Pedido, Restriccion
+from Modulos import Usuario, Alimento, Lonchera, Pedido, Restriccion, Algoritmos
 from Core import auth
 
 @asynccontextmanager
@@ -43,6 +43,7 @@ app.include_router(Alimento.router)
 app.include_router(Lonchera.router)
 app.include_router(Restriccion.router)
 app.include_router(Pedido.router)
+app.include_router(Algoritmos.router)
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
