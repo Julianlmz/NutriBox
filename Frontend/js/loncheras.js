@@ -1,8 +1,5 @@
-// --- COPIA Y PEGA EL CÓDIGO DEL CRUD DE LONCHERAS AQUÍ ---
-
 document.addEventListener("DOMContentLoaded", function() {
 
-    // 1. Configurar botones de layout (del auth-guard.js)
     setupLogoutButton();
     const mobileLogout = document.getElementById("logout-button-mobile");
     if (mobileLogout) {
@@ -11,37 +8,29 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // 2. Referencias del CRUD
     const listaDiv = document.getElementById("lista-loncheras");
     const modalElement = document.getElementById('modalEditarLonchera');
     const modalEditar = new bootstrap.Modal(modalElement);
-    let currentUserId = null; // Lo necesitaremos para el 'Create'
+    let currentUserId = null;
 
-    // 3. Obtener el ID del usuario (necesario para 'Crear')
-    fetch("http://127.0.0.1:8000/usuario/me", { method: 'GET', headers: AUTH_HEADERS })
+    // CORRECCIÓN: Ruta relativa
+    fetch("/usuario/me", { method: 'GET', headers: AUTH_HEADERS })
         .then(response => {
             if (response.ok) { return response.json(); }
             else { throw new Error('Token inválido.'); }
         })
         .then(usuario => {
             currentUserId = usuario.id;
-            // Una vez que tenemos el ID del usuario, cargamos sus loncheras
             cargarLoncheras();
         })
         .catch(gestionarErrorDeAutenticacion);
 
-
-    // ==============================================
-    // FUNCIÓN 2: Cargar las loncheras (Read)
-    // ==============================================
     function cargarLoncheras() {
-        // ... (el resto del código es idéntico al que ya tenías) ...
-        const loadingText = document.getElementById("loncheras-loading");
+        const loadingText = document.getElementById("lista-loncheras");
+        // (Usamos listaDiv temporalmente para mostrar loading o limpiar)
 
-        if (loadingText) { loadingText.style.display = "block"; }
-        listaDiv.innerHTML = "";
-
-        fetch(`/lonchera/`, {
+        // CORRECCIÓN: Ruta relativa
+        fetch("/lonchera/", {
             method: 'GET',
             headers: AUTH_HEADERS
         })
@@ -50,48 +39,42 @@ document.addEventListener("DOMContentLoaded", function() {
             return response.json();
         })
         .then(loncheras => {
-            if (loadingText) { loadingText.style.display = "none"; }
+            listaDiv.innerHTML = ""; // Limpiar lista
             if (loncheras.length === 0) {
-                listaDiv.innerHTML = '<p class="text-muted text-center">Aún no has creado ninguna lonchera.</p>';
+                listaDiv.innerHTML = '<div class="text-center text-muted py-5"><i class="fas fa-box-open fa-3x mb-3 opacity-25"></i><p>Aún no tienes loncheras.</p></div>';
                 return;
             }
             loncheras.forEach(lonchera => {
                 const loncheraCard = document.createElement('div');
-                loncheraCard.className = 'card mb-3';
+                loncheraCard.className = 'card-lonchera-item'; // Usamos la clase CSS nueva
                 loncheraCard.innerHTML = `
-                    <div class="card-body d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="card-title mb-1">${lonchera.nombre}</h5>
-                            <p class="card-text text-muted small">${lonchera.descripcion}</p>
-                        </div>
-                        <div>
-                            <button class="btn btn-sm btn-outline-primary btn-editar" 
-                                    data-id="${lonchera.id}" 
-                                    data-nombre="${lonchera.nombre}" 
-                                    data-descripcion="${lonchera.descripcion}">
-                                Editar
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger btn-borrar" data-id="${lonchera.id}">
-                                Borrar
-                            </button>
-                        </div>
+                    <div>
+                        <h5 class="mb-1 fw-bold text-dark">${lonchera.nombre}</h5>
+                        <p class="mb-0 text-muted small text-truncate" style="max-width: 250px;">${lonchera.descripcion}</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-action btn-outline-primary btn-editar" 
+                                data-id="${lonchera.id}" 
+                                data-nombre="${lonchera.nombre}" 
+                                data-descripcion="${lonchera.descripcion}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-action btn-outline-danger btn-borrar" data-id="${lonchera.id}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
                     </div>
                 `;
                 listaDiv.appendChild(loncheraCard);
             });
         })
         .catch(error => {
-            console.error("Error al cargar loncheras:", error);
-            if (loadingText) { loadingText.textContent = "Error al cargar las loncheras."; }
+            console.error("Error:", error);
+            listaDiv.innerHTML = '<p class="text-center text-danger">Error al cargar.</p>';
         });
     }
 
-    // ==============================================
-    // FUNCIÓN 3: Crear una lonchera (Create)
-    // ==============================================
     const formCrearLonchera = document.getElementById("form-crear-lonchera");
     formCrearLonchera.addEventListener("submit", function(event) {
-        // ... (código idéntico al que ya tenías) ...
         event.preventDefault();
         const nombre = document.getElementById("lonchera-nombre").value;
         const descripcion = document.getElementById("lonchera-descripcion").value;
@@ -102,38 +85,43 @@ document.addEventListener("DOMContentLoaded", function() {
             usuario_id: currentUserId,
         };
 
-        fetch("http://127.0.0.1:8000/lonchera/", {
+        // CORRECCIÓN: Ruta relativa
+        fetch("/lonchera/", {
             method: 'POST',
             headers: AUTH_HEADERS,
             body: JSON.stringify(datosLonchera)
         })
         .then(response => {
             if (response.ok) { return response.json(); }
-            else { throw new Error('Error al crear la lonchera.'); }
+            else { throw new Error('Error al crear.'); }
         })
         .then(nuevaLonchera => {
-            Swal.fire('¡Creada!', `Se ha creado la lonchera "${nuevaLonchera.nombre}".`, 'success');
+            Swal.fire({
+                icon: 'success',
+                title: '¡Creada!',
+                text: `Lonchera "${nuevaLonchera.nombre}" lista.`,
+                confirmButtonColor: '#4CAF50'
+            });
             formCrearLonchera.reset();
             cargarLoncheras();
         })
         .catch(error => {
-            Swal.fire('Oops...', 'No se pudo crear la lonchera. Inténtalo de nuevo.', 'error');
+            Swal.fire('Error', 'No se pudo crear la lonchera.', 'error');
         });
     });
 
-    // ==============================================
-    // Lógica de Click (Delete y Update)
-    // ==============================================
     listaDiv.addEventListener("click", function(event) {
-        // ... (código idéntico al que ya tenías) ...
-        if (event.target.classList.contains("btn-borrar")) {
-            const loncheraId = event.target.dataset.id;
+        const btnBorrar = event.target.closest(".btn-borrar");
+        const btnEditar = event.target.closest(".btn-editar");
+
+        if (btnBorrar) {
+            const loncheraId = btnBorrar.dataset.id;
             gestionarClickDeBorrado(loncheraId);
         }
-        if (event.target.classList.contains("btn-editar")) {
-            const loncheraId = event.target.dataset.id;
-            const nombre = event.target.dataset.nombre;
-            const descripcion = event.target.dataset.descripcion;
+        if (btnEditar) {
+            const loncheraId = btnEditar.dataset.id;
+            const nombre = btnEditar.dataset.nombre;
+            const descripcion = btnEditar.dataset.descripcion;
 
             document.getElementById("edit-lonchera-id").value = loncheraId;
             document.getElementById("edit-lonchera-nombre").value = nombre;
@@ -143,47 +131,45 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // ==============================================
-    // FUNCIÓN 4: Borrar una lonchera (Delete)
-    // ==============================================
     function gestionarClickDeBorrado(loncheraId) {
-        // ... (código idéntico al que ya tenías) ...
         Swal.fire({
-            title: '¿Estás seguro?',
-            text: "No podrás revertir esto (será desactivada).",
+            title: '¿Borrar lonchera?',
+            text: "Desaparecerá de tu lista.",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: '¡Sí, bórrala!',
-            cancelButtonText: 'Cancelar'
+            cancelButtonColor: '#f8f9fa',
+            cancelButtonText: '<span style="color:#555">Cancelar</span>',
+            confirmButtonText: 'Sí, borrar'
         }).then((result) => {
             if (result.isConfirmed) {
-                fetch(`http://127.0.0.1:8000/lonchera/${loncheraId}`, {
+                // CORRECCIÓN: Ruta relativa
+                fetch(`/lonchera/${loncheraId}`, {
                     method: 'DELETE',
                     headers: AUTH_HEADERS
                 })
                 .then(response => {
                     if (response.status === 204) { return; }
-                    else { throw new Error('Error al borrar la lonchera.'); }
+                    else { throw new Error('Error al borrar.'); }
                 })
                 .then(() => {
-                    Swal.fire('¡Borrada!', 'Tu lonchera ha sido desactivada.', 'success');
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Borrada!',
+                        showConfirmButton: false,
+                        timer: 1000
+                    });
                     cargarLoncheras();
                 })
                 .catch(error => {
-                    Swal.fire('Oops...', 'No se pudo borrar la lonchera.', 'error');
+                    Swal.fire('Error', 'No se pudo borrar.', 'error');
                 });
             }
         });
     }
 
-    // ==============================================
-    // FUNCIÓN 5: Guardar Cambios (Update)
-    // ==============================================
     const formEditarLonchera = document.getElementById("form-editar-lonchera");
     formEditarLonchera.addEventListener("submit", function(event) {
-        // ... (código idéntico al que ya tenías) ...
         event.preventDefault();
 
         const loncheraId = document.getElementById("edit-lonchera-id").value;
@@ -195,23 +181,28 @@ document.addEventListener("DOMContentLoaded", function() {
             descripcion: descripcion
         };
 
-        fetch(`http://127.0.0.1:8000/lonchera/${loncheraId}`, {
+        // CORRECCIÓN: Ruta relativa
+        fetch(`/lonchera/${loncheraId}`, {
             method: 'PATCH',
             headers: AUTH_HEADERS,
             body: JSON.stringify(datosActualizados)
         })
         .then(response => {
             if (response.ok) { return response.json(); }
-            else { throw new Error('Error al actualizar la lonchera.'); }
+            else { throw new Error('Error al actualizar.'); }
         })
         .then(loncheraActualizada => {
             modalEditar.hide();
-            Swal.fire('¡Actualizada!', `Lonchera "${loncheraActualizada.nombre}" guardada.`, 'success');
+            Swal.fire({
+                icon: 'success',
+                title: '¡Actualizado!',
+                showConfirmButton: false,
+                timer: 1000
+            });
             cargarLoncheras();
         })
         .catch(error => {
-            Swal.fire('Oops...', 'No se pudo actualizar la lonchera.', 'error');
+            Swal.fire('Error', 'No se pudo actualizar.', 'error');
         });
     });
-
 });
