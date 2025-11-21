@@ -11,3 +11,4 @@ python-dotenv
 gunicorn
 uvicorn
 asyncpg
+jinja2
