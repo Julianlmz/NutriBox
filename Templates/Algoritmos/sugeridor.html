@@ -1,10 +1,249 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sugeridor Inteligente - NutriBox</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+    <link rel="stylesheet" href="/static/css/style.css">
+
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #f8f9fa; }
+
+        /* Navbar */
+        .navbar { padding: 15px 0; }
+        .btn-pill { border-radius: 50px; font-weight: 600; }
+
+        /* Header */
+        .algo-hero {
+            background: white;
+            padding: 60px 0;
+            border-bottom: 1px solid #e9ecef;
+            text-align: center;
+        }
+        .tech-badge {
+            background-color: #e0f2f1;
+            color: #00695c;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        /* Diagrama y Código */
+        .diagram-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            text-align: center;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #dee2e6;
+        }
+
+        .code-window {
+            background: #2d2d2d;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .code-header {
+            background: #1e1e1e;
+            padding: 10px 15px;
+            display: flex;
+            gap: 8px;
+        }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .dot-red { background: #ff5f56; }
+        .dot-yellow { background: #ffbd2e; }
+        .dot-green { background: #27c93f; }
+
+        /* Listas */
+        .feature-list li {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: start;
+        }
+        .check-icon {
+            color: #009688;
+            margin-right: 15px;
+            margin-top: 4px;
+        }
+    </style>
 </head>
 <body>
-$END$
+
+    <header class="bg-white sticky-top shadow-sm">
+        <div class="container">
+            <nav class="navbar navbar-expand-lg navbar-light">
+                <div class="container-fluid px-0">
+
+                    <a class="navbar-brand text-primary-nb fw-bold fs-2 d-flex align-items-center" href="/">
+                        <img src="https://i.pinimg.com/736x/2d/46/a7/2d46a70bbd931232f4b9afc799aaf977.jpg"
+                             alt="NutriBox Logo"
+                             style="height: 85px;"
+                             class="me-2">
+                        NutriBox
+                    </a>
+
+                    <div class="ms-auto">
+                        <a class="btn btn-outline-secondary btn-pill btn-sm" href="/">
+                            <i class="fas fa-arrow-left me-2"></i> Volver al Inicio
+                        </a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <section class="algo-hero">
+        <div class="container">
+            <span class="tech-badge"><i class="fas fa-layer-group me-2"></i>Greedy + Backtracking Híbrido</span>
+            <h1 class="display-4 fw-bold text-dark mb-3">Sugeridor Inteligente</h1>
+            <p class="lead text-muted mx-auto" style="max-width: 700px;">
+                Algoritmo híbrido voraz-recursivo diseñado para encontrar combinaciones óptimas de alimentos equilibrando precisión y velocidad.
+            </p>
+            <div class="mt-4 d-flex justify-content-center gap-3 text-secondary small">
+                <span><i class="fas fa-clock me-1"></i> Complejidad: <strong>Promedio O(n log n)</strong></span>
+                <span><i class="fas fa-cogs me-1"></i> Tipo: <strong>Metaheurística</strong></span>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5">
+        <div class="container">
+            <div class="row g-5">
+
+                <div class="col-lg-5">
+                    <h3 class="fw-bold mb-4">¿Por qué es óptimo?</h3>
+                    <p class="text-muted mb-4">
+                        Combina la velocidad de los algoritmos voraces con la precisión de la recursividad para personalizar menús según preferencias y restricciones.
+                    </p>
+                    <ul class="list-unstyled feature-list">
+                        <li>
+                            <i class="fas fa-check-circle check-icon"></i>
+                            <div>
+                                <strong>Lo mejor de ambos mundos:</strong>
+                                <p class="small text-muted mb-0">Usa una estrategia Voraz para pre-seleccionar alimentos prometedores y Backtracking para validar la combinación final.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle check-icon"></i>
+                            <div>
+                                <strong>Equilibrio Precisión-Velocidad:</strong>
+                                <p class="small text-muted mb-0">Ideal para sistemas en tiempo real donde necesitamos respuestas rápidas pero nutricionalmente exactas.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle check-icon"></i>
+                            <div>
+                                <strong>Personalización Total:</strong>
+                                <p class="small text-muted mb-0">Permite adaptar las sugerencias a alergias, gustos específicos o límites calóricos estrictos.</p>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div class="alert alert-success bg-success bg-opacity-10 border-0 mt-4">
+                        <h6 class="fw-bold text-success"><i class="fas fa-lightbulb me-2"></i>Caso de Uso</h6>
+                        <p class="small mb-0 text-dark opacity-75">
+                            Sugerir una lonchera que no supere las <strong>300 calorías</strong> pero maximice el <strong>score nutricional</strong>, probando combinaciones inteligentes.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-lg-7">
+
+                    <ul class="nav nav-pills mb-3 justify-content-end" id="pills-tab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active rounded-pill" id="pills-diagram-tab" data-bs-toggle="pill" data-bs-target="#pills-diagram" type="button">Diagrama de Flujo</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link rounded-pill" id="pills-code-tab" data-bs-toggle="pill" data-bs-target="#pills-code" type="button">Ver Código</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="pills-tabContent">
+
+                        <div class="tab-pane fade show active" id="pills-diagram" role="tabpanel">
+                            <div class="diagram-container">
+                                <img src="/static/img/Diagrama_Flujo_Sugeridor.jpg"
+                                     class="img-fluid rounded shadow-sm"
+                                     alt="Diagrama de Flujo Sugeridor"
+                                     style="max-height: 600px;">
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="pills-code" role="tabpanel">
+                            <div class="code-window">
+                                <div class="code-header">
+                                    <div class="dot dot-red"></div>
+                                    <div class="dot dot-yellow"></div>
+                                    <div class="dot dot-green"></div>
+                                    <span class="ms-2 text-muted small font-monospace">sugeridor.py</span>
+                                </div>
+                                <pre><code class="language-python">
+
+def sugeridor_inteligente(alimentos, max_calorias):
+
+    alimentos = sorted(alimentos, key=lambda x: x["score"] / x["calorias"], reverse=True)
+
+    mejor_combo, mejor_score = [], 0
+
+    def backtrack(i, combo, cal, score):
+        nonlocal mejor_combo, mejor_score
+        if cal <= max_calorias and score > mejor_score:
+            mejor_combo, mejor_score = combo[:], score
+        if i >= len(alimentos) or cal > max_calorias:
+            return
+        a = alimentos[i]
+        backtrack(i + 1, combo + [a], cal + a["calorias"], score + a["score"])
+        backtrack(i + 1, combo, cal, score)
+
+    backtrack(0, [], 0, 0)
+    return mejor_combo, mejor_score
+
+alimentos = [
+    {"name": "Manzana", "score": 80, "calorias": 50},
+    {"name": "Aguacate", "score": 90, "calorias": 160},
+    {"name": "Salmón", "score": 95, "calorias": 200},
+    {"name": "Yogurt", "score": 70, "calorias": 80},
+]
+
+combo, score = sugeridor_inteligente(alimentos, max_calorias=300)
+print("Mejor combinación:")
+for a in combo: print(f"- {a['name']}")
+print("Puntaje total:", score)
+
+                                </code></pre>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-light text-center py-4 mt-5 border-top">
+        <p class="mb-0 text-muted small">&copy; 2025 NutriBox Algoritmos. Documentación interna.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
 </body>
 </html>
