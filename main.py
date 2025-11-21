@@ -33,10 +33,8 @@ app.add_middleware(
 
 app.mount("/static", StaticFiles(directory="Frontend"), name="static")
 
-# 2. Templates HTML: Buscamos en la carpeta 'Templates'
 templates = Jinja2Templates(directory="Templates")
 
-# --- RUTAS (ENDPOINTS) ---
 app.include_router(auth.router)
 app.include_router(Usuario.router)
 app.include_router(Alimento.router)
@@ -48,3 +46,7 @@ app.include_router(Algoritmos.router)
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/{page_name}.html", response_class=HTMLResponse)
+async def render_page(request: Request, page_name: str):
+    return templates.TemplateResponse(f"{page_name}.html", {"request": request})

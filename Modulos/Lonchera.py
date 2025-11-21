@@ -1,16 +1,13 @@
-# --- COPIA Y PEGA TODO ESTE CÓDIGO EN Modulos/lonchera.py ---
-
 from fastapi import APIRouter, HTTPException, Query, Depends
 from Core.database import SessionDep
 from Modulos.models import (
     Lonchera, LoncheraCreate, LoncheraUpdate, LoncheraAlimento,
     AgregarAlimento, Usuario, Alimento, RestriccionAlimento
 )
-# --- ¡Importaciones añadidas! ---
 from typing import List, Annotated
 from Core.auth import get_current_user
-
-# ------------------------------
+from sqlmodel import select
+from sqlalchemy.orm import selectinload
 
 router = APIRouter(tags=["Loncheras"], prefix="/lonchera")
 
@@ -20,7 +17,8 @@ async def crear_lonchera(data: LoncheraCreate, session: SessionDep):
     """
     Crea una nueva lonchera para un usuario.
     """
-    usuario = session.get(Usuario, data.usuario_id)
+    # CORRECCIÓN: Usamos 'await' porque session.get es asíncrono
+    usuario = await session.get(Usuario, data.usuario_id)
     if not usuario or not usuario.is_active:
         raise HTTPException(
             status_code=404,
@@ -29,46 +27,46 @@ async def crear_lonchera(data: LoncheraCreate, session: SessionDep):
 
     lonchera = Lonchera(**data.model_dump())
     session.add(lonchera)
-    session.commit()
-    session.refresh(lonchera)
+
+    # CORRECCIÓN: Commit y refresh también llevan 'await'
+    await session.commit()
+    await session.refresh(lonchera)
     return lonchera
 
 
-# =============================================================
-# --- ¡FUNCIÓN 100% CORREGIDA Y SEGURA! ---
-# =============================================================
 @router.get("/", response_model=List[Lonchera])
 async def listar_loncheras_del_usuario_actual(
-        session: SessionDep,  # <-- ¡ARREGLADO! (quitamos el = None)
-        current_user: Annotated[Usuario, Depends(get_current_user)],  # <-- ¡MÁS SEGURO!
+        session: SessionDep,
+        current_user: Annotated[Usuario, Depends(get_current_user)],
         incluir_inactivas: bool = Query(default=False)
 ):
     """
-    Lista las loncheras del usuario actualmente autenticado.
-    Filtra automáticamente las loncheras borradas (is_active=False).
+    Lista las loncheras del usuario actual.
     """
-    # Filtra por el ID del usuario que viene en el token
-    query = session.query(Lonchera).filter(Lonchera.usuario_id == current_user.id)
+    # CORRECCIÓN: Usamos 'select()' en lugar de 'session.query()'
+    query = select(Lonchera).where(Lonchera.usuario_id == current_user.id)
 
-    # --- ¡ESTA ES LA LÍNEA QUE ARREGLA TU BUG! ---
     if not incluir_inactivas:
-        query = query.filter(Lonchera.is_active == True)  # Solo muestra las activas
-    # --------------------------------------------------
+        query = query.where(Lonchera.is_active == True)
 
-    loncheras = query.all()
+    # CORRECCIÓN: Ejecutamos la consulta con 'await session.execute'
+    result = await session.execute(query)
+    loncheras = result.scalars().all()
     return loncheras
-
-
-# =============================================================
 
 
 @router.get("/{lonchera_id}", response_model=Lonchera)
 async def obtener_lonchera(lonchera_id: int, session: SessionDep):
     """
-    Obtiene una lonchera por ID, solo si está activa.
+    Obtiene una lonchera por ID cargando sus alimentos.
     """
-    lonchera = session.get(Lonchera, lonchera_id)
-    # Solo la encuentra si existe Y está activa
+    # CORRECCIÓN: Cargar relaciones (Eager Loading) para evitar errores de lazy load
+    query = select(Lonchera).where(Lonchera.id == lonchera_id).options(
+        selectinload(Lonchera.alimentos).selectinload(LoncheraAlimento.alimento)
+    )
+    result = await session.execute(query)
+    lonchera = result.scalars().first()
+
     if not lonchera or not lonchera.is_active:
         raise HTTPException(status_code=404, detail="Lonchera no encontrada")
     return lonchera
@@ -80,10 +78,6 @@ async def actualizar_lonchera(
         data: LoncheraUpdate,
         session: SessionDep
 ):
-    """
-    Actualiza parcialmente una lonchera.
-    """
-    # Usamos la función 'obtener_lonchera' para asegurar que existe y está activa
     lonchera = await obtener_lonchera(lonchera_id, session)
 
     update_data = data.model_dump(exclude_unset=True)
@@ -98,39 +92,30 @@ async def actualizar_lonchera(
         setattr(lonchera, key, value)
 
     session.add(lonchera)
-    session.commit()
-    session.refresh(lonchera)
+    await session.commit()
+    await session.refresh(lonchera)
     return lonchera
 
 
-# =============================================================
-# --- ¡FUNCIÓN 100% CORREGIDA! ---
-# =============================================================
 @router.delete("/{lonchera_id}", status_code=204)
 async def eliminar_lonchera(
         lonchera_id: int,
-        session: SessionDep,  # <-- ¡ARREGLADO! (quitamos el = None)
+        session: SessionDep,
         hard_delete: bool = Query(default=False)
 ):
-    """
-    Elimina (hard) o desactiva (soft) una lonchera.
-    """
-    lonchera = session.get(Lonchera, lonchera_id)
+    # Usamos session.get simple aquí porque no necesitamos las relaciones para borrar
+    lonchera = await session.get(Lonchera, lonchera_id)
     if not lonchera:
         raise HTTPException(status_code=404, detail="Lonchera no encontrada")
 
     if hard_delete:
-        session.delete(lonchera)
+        await session.delete(lonchera)
     else:
-        # ¡Esta lógica está perfecta!
         lonchera.is_active = False
         session.add(lonchera)
 
-    session.commit()
-    return  # Devuelve 204 No Content
-
-
-# =============================================================
+    await session.commit()
+    return
 
 
 @router.post("/{lonchera_id}/alimento", status_code=201)
@@ -139,26 +124,22 @@ async def agregar_alimento(
         data: AgregarAlimento,
         session: SessionDep
 ):
-    """
-    Agrega un alimento a la lonchera con cantidad específica.
-    """
-    # Usamos la función 'obtener_lonchera' para asegurar que existe y está activa
     lonchera = await obtener_lonchera(lonchera_id, session)
+    alimento = await session.get(Alimento, data.alimento_id)
 
-    alimento = session.get(Alimento, data.alimento_id)
     if not alimento or not alimento.is_active:
         raise HTTPException(status_code=404, detail="Alimento no encontrado o inactivo")
 
     if data.cantidad_gramos <= 0:
-        raise HTTPException(
-            status_code=400,
-            detail="La cantidad debe ser mayor a 0"
-        )
+        raise HTTPException(status_code=400, detail="La cantidad debe ser mayor a 0")
 
-    existing = session.query(LoncheraAlimento).filter(
+    # Verificar existencia usando select
+    query = select(LoncheraAlimento).where(
         LoncheraAlimento.lonchera_id == lonchera_id,
         LoncheraAlimento.alimento_id == data.alimento_id
-    ).first()
+    )
+    result = await session.execute(query)
+    existing = result.scalars().first()
 
     if existing:
         existing.cantidad_gramos = data.cantidad_gramos
@@ -173,9 +154,11 @@ async def agregar_alimento(
         session.add(la)
         mensaje = "Alimento agregado a la lonchera"
 
-    session.commit()  # Commit para guardar la relación LoncheraAlimento
+    await session.commit()
 
-    _recalcular_totales_lonchera(lonchera, session)  # Ahora recalcular
+    # Recargar lonchera para cálculos
+    await session.refresh(lonchera)
+    await _recalcular_totales_lonchera(lonchera, session)
 
     factor = data.cantidad_gramos / 100
     calorias_alimento = factor * alimento.calorias_por_100g
@@ -204,15 +187,14 @@ async def quitar_alimento(
         alimento_id: int,
         session: SessionDep
 ):
-    """
-    Quita un alimento de la lonchera.
-    """
     lonchera = await obtener_lonchera(lonchera_id, session)
 
-    la = session.query(LoncheraAlimento).filter(
+    query = select(LoncheraAlimento).where(
         LoncheraAlimento.lonchera_id == lonchera_id,
         LoncheraAlimento.alimento_id == alimento_id
-    ).first()
+    )
+    result = await session.execute(query)
+    la = result.scalars().first()
 
     if not la:
         raise HTTPException(
@@ -220,18 +202,16 @@ async def quitar_alimento(
             detail="El alimento no está en la lonchera"
         )
 
-    session.delete(la)
-    session.commit()
+    await session.delete(la)
+    await session.commit()
 
-    _recalcular_totales_lonchera(lonchera, session)
+    await session.refresh(lonchera)
+    await _recalcular_totales_lonchera(lonchera, session)
     return
 
 
 @router.get("/{lonchera_id}/alimentos")
 async def listar_alimentos_lonchera(lonchera_id: int, session: SessionDep):
-    """
-    Lista todos los alimentos de una lonchera con información nutricional detallada.
-    """
     lonchera = await obtener_lonchera(lonchera_id, session)
 
     alimentos_info = []
@@ -242,6 +222,8 @@ async def listar_alimentos_lonchera(lonchera_id: int, session: SessionDep):
     total_precio = 0
 
     for la in lonchera.alimentos:
+        if not la.alimento: continue
+
         factor = la.cantidad_gramos / 100
         calorias = factor * la.alimento.calorias_por_100g
         proteinas = factor * la.alimento.proteinas_por_100g
@@ -283,24 +265,21 @@ async def listar_alimentos_lonchera(lonchera_id: int, session: SessionDep):
     }
 
 
-# =============================================================
-# --- ¡FUNCIÓN CORREGIDA! (Campos borrados eliminados) ---
-# =============================================================
 @router.get("/{lonchera_id}/completo")
 async def obtener_lonchera_completa(lonchera_id: int, session: SessionDep):
-    """
-    Obtiene información completa de la lonchera con usuario y alimentos.
-    """
     lonchera = await obtener_lonchera(lonchera_id, session)
 
+    usuario = await session.get(Usuario, lonchera.usuario_id)
+
     usuario_info = {
-        "id": lonchera.usuario.id,
-        "nombre": lonchera.usuario.nombre,
-        "apellido": lonchera.usuario.apellido
+        "id": usuario.id,
+        "nombre": usuario.nombre,
+        "apellido": usuario.apellido
     }
 
     alimentos_info = []
     for la in lonchera.alimentos:
+        if not la.alimento: continue
         alimentos_info.append({
             "id": la.alimento.id,
             "nombre": la.alimento.nombre,
@@ -323,21 +302,12 @@ async def obtener_lonchera_completa(lonchera_id: int, session: SessionDep):
     }
 
 
-# =============================================================
-
-
-# =============================================================
-# --- ¡FUNCIÓN CORREGIDA! (Bug de session=None arreglado) ---
-# =============================================================
 @router.get("/{lonchera_id}/validar-restricciones")
 async def validar_restricciones_lonchera(
         lonchera_id: int,
-        session: SessionDep,  # <-- ¡ARREGLADO!
+        session: SessionDep,
         restriccion_ids: List[int] = Query(default=[])
 ):
-    """
-    Valida si la lonchera contiene alimentos con restricciones específicas.
-    """
     lonchera = await obtener_lonchera(lonchera_id, session)
 
     if not restriccion_ids:
@@ -350,9 +320,10 @@ async def validar_restricciones_lonchera(
 
     alimentos_restringidos = {}
     for restriccion_id in restriccion_ids:
-        asociaciones = session.query(RestriccionAlimento).filter(
-            RestriccionAlimento.restriccion_id == restriccion_id
-        ).all()
+        query = select(RestriccionAlimento).where(RestriccionAlimento.restriccion_id == restriccion_id)
+        result = await session.execute(query)
+        asociaciones = result.scalars().all()
+
         for asoc in asociaciones:
             alimentos_restringidos[asoc.alimento_id] = restriccion_id
 
@@ -378,35 +349,27 @@ async def validar_restricciones_lonchera(
     }
 
 
-# =============================================================
-
-
-# =============================================================
-# --- ¡FUNCIÓN CORREGIDA! (Más robusta) ---
-# =============================================================
-def _recalcular_totales_lonchera(lonchera: Lonchera, session: SessionDep):
+async def _recalcular_totales_lonchera(lonchera: Lonchera, session: SessionDep):
     """
-    Función auxiliar para recalcular calorías y precio total de una lonchera.
+    Función auxiliar ASÍNCRONA para recalcular totales.
     """
+    query = select(LoncheraAlimento).where(LoncheraAlimento.lonchera_id == lonchera.id).options(
+        selectinload(LoncheraAlimento.alimento))
+    result = await session.execute(query)
+    items = result.scalars().all()
+
     total_calorias = 0
     total_precio = 0
 
-    # Forzar la carga de la relación 'alimentos' si no está cargada
-    session.refresh(lonchera, ["alimentos"])
-
-    for la in lonchera.alimentos:
-        # Asegurarse de que el 'alimento' dentro de la relación esté cargado
-        if la.alimento is None:
-            session.refresh(la, ["alimento"])
-
-        factor = la.cantidad_gramos / 100
-        total_calorias += factor * la.alimento.calorias_por_100g
-        total_precio += factor * la.alimento.precio_unitario
+    for la in items:
+        if la.alimento:
+            factor = la.cantidad_gramos / 100
+            total_calorias += factor * la.alimento.calorias_por_100g
+            total_precio += factor * la.alimento.precio_unitario
 
     lonchera.calorias = int(round(total_calorias))
     lonchera.precio = round(total_precio, 2)
 
-    session.add(lonchera)  # Añadir al contexto de la sesión
-    session.commit()  # Guardar los cambios en la BD
-    session.refresh(lonchera)  # Refrescar la instancia
-# =============================================================
+    session.add(lonchera)
+    await session.commit()
+    await session.refresh(lonchera)
