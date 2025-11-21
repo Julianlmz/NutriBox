@@ -4,70 +4,361 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Perfil - NutriBox</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../Frontend/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/static/css/style.css">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f7f6;
+            background-image: radial-gradient(circle at 80% 10%, rgba(76, 175, 80, 0.08) 0%, rgba(255, 255, 255, 0) 60%);
+            min-height: 100vh;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background-color: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .navbar-brand img { mix-blend-mode: multiply; }
+
+        /* SIDEBAR */
+        .offcanvas {
+            border-top-right-radius: 25px;
+            border-bottom-right-radius: 25px;
+            box-shadow: 5px 0 25px rgba(0,0,0,0.05);
+        }
+        .offcanvas-header .logo-mini { height: 35px; mix-blend-mode: multiply; }
+
+        .nav-link {
+            border-radius: 12px;
+            padding: 14px 20px;
+            color: #6c757d;
+            font-weight: 500;
+            transition: all 0.25s ease;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        .nav-link i { font-size: 1.1rem; width: 30px; text-align: center; margin-right: 8px; }
+
+        /* Link Activo */
+        .nav-link.active {
+            background-color: #e8f5e9 !important;
+            color: #2e7d32 !important;
+            font-weight: 700;
+        }
+        .nav-link.active i { color: #2e7d32 !important; }
+
+        .nav-link:hover:not(.active) {
+            background-color: #f8f9fa;
+            color: #4CAF50;
+        }
+
+        /* TARJETAS DE PERFIL */
+        .profile-card {
+            border: none;
+            border-radius: 25px;
+            background: white;
+            padding: 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .profile-header-bg {
+            background: linear-gradient(135deg, #4CAF50 0%, #81C784 100%);
+            height: 120px;
+            width: 100%;
+        }
+
+        .avatar-container {
+            margin-top: -60px;
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+
+        .avatar-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 5px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            object-fit: cover;
+            background-color: #e8f5e9;
+        }
+
+        /* Botón para editar foto */
+        .btn-edit-photo {
+            position: absolute;
+            bottom: 0;
+            right: 35%;
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-edit-photo:hover {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        /* Formulario */
+        .form-control {
+            border-radius: 12px;
+            padding: 12px 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #eee;
+        }
+        .form-control:focus {
+            background-color: white;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.1);
+        }
+        .form-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #6c757d;
+            margin-left: 5px;
+        }
+
+        .btn-save {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-save:hover {
+            background-color: #388E3C;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+    </style>
 </head>
-<body class="bg-light">
-    <header class="bg-white shadow-sm sticky-top">
-        <nav class="navbar navbar-expand-lg">
-            <div class="container-fluid">
-                <button class="btn btn-outline-success" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
-                    <i class="fas fa-bars"></i>
+<body>
+
+    <header class="navbar navbar-expand-lg sticky-top">
+        <div class="container-fluid px-4 py-1">
+            <div class="d-flex align-items-center">
+                <button class="btn btn-light border-0 bg-transparent p-2 me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu">
+                    <i class="fas fa-bars fs-4 text-secondary"></i>
                 </button>
-                <a class="navbar-brand text-primary-nb fw-bold fs-1 mx-auto" href="dashboard.html">
-                    <img src="https://i.pinimg.com/736x/2d/46/a7/2d46a70bbd931232f4b9afc799aaf977.jpg" alt="NutriBox Logo" style="height: 90px;">
+
+                <a class="navbar-brand fw-bold fs-3 d-flex align-items-center" href="dashboard.html" style="color: #4CAF50;">
+                    <img src="https://i.pinimg.com/736x/2d/46/a7/2d46a70bbd931232f4b9afc799aaf977.jpg"
+                         alt="NutriBox Logo"
+                         style="height: 45px; mix-blend-mode: multiply;"
+                         class="me-2">
                     NutriBox
                 </a>
-                <button id="logout-button" class="btn btn-outline-danger d-none d-lg-flex">
-                    <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
-                </button>
             </div>
-        </nav>
-    </header>
-    <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title text-primary-nb fw-bold fs-3" id="sidebarMenuLabel">NutriBox</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            <button id="logout-button" class="btn btn-outline-danger rounded-pill px-4 py-2 fw-bold d-none d-lg-block" style="border-width: 2px;">
+                <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+            </button>
         </div>
-        <div class="offcanvas-body">
+    </header>
+
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMenu">
+        <div class="offcanvas-header border-bottom p-4">
+            <h5 class="offcanvas-title fw-bold fs-4 d-flex align-items-center" style="color: #4CAF50;">
+                <img src="https://i.pinimg.com/736x/2d/46/a7/2d46a70bbd931232f4b9afc799aaf977.jpg"
+                     alt="Logo Mini"
+                     class="logo-mini me-2">
+                Menú
+            </h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body p-4">
             <ul class="navbar-nav fs-5">
                 <li class="nav-item">
-                    <a class="nav-link" href="dashboard.html"><i class="fas fa-home me-2"></i>Inicio</a>
+                    <a class="nav-link" href="dashboard.html"><i class="fas fa-home"></i>Inicio</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="loncheras.html"><i class="fas fa-box-open me-2"></i>Loncheras</a>
+                    <a class="nav-link" href="loncheras.html"><i class="fas fa-box-open"></i>Mis Loncheras</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="alimentos.html"><i class="fas fa-apple-alt me-2"></i>Alimentos</a>
+                    <a class="nav-link" href="alimentos.html"><i class="fas fa-carrot"></i>Alimentos</a>
                 </li>
+
                 <li class="nav-item">
-                    <a class="nav-link active" href="perfil.html"><i class="fas fa-user me-2"></i>Perfil</a>
+                    <a class="nav-link active" href="perfil.html"><i class="fas fa-user-circle"></i>Mi Perfil</a>
                 </li>
-                <li class="nav-item d-lg-none mt-3">
-                    <button id="logout-button-mobile" class="btn btn-outline-danger w-100">Cerrar Sesión</button>
+
+                <li class="nav-item mt-auto pt-4 border-top d-lg-none">
+                    <button id="logout-button-mobile" class="btn btn-danger w-100 rounded-pill py-3 fw-bold">
+                        <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                    </button>
                 </li>
             </ul>
         </div>
     </div>
 
     <main class="container my-5">
-        <h1>Mi Perfil (Próximamente)</h1>
-        <p>Aquí irá el formulario para editar tu perfil.</p>
+        <div class="row g-5">
+
+            <div class="col-lg-4">
+                <div class="profile-card text-center pb-4">
+                    <div class="profile-header-bg"></div>
+
+                    <div class="avatar-container">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+                             alt="Foto Perfil" class="avatar-img" id="foto-perfil">
+
+                        <div class="btn-edit-photo" title="Cambiar foto">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                    </div>
+
+                    <div class="px-4 mt-3">
+                        <h3 class="fw-bold text-dark mb-1" id="perfil-nombre">Cargando...</h3>
+                        <p class="text-muted small mb-3" id="perfil-email">usuario@email.com</p>
+
+                        <div class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2 mb-3">
+                            <i class="fas fa-check-circle me-1"></i> Cuenta Activa
+                        </div>
+
+                        <hr class="mx-4 opacity-25">
+
+                        <div class="d-flex justify-content-center gap-4 text-secondary">
+                            <div class="text-center">
+                                <h5 class="fw-bold mb-0 text-dark" id="count-loncheras">0</h5>
+                                <small class="small">Loncheras</small>
+                            </div>
+                            <div class="text-center">
+                                <h5 class="fw-bold mb-0 text-dark" id="count-pedidos">0</h5>
+                                <small class="small">Pedidos</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="profile-card p-4 p-md-5">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="fw-bold text-success m-0">
+                            <i class="fas fa-user-edit me-2"></i>Editar Información
+                        </h3>
+                    </div>
+
+                    <form id="form-perfil">
+
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Nombre</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="fas fa-user text-muted"></i></span>
+                                    <input type="text" class="form-control border-start-0" id="input-nombre" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Apellido</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="fas fa-user text-muted"></i></span>
+                                    <input type="text" class="form-control border-start-0" id="input-apellido" readonly>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Teléfono</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="fas fa-phone text-muted"></i></span>
+                                    <input type="text" class="form-control border-start-0" id="input-telefono" placeholder="+57 300 123 4567">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Correo Electrónico</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="fas fa-envelope text-muted"></i></span>
+                                    <input type="email" class="form-control border-start-0" id="input-email" readonly>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Sobre mí (Bio)</label>
+                                <textarea class="form-control" id="input-bio" rows="4" placeholder="Escribe algo breve sobre ti o las preferencias de tus hijos..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-5">
+                            <button type="submit" class="btn btn-save shadow-sm px-5">
+                                Guardar Cambios
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../Frontend/js/auth-guard.js"></script>
+
+    <script src="/static/js/auth-guard.js"></script>
+
     <script>
-        // Setup simple de logout para esta página
-        setupLogoutButton();
-        const mobileLogout = document.getElementById("logout-button-mobile");
-        if (mobileLogout) {
-            mobileLogout.addEventListener("click", () => {
-                 document.getElementById("logout-button").click();
+        document.addEventListener("DOMContentLoaded", function() {
+            setupLogoutButton();
+
+            // Cargar datos
+            fetch("http://127.0.0.1:8000/usuario/me", {
+                method: 'GET',
+                headers: AUTH_HEADERS
+            })
+            .then(res => res.json())
+            .then(user => {
+                // Llenar tarjeta izquierda
+                document.getElementById("perfil-nombre").textContent = user.nombre + " " + user.apellido;
+                document.getElementById("perfil-email").textContent = user.email;
+
+                // Llenar inputs (Nombre/Apellido/Email solo lectura visualmente)
+                document.getElementById("input-nombre").value = user.nombre;
+                document.getElementById("input-apellido").value = user.apellido;
+                document.getElementById("input-email").value = user.email;
+
+                // Si el usuario tiene perfil, cargar datos extra
+                if (user.perfil) {
+                    document.getElementById("input-telefono").value = user.perfil.telefono || "";
+                    document.getElementById("input-bio").value = user.perfil.bio || "";
+                    if(user.perfil.foto_url) {
+                        document.getElementById("foto-perfil").src = user.perfil.foto_url;
+                    }
+                }
+            })
+            .catch(console.error);
+
+            // Manejar Guardado (Simulado visualmente por ahora para el demo)
+            document.getElementById("form-perfil").addEventListener("submit", function(e) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Perfil Actualizado!',
+                    text: 'Tus datos han sido guardados correctamente.',
+                    confirmButtonColor: '#4CAF50'
+                });
             });
-        }
+        });
     </script>
 </body>
 </html>

@@ -4,75 +4,277 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - NutriBox</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../Frontend/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/static/css/style.css">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f7f6;
+            background-image: radial-gradient(circle at 80% 10%, rgba(76, 175, 80, 0.08) 0%, rgba(255, 255, 255, 0) 60%);
+            min-height: 100vh;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background-color: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .navbar-brand img {
+            mix-blend-mode: multiply;
+        }
+
+        /* SIDEBAR (Offcanvas) */
+        .offcanvas {
+            border-top-right-radius: 25px;
+            border-bottom-right-radius: 25px;
+            box-shadow: 5px 0 25px rgba(0,0,0,0.05);
+        }
+
+        /* Estilo para el enlace del menú */
+        .nav-link {
+            border-radius: 12px;
+            padding: 14px 20px;
+            color: #6c757d; /* Gris suave por defecto */
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-link i {
+            font-size: 1.2rem;
+            width: 35px; /* Ancho fijo para alinear texto */
+            text-align: center;
+            color: #adb5bd; /* Icono gris por defecto */
+            transition: color 0.2s;
+        }
+
+        /* CORRECCIÓN: Estilo "Activo" (Verde pastel, no sólido) */
+        .nav-link.active {
+            background-color: #e8f5e9 !important; /* Fondo muy claro */
+            color: #2e7d32 !important; /* Texto verde oscuro */
+            font-weight: 700;
+        }
+
+        .nav-link.active i {
+            color: #4CAF50 !important; /* Icono verde vibrante */
+        }
+
+        .nav-link:hover:not(.active) {
+            background-color: #f8f9fa;
+            color: #4CAF50;
+        }
+
+        .nav-link:hover i {
+            color: #4CAF50;
+        }
+
+        /* BANNER */
+        .welcome-banner {
+            background: linear-gradient(135deg, #4CAF50 0%, #66bb6a 100%);
+            color: white;
+            border-radius: 25px;
+            padding: 3.5rem 3rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 15px 30px rgba(76, 175, 80, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-banner::after {
+            content: '\f5d1';
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            right: -10px;
+            bottom: -35px;
+            font-size: 11rem;
+            opacity: 0.15;
+            color: white;
+            transform: rotate(-15deg);
+            pointer-events: none;
+        }
+
+        /* CARDS */
+        .dashboard-card {
+            border: none;
+            border-radius: 25px;
+            background: white;
+            padding: 2.5rem 2rem;
+            height: 100%;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.04);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            text-decoration: none;
+            display: block;
+            color: inherit;
+            position: relative;
+            top: 0;
+        }
+
+        .dashboard-card:hover {
+            top: -8px;
+            box-shadow: 0 20px 45px rgba(76, 175, 80, 0.15);
+        }
+
+        .icon-container {
+            width: 75px;
+            height: 75px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 1.8rem;
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-card:hover .icon-container { transform: scale(1.08); }
+
+        .card-lonchera .icon-container { background-color: #e1f5fe; color: #0288d1; }
+        .card-alimento .icon-container { background-color: #fff3e0; color: #f57c00; }
+        .card-perfil .icon-container { background-color: #e8f5e9; color: #2e7d32; }
+
+        .dashboard-card h3 { font-weight: 600; }
+        .dashboard-card p { color: #899499; font-size: 0.95rem; line-height: 1.5; }
+
+        .btn-card {
+            border-radius: 50px;
+            padding: 8px 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-top: 1.5rem;
+            border-width: 2px;
+        }
+    </style>
 </head>
-<body class="bg-light">
+<body>
 
-    <header class="bg-white shadow-sm sticky-top">
-        <nav class="navbar navbar-expand-lg">
-            <div class="container-fluid">
+    <header class="navbar navbar-expand-lg sticky-top">
+        <div class="container-fluid px-4 py-1">
 
-                <button class="btn btn-outline-success" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
-                    <i class="fas fa-bars"></i>
+            <div class="d-flex align-items-center">
+                <button class="btn btn-light border-0 bg-transparent p-2 me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu">
+                    <i class="fas fa-bars fs-4 text-secondary"></i>
                 </button>
 
-                <a class="navbar-brand text-primary-nb fw-bold fs-1 mx-auto" href="dashboard.html">
-                    <img src="https://i.pinimg.com/736x/2d/46/a7/2d46a70bbd931232f4b9afc799aaf977.jpg" alt="NutriBox Logo" style="height: 90px;">
+                <a class="navbar-brand fw-bold fs-3 d-flex align-items-center" href="dashboard.html" style="color: #4CAF50;">
+                    <img src="https://i.pinimg.com/736x/2d/46/a7/2d46a70bbd931232f4b9afc799aaf977.jpg"
+                         alt="NutriBox Logo"
+                         style="height: 45px; mix-blend-mode: multiply;"
+                         class="me-2">
                     NutriBox
                 </a>
-
-                <button id="logout-button" class="btn btn-outline-danger d-none d-lg-flex">
-                    <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
-                </button>
-
             </div>
-        </nav>
+
+            <button id="logout-button" class="btn btn-outline-danger rounded-pill px-4 py-2 fw-bold d-none d-lg-block" style="border-width: 2px;">
+                <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+            </button>
+
+        </div>
     </header>
 
-    <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title text-primary-nb fw-bold fs-3" id="sidebarMenuLabel">NutriBox</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMenu">
+        <div class="offcanvas-header border-bottom p-4">
+            <h5 class="offcanvas-title fw-bold fs-4 d-flex align-items-center" style="color: #4CAF50;">
+                <img src="https://i.pinimg.com/736x/2d/46/a7/2d46a70bbd931232f4b9afc799aaf977.jpg"
+                     alt="Logo Menu"
+                     style="height: 35px; mix-blend-mode: multiply;"
+                     class="me-2">
+                Menú
+            </h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
         </div>
-        <div class="offcanvas-body">
+        <div class="offcanvas-body p-4">
             <ul class="navbar-nav fs-5">
+
                 <li class="nav-item">
-                    <a class="nav-link active" href="dashboard.html"><i class="fas fa-home me-2"></i>Inicio</a>
+                    <a class="nav-link active" href="dashboard.html">
+                        <i class="fas fa-home"></i> Inicio
+                    </a>
                 </li>
+
                 <li class="nav-item">
-                    <a class="nav-link" href="loncheras.html"><i class="fas fa-box-open me-2"></i>Loncheras</a>
+                    <a class="nav-link" href="loncheras.html">
+                        <i class="fas fa-box-open"></i> Mis Loncheras
+                    </a>
                 </li>
+
                 <li class="nav-item">
-                    <a class="nav-link" href="alimentos.html"><i class="fas fa-apple-alt me-2"></i>Alimentos</a>
+                    <a class="nav-link" href="alimentos.html">
+                        <i class="fas fa-carrot"></i> Alimentos
+                    </a>
                 </li>
+
                 <li class="nav-item">
-                    <a class="nav-link" href="perfil.html"><i class="fas fa-user me-2"></i>Perfil</a>
+                    <a class="nav-link" href="perfil.html">
+                        <i class="fas fa-user-circle"></i> Mi Perfil
+                    </a>
                 </li>
-                <li class="nav-item d-lg-none mt-3">
-                    <button id="logout-button-mobile" class="btn btn-outline-danger w-100">Cerrar Sesión</button>
+
+                <li class="nav-item mt-auto pt-4 border-top d-lg-none">
+                    <button id="logout-button-mobile" class="btn btn-danger w-100 rounded-pill py-3 fw-bold">
+                        <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                    </button>
                 </li>
             </ul>
         </div>
     </div>
-    <main class="container my-5">
 
-        <div class="card border-0 card-shadow">
-            <div class="card-body p-4 p-md-5">
-                <h1 class="text-center fw-bold mb-4" id="welcome-message">
-                    Cargando...
-                </h1>
-                <hr>
-                <div id="user-info" class="text-center">
-                    </div>
+    <main class="container py-5">
+
+        <div class="welcome-banner">
+            <div class="row align-items-center">
+                <div class="col-md-9">
+                    <h1 class="display-5 fw-bold mb-3" id="welcome-message">¡Hola!</h1>
+                    <p class="fs-5 mb-0" style="opacity: 0.95;">Bienvenido a tu panel de control. ¿Qué quieres planificar hoy?</p>
+                </div>
             </div>
         </div>
+
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <a href="loncheras.html" class="dashboard-card card-lonchera">
+                    <div class="icon-container"><i class="fas fa-box-open"></i></div>
+                    <h3 class="h4 text-dark mb-3">Mis Loncheras</h3>
+                    <p>Crea, edita y organiza los menús semanales para tus hijos de forma sencilla.</p>
+                    <span class="btn btn-card btn-outline-primary mt-3">Ir a Loncheras <i class="fas fa-arrow-right ms-1"></i></span>
+                </a>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <a href="alimentos.html" class="dashboard-card card-alimento">
+                    <div class="icon-container"><i class="fas fa-carrot"></i></div>
+                    <h3 class="h4 text-dark mb-3">Alimentos</h3>
+                    <p>Explora nuestra completa base de datos de opciones saludables y sus precios.</p>
+                    <span class="btn btn-card btn-outline-warning text-warning-emphasis mt-3">Ver Alimentos <i class="fas fa-arrow-right ms-1"></i></span>
+                </a>
+            </div>
+
+            <div class="col-lg-4 col-md-6 mx-auto">
+                <a href="perfil.html" class="dashboard-card card-perfil">
+                    <div class="icon-container"><i class="fas fa-user-cog"></i></div>
+                    <h3 class="h4 text-dark mb-3">Mi Cuenta</h3>
+                    <p>Gestiona tus datos personales, preferencias y configuración de seguridad.</p>
+                    <span class="btn btn-card btn-outline-success mt-3">Editar Perfil <i class="fas fa-arrow-right ms-1"></i></span>
+                </a>
+            </div>
+        </div>
+
+        <div id="user-info" class="d-none"></div>
 
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script src="../Frontend/js/auth-guard.js"></script> <script src="../Frontend/js/dashboard.js"></script> </body>
+    <script src="/static/js/auth-guard.js"></script>
+    <script src="/static/js/dashboard.js"></script>
+</body>
 </html>
