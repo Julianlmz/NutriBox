@@ -2,7 +2,8 @@ from fastapi import APIRouter, HTTPException, Query, Depends
 from Core.database import SessionDep
 from Modulos.models import (
     Lonchera, LoncheraCreate, LoncheraUpdate, LoncheraAlimento,
-    AgregarAlimento, Usuario, Alimento, RestriccionAlimento
+    AgregarAlimento, Usuario, Alimento, RestriccionAlimento,
+    Direccion  # Importamos la dirección del modelo
 )
 from typing import List, Annotated
 from Core.auth import get_current_user
@@ -15,20 +16,29 @@ router = APIRouter(tags=["Loncheras"], prefix="/lonchera")
 @router.post("/", response_model=Lonchera, status_code=201)
 async def crear_lonchera(data: LoncheraCreate, session: SessionDep):
     """
-    Crea una nueva lonchera para un usuario.
+    Crea una nueva lonchera para un usuario, validando el hijo y la dirección.
     """
-    # CORRECCIÓN: Usamos 'await' porque session.get es asíncrono
+    # 1. Validar Usuario (Padre, que es el creador/dueño de la dirección)
     usuario = await session.get(Usuario, data.usuario_id)
     if not usuario or not usuario.is_active:
-        raise HTTPException(
-            status_code=404,
-            detail="Usuario no encontrado o inactivo"
-        )
+        raise HTTPException(status_code=404, detail="Usuario (creador/padre) no encontrado o inactivo")
 
+    # 2. Validar Dirección
+    if data.direccion_id:
+        direccion = await session.get(Direccion, data.direccion_id)
+        if not direccion:
+            raise HTTPException(status_code=404, detail="Dirección no encontrada")
+
+        # Seguridad: Verificar que la dirección pertenezca al usuario creador
+        if direccion.usuario_id != data.usuario_id:
+            raise HTTPException(status_code=403, detail="La dirección no pertenece al usuario creador")
+    else:
+        raise HTTPException(status_code=400, detail="Se requiere una dirección de entrega")
+
+    # 3. Crear Lonchera
     lonchera = Lonchera(**data.model_dump())
     session.add(lonchera)
 
-    # CORRECCIÓN: Commit y refresh también llevan 'await'
     await session.commit()
     await session.refresh(lonchera)
     return lonchera
@@ -43,13 +53,14 @@ async def listar_loncheras_del_usuario_actual(
     """
     Lista las loncheras del usuario actual.
     """
-    # CORRECCIÓN: Usamos 'select()' en lugar de 'session.query()'
-    query = select(Lonchera).where(Lonchera.usuario_id == current_user.id)
+    # Consulta con eager loading para traer la dirección si es necesario
+    query = select(Lonchera).where(Lonchera.usuario_id == current_user.id).options(
+        selectinload(Lonchera.direccion)
+    )
 
     if not incluir_inactivas:
         query = query.where(Lonchera.is_active == True)
 
-    # CORRECCIÓN: Ejecutamos la consulta con 'await session.execute'
     result = await session.execute(query)
     loncheras = result.scalars().all()
     return loncheras
@@ -58,11 +69,11 @@ async def listar_loncheras_del_usuario_actual(
 @router.get("/{lonchera_id}", response_model=Lonchera)
 async def obtener_lonchera(lonchera_id: int, session: SessionDep):
     """
-    Obtiene una lonchera por ID cargando sus alimentos.
+    Obtiene una lonchera por ID cargando sus alimentos y dirección.
     """
-    # CORRECCIÓN: Cargar relaciones (Eager Loading) para evitar errores de lazy load
     query = select(Lonchera).where(Lonchera.id == lonchera_id).options(
-        selectinload(Lonchera.alimentos).selectinload(LoncheraAlimento.alimento)
+        selectinload(Lonchera.alimentos).selectinload(LoncheraAlimento.alimento),
+        selectinload(Lonchera.direccion)  # Incluir la dirección en la carga
     )
     result = await session.execute(query)
     lonchera = result.scalars().first()
@@ -71,6 +82,8 @@ async def obtener_lonchera(lonchera_id: int, session: SessionDep):
         raise HTTPException(status_code=404, detail="Lonchera no encontrada")
     return lonchera
 
+
+# --- Resto del código se mantiene igual ---
 
 @router.patch("/{lonchera_id}", response_model=Lonchera)
 async def actualizar_lonchera(
@@ -103,7 +116,6 @@ async def eliminar_lonchera(
         session: SessionDep,
         hard_delete: bool = Query(default=False)
 ):
-    # Usamos session.get simple aquí porque no necesitamos las relaciones para borrar
     lonchera = await session.get(Lonchera, lonchera_id)
     if not lonchera:
         raise HTTPException(status_code=404, detail="Lonchera no encontrada")
@@ -133,7 +145,6 @@ async def agregar_alimento(
     if data.cantidad_gramos <= 0:
         raise HTTPException(status_code=400, detail="La cantidad debe ser mayor a 0")
 
-    # Verificar existencia usando select
     query = select(LoncheraAlimento).where(
         LoncheraAlimento.lonchera_id == lonchera_id,
         LoncheraAlimento.alimento_id == data.alimento_id
@@ -156,7 +167,6 @@ async def agregar_alimento(
 
     await session.commit()
 
-    # Recargar lonchera para cálculos
     await session.refresh(lonchera)
     await _recalcular_totales_lonchera(lonchera, session)
 
@@ -294,7 +304,9 @@ async def obtener_lonchera_completa(lonchera_id: int, session: SessionDep):
             "descripcion": lonchera.descripcion,
             "precio": lonchera.precio,
             "calorias": lonchera.calorias,
-            "is_active": lonchera.is_active
+            "is_active": lonchera.is_active,
+            # Incluir la dirección de entrega
+            "direccion_entrega": f"{lonchera.direccion.direccion} ({lonchera.direccion.nombre})" if lonchera.direccion else "No asignada"
         },
         "usuario": usuario_info,
         "alimentos": alimentos_info,
@@ -350,9 +362,6 @@ async def validar_restricciones_lonchera(
 
 
 async def _recalcular_totales_lonchera(lonchera: Lonchera, session: SessionDep):
-    """
-    Función auxiliar ASÍNCRONA para recalcular totales.
-    """
     query = select(LoncheraAlimento).where(LoncheraAlimento.lonchera_id == lonchera.id).options(
         selectinload(LoncheraAlimento.alimento))
     result = await session.execute(query)

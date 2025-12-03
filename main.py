@@ -22,6 +22,7 @@ app = FastAPI(
     title="NutriBox API",
     description="Sistema de gestión de loncheras",
     lifespan=lifespan,
+    debug=True,
 )
 
 app.add_middleware(

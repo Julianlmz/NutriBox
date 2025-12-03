@@ -1,44 +1,18 @@
 from fastapi import APIRouter, HTTPException, Depends
 from Core.database import SessionDep
-from sqlmodel import SQLModel, Field, select
-from typing import Optional, List
-from datetime import datetime
-from Core.auth import get_current_user  # Importa tu función de autenticación
-from Modulos import Usuario  # Importa tu modelo Usuario
-
-
-class DireccionBase(SQLModel):
-    nombre: Optional[str] = Field(default=None, max_length=100)
-    direccion: str = Field(min_length=5, max_length=200)
-    ciudad: Optional[str] = Field(default="Bogotá", max_length=100)
-    principal: bool = Field(default=False)
-
-
-class Direccion(DireccionBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    usuario_id: int = Field(foreign_key="usuario.id")
-    fecha_creacion: datetime = Field(default_factory=datetime.now)
-
-
-class DireccionCreate(DireccionBase):
-    pass
-
-
-class DireccionUpdate(SQLModel):
-    nombre: Optional[str] = None
-    direccion: Optional[str] = None
-    ciudad: Optional[str] = None
-    principal: Optional[bool] = None
-
+from sqlmodel import select
+from typing import List
+from Core.auth import get_current_user
+# IMPORTACIÓN CLAVE: Usamos los modelos de models.py para que no haya conflictos
+from Modulos.models import Usuario, Direccion, DireccionCreate, DireccionUpdate
 
 router = APIRouter(prefix="/direcciones", tags=["Direcciones"])
-
 
 @router.post("/", response_model=Direccion, status_code=201)
 async def crear_direccion(
         data: DireccionCreate,
         session: SessionDep,
-        current_user: Usuario = Depends(get_current_user)  # ← OBTENER USUARIO DEL TOKEN
+        current_user: Usuario = Depends(get_current_user)
 ):
     # Si marca como principal, desmarcar las demás
     if data.principal:
@@ -52,6 +26,7 @@ async def crear_direccion(
             dir.principal = False
             session.add(dir)
 
+    # Crear la dirección usando el modelo de la base de datos
     direccion = Direccion(
         **data.model_dump(),
         usuario_id=current_user.id
@@ -61,16 +36,15 @@ async def crear_direccion(
     await session.refresh(direccion)
     return direccion
 
-
 @router.get("/", response_model=List[Direccion])
 async def listar_direcciones(
         session: SessionDep,
-        current_user: Usuario = Depends(get_current_user)  # ← OBTENER USUARIO DEL TOKEN
+        current_user: Usuario = Depends(get_current_user)
 ):
+    # Filtrar solo las direcciones del usuario actual
     query = select(Direccion).where(Direccion.usuario_id == current_user.id)
     result = await session.execute(query)
     return result.scalars().all()
-
 
 @router.get("/{direccion_id}", response_model=Direccion)
 async def obtener_direccion(
@@ -82,12 +56,10 @@ async def obtener_direccion(
     if not direccion:
         raise HTTPException(status_code=404, detail="Dirección no encontrada")
 
-    # Verificar que la dirección pertenece al usuario
     if direccion.usuario_id != current_user.id:
         raise HTTPException(status_code=403, detail="No tienes permiso para ver esta dirección")
 
     return direccion
-
 
 @router.put("/{direccion_id}", response_model=Direccion)
 async def actualizar_direccion(
@@ -100,11 +72,9 @@ async def actualizar_direccion(
     if not direccion:
         raise HTTPException(status_code=404, detail="Dirección no encontrada")
 
-    # Verificar que la dirección pertenece al usuario
     if direccion.usuario_id != current_user.id:
         raise HTTPException(status_code=403, detail="No tienes permiso para editar esta dirección")
 
-    # Si marca como principal, desmarcar las demás
     if data.principal:
         query = select(Direccion).where(
             Direccion.usuario_id == current_user.id,
@@ -117,7 +87,6 @@ async def actualizar_direccion(
             dir.principal = False
             session.add(dir)
 
-    # Actualizar campos
     for key, value in data.model_dump(exclude_unset=True).items():
         setattr(direccion, key, value)
 
@@ -125,7 +94,6 @@ async def actualizar_direccion(
     await session.commit()
     await session.refresh(direccion)
     return direccion
-
 
 @router.put("/{direccion_id}/principal", response_model=Direccion)
 async def establecer_principal(
@@ -137,11 +105,9 @@ async def establecer_principal(
     if not direccion:
         raise HTTPException(status_code=404, detail="Dirección no encontrada")
 
-    # Verificar que la dirección pertenece al usuario
     if direccion.usuario_id != current_user.id:
         raise HTTPException(status_code=403, detail="No tienes permiso")
 
-    # Desmarcar todas las direcciones principales del usuario
     query = select(Direccion).where(
         Direccion.usuario_id == current_user.id,
         Direccion.principal == True
@@ -152,13 +118,11 @@ async def establecer_principal(
         dir.principal = False
         session.add(dir)
 
-    # Marcar esta como principal
     direccion.principal = True
     session.add(direccion)
     await session.commit()
     await session.refresh(direccion)
     return direccion
-
 
 @router.delete("/{direccion_id}", status_code=204)
 async def eliminar_direccion(
@@ -170,7 +134,6 @@ async def eliminar_direccion(
     if not direccion:
         raise HTTPException(status_code=404, detail="Dirección no encontrada")
 
-    # Verificar que la dirección pertenece al usuario
     if direccion.usuario_id != current_user.id:
         raise HTTPException(status_code=403, detail="No tienes permiso para eliminar esta dirección")
 

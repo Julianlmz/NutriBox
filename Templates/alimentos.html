@@ -24,6 +24,7 @@
             padding: 20px;
         }
 
+        /* --- FONDO ANIMADO --- */
         .bg-blobs {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1; pointer-events: none;
@@ -39,6 +40,7 @@
             border-radius: 50%; filter: blur(80px);
         }
 
+        /* --- CONTENEDOR PRINCIPAL --- */
         .dashboard-container {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(20px);
@@ -52,6 +54,7 @@
             flex-direction: column;
         }
 
+        /* --- NAVBAR --- */
         .top-navbar {
             padding: 15px 30px;
             display: flex;
@@ -61,10 +64,7 @@
             z-index: 1001;
             min-height: 70px;
         }
-
-        .logo-area {
-            display: flex; align-items: center; gap: 10px; text-decoration: none;
-        }
+        .logo-area { display: flex; align-items: center; gap: 10px; text-decoration: none; }
         .logo-icon { font-size: 1.8rem; color: var(--primary-nb); }
         .logo-text { font-size: 1.3rem; font-weight: 700; color: #333; letter-spacing: -0.5px; }
 
@@ -74,7 +74,6 @@
             cursor: pointer; z-index: 1200; box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: all 0.3s;
         }
         .burger-btn:hover { background: #f9f9f9; }
-
         .burger-line {
             width: 24px; height: 3px; background-color: #333; border-radius: 2px; margin: 2px 0; transition: all 0.3s;
         }
@@ -82,6 +81,7 @@
         .burger-btn.is-active .burger-line:nth-child(2) { opacity: 0; }
         .burger-btn.is-active .burger-line:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
+        /* --- SIDEBAR --- */
         .sidebar-menu {
             position: absolute;
             top: 0; left: 0; height: 100%; width: 280px;
@@ -105,95 +105,70 @@
 
         .main-area { flex-grow: 1; display: flex; position: relative; overflow: hidden; }
         .content-section {
-            flex-grow: 1;
-            padding: 40px;
-            overflow-y: auto;
-            height: 100%;
-            width: 100%;
-            transition: filter 0.3s;
-            max-height: calc(90vh - 70px);
+            flex-grow: 1; padding: 40px; overflow-y: auto; height: 100%; width: 100%;
+            transition: filter 0.3s; max-height: calc(90vh - 70px);
         }
         .content-section.menu-open { filter: blur(3px); pointer-events: none; }
-
         .menu-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.2); z-index: 999; display: none;
-            backdrop-filter: blur(2px);
+            background: rgba(0,0,0,0.2); z-index: 999; display: none; backdrop-filter: blur(2px);
         }
         .menu-overlay.is-visible { display: block; }
 
+        /* --- ESTILOS DE FORMULARIO --- */
         .form-control, .form-select {
-            border-radius: 12px;
-            padding: 10px 15px;
-            background-color: #f8f9fa;
-            border: 1px solid #eee;
-            font-size: 0.9rem;
+            border-radius: 12px; padding: 10px 15px;
+            background-color: #f8f9fa; border: 1px solid #eee; font-size: 0.9rem;
         }
         .form-control:focus, .form-select:focus {
-            background-color: white;
-            border-color: #4CAF50;
+            background-color: white; border-color: #4CAF50;
             box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.1);
         }
-
         .form-label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #6c757d;
-            margin-bottom: 0.4rem;
-            margin-left: 0.2rem;
+            font-size: 0.85rem; font-weight: 600; color: #6c757d;
+            margin-bottom: 0.4rem; margin-left: 0.2rem;
         }
-
         .section-title {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #4CAF50;
-            font-weight: 700;
-            margin-top: 1.5rem;
-            margin-bottom: 1rem;
-            border-bottom: 2px solid #e8f5e9;
-            padding-bottom: 5px;
+            font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;
+            color: #4CAF50; font-weight: 700; margin-top: 1.5rem; margin-bottom: 1rem;
+            border-bottom: 2px solid #e8f5e9; padding-bottom: 5px;
         }
-
         .btn-save {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 12px 25px;
-            font-weight: 600;
-            width: 100%;
-            transition: all 0.3s;
-            margin-top: 1.5rem;
+            background-color: #4CAF50; color: white; border: none; border-radius: 50px;
+            padding: 12px 25px; font-weight: 600; width: 100%; transition: all 0.3s; margin-top: 1.5rem;
         }
         .btn-save:hover {
-            background-color: #388E3C;
-            transform: translateY(-2px);
+            background-color: #388E3C; transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
         }
 
+        /* --- ESTILOS DE LISTADO --- */
         .card-alimento-item {
-            border: 1px solid #f0f0f0;
-            border-radius: 15px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            background: #fff;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
+            border: 1px solid #f0f0f0; border-radius: 15px; padding: 1rem;
+            margin-bottom: 1rem; background: #fff; transition: all 0.2s;
+            display: flex; align-items: center;
         }
         .card-alimento-item:hover {
-            border-color: #4CAF50;
-            background-color: #f1f8e9;
-            transform: scale(1.01);
+            border-color: #4CAF50; background-color: #f1f8e9; transform: scale(1.01);
         }
         .alimento-img {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 12px;
-            margin-right: 15px;
-            background-color: #f1f1f1;
+            width: 60px; height: 60px; object-fit: cover; border-radius: 12px;
+            margin-right: 15px; background-color: #f1f1f1;
+        }
+        .category-title {
+            font-size: 1.1rem; font-weight: 700; color: #2c3e50; margin-top: 2rem;
+            margin-bottom: 1rem; padding-bottom: 5px; border-bottom: 2px solid var(--primary-nb);
+        }
+
+        /* Radio Buttons Estilizados */
+        .btn-check:checked + .btn-outline-success {
+            background-color: var(--primary-nb); color: white; border-color: var(--primary-nb);
+        }
+        .btn-outline-success {
+            color: var(--primary-nb); border-color: var(--primary-nb);
+        }
+        .btn-outline-success:hover {
+            background-color: #f1f8e9; color: var(--primary-dark-nb);
         }
 
         @media (max-width: 992px) {
@@ -214,9 +189,7 @@
         <div class="top-navbar">
             <div class="d-flex align-items-center gap-3">
                 <button class="burger-btn" onclick="toggleSidebar()">
-                    <span class="burger-line"></span>
-                    <span class="burger-line"></span>
-                    <span class="burger-line"></span>
+                    <span class="burger-line"></span><span class="burger-line"></span><span class="burger-line"></span>
                 </button>
                 <a href="dashboard.html" class="logo-area mb-0">
                     <i class="fas fa-leaf logo-icon"></i>
@@ -226,18 +199,15 @@
         </div>
 
         <div class="main-area">
-
             <div class="menu-overlay" onclick="toggleSidebar()"></div>
 
             <aside class="sidebar-menu" id="sidebar">
                 <nav class="d-flex flex-column gap-1 flex-grow-1">
                     <a href="dashboard.html" class="nav-item"><i class="fas fa-th-large"></i> Dashboard</a>
-
                     <div class="nav-title">GESTIÓN</div>
                     <a href="hijos.html" class="nav-item"><i class="fas fa-child"></i> Mis Hijos</a>
                     <a href="crear-lonchera.html" class="nav-item"><i class="fas fa-plus-circle"></i> Crear Lonchera</a>
                     <a href="mis-loncheras.html" class="nav-item"><i class="fas fa-calendar-check"></i> Historial</a>
-
                     <div class="nav-title">CUENTA</div>
                     <a href="direcciones.html" class="nav-item"><i class="fas fa-map-marker-alt"></i> Direcciones</a>
                     <a href="restricciones.html" class="nav-item"><i class="fas fa-shield-alt"></i> Restricciones</a>
@@ -249,7 +219,6 @@
             </aside>
 
             <main class="content-section" id="main-content">
-
                 <div class="mb-4">
                     <h2 class="fw-bold text-dark m-0">Alimentos</h2>
                     <p class="text-muted m-0">Gestiona tu catálogo de alimentos</p>
@@ -257,10 +226,9 @@
 
                 <div class="row g-4">
                     <div class="col-lg-5">
-                        <div class="bg-white p-4 rounded-4 shadow-sm">
+                        <div class="bg-white p-4 rounded-4 shadow-sm h-100">
                             <h5 class="fw-bold mb-4 d-flex align-items-center text-success">
-                                <i class="fas fa-plus-circle me-2"></i>
-                                Nuevo Alimento
+                                <i class="fas fa-plus-circle me-2"></i> Nuevo Alimento
                             </h5>
 
                             <form id="form-crear-alimento" enctype="multipart/form-data">
@@ -280,45 +248,47 @@
                                 <div class="row g-2">
                                     <div class="col-6">
                                         <label class="form-label">Calorías</label>
-                                        <div class="input-group">
-                                            <input type="number" step="0.1" class="form-control" id="alimento-calorias" placeholder="0" required>
-                                            <span class="input-group-text bg-light border-start-0 text-muted" style="font-size: 0.8rem;">kcal</span>
-                                        </div>
+                                        <input type="number" step="0.1" class="form-control" id="alimento-calorias" placeholder="0" required>
                                     </div>
                                     <div class="col-6">
-                                        <label class="form-label">Proteínas</label>
-                                        <div class="input-group">
-                                            <input type="number" step="0.1" class="form-control" id="alimento-proteinas" placeholder="0" required>
-                                            <span class="input-group-text bg-light border-start-0 text-muted" style="font-size: 0.8rem;">g</span>
-                                        </div>
+                                        <label class="form-label">Proteínas (g)</label>
+                                        <input type="number" step="0.1" class="form-control" id="alimento-proteinas" placeholder="0" required>
                                     </div>
                                     <div class="col-6">
-                                        <label class="form-label">Carbos</label>
-                                        <div class="input-group">
-                                            <input type="number" step="0.1" class="form-control" id="alimento-carbohidratos" placeholder="0" required>
-                                            <span class="input-group-text bg-light border-start-0 text-muted" style="font-size: 0.8rem;">g</span>
-                                        </div>
+                                        <label class="form-label">Carbos (g)</label>
+                                        <input type="number" step="0.1" class="form-control" id="alimento-carbohidratos" placeholder="0" required>
                                     </div>
                                     <div class="col-6">
-                                        <label class="form-label">Grasas</label>
-                                        <div class="input-group">
-                                            <input type="number" step="0.1" class="form-control" id="alimento-grasas" placeholder="0" required>
-                                            <span class="input-group-text bg-light border-start-0 text-muted" style="font-size: 0.8rem;">g</span>
-                                        </div>
+                                        <label class="form-label">Grasas (g)</label>
+                                        <input type="number" step="0.1" class="form-control" id="alimento-grasas" placeholder="0" required>
                                     </div>
                                 </div>
-
-                                <input type="hidden" id="alimento-precio" value="0">
-                                <input type="hidden" id="alimento-stock" value="0">
 
                                 <div class="mt-3">
-                                    <label class="form-label">Imagen (Opcional)</label>
-                                    <input class="form-control" type="file" id="alimento-imagen" accept="image/*">
+                                    <label class="form-label">Precio Unitario</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0 text-muted">$</span>
+                                        <input type="number" step="0.01" class="form-control" id="alimento-precio" placeholder="0.00" required>
+                                    </div>
                                 </div>
 
-                                <button type="submit" class="btn btn-save shadow-sm">
-                                    Guardar Alimento
-                                </button>
+                                <div class="mt-3">
+                                    <label class="form-label">Imagen</label>
+                                    <div class="btn-group w-100 mb-2" role="group">
+                                        <input type="radio" class="btn-check" name="tipoImagen" id="option-file" value="file" checked onchange="toggleImageInput('file')">
+                                        <label class="btn btn-outline-success" for="option-file">Subir Archivo</label>
+                                        <input type="radio" class="btn-check" name="tipoImagen" id="option-url" value="url" onchange="toggleImageInput('url')">
+                                        <label class="btn btn-outline-success" for="option-url">Pegar URL</label>
+                                    </div>
+                                    <div id="input-file-container">
+                                        <input class="form-control" type="file" id="alimento-imagen-file" accept="image/*">
+                                    </div>
+                                    <div id="input-url-container" style="display: none;">
+                                        <input class="form-control" type="url" id="alimento-imagen-url" placeholder="https://ejemplo.com/imagen.jpg">
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-save shadow-sm">Guardar Alimento</button>
                             </form>
                         </div>
                     </div>
@@ -326,8 +296,7 @@
                     <div class="col-lg-7">
                         <div class="bg-white p-4 rounded-4 shadow-sm" style="min-height: 500px;">
                             <h5 class="fw-bold mb-4 d-flex align-items-center text-success">
-                                <i class="fas fa-list-ul me-2"></i>
-                                Catálogo
+                                <i class="fas fa-list-ul me-2"></i> Catálogo
                             </h5>
                             <div id="lista-alimentos">
                                 <div class="text-center py-5 text-muted">
@@ -338,7 +307,6 @@
                         </div>
                     </div>
                 </div>
-
             </main>
         </div>
     </div>
@@ -350,18 +318,26 @@
                     <h5 class="modal-title fw-bold text-success">Editar Alimento</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-
-                <form id="form-editar-alimento" enctype="multipart/form-data">
+                <form id="form-editar-alimento">
                     <div class="modal-body p-4">
                         <input type="hidden" id="edit-alimento-id">
-
                         <div class="row">
-                            <div class="col-md-4 text-center mb-3 mb-md-0">
+                            <div class="col-md-4 text-center mb-3">
                                 <label class="form-label d-block mb-2">Imagen Actual</label>
-                                <img id="edit-alimento-imagen-preview" src="" alt="Preview"
-                                     style="width: 150px; height: 150px; object-fit: cover; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);"
-                                     class="mb-3">
-                                <input class="form-control form-control-sm" type="file" id="edit-alimento-imagen-file" accept="image/*">
+                                <img id="edit-alimento-imagen-preview" src="" style="width: 150px; height: 150px; object-fit: cover; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);" class="mb-3">
+
+                                <div class="btn-group w-100 mb-2 btn-group-sm" role="group">
+                                    <input type="radio" class="btn-check" name="editTipoImagen" id="edit-option-file" value="file" checked onchange="toggleEditImageInput('file')">
+                                    <label class="btn btn-outline-secondary" for="edit-option-file">Archivo</label>
+                                    <input type="radio" class="btn-check" name="editTipoImagen" id="edit-option-url" value="url" onchange="toggleEditImageInput('url')">
+                                    <label class="btn btn-outline-secondary" for="edit-option-url">URL</label>
+                                </div>
+                                <div id="edit-input-file-container">
+                                    <input class="form-control form-control-sm" type="file" id="edit-alimento-imagen-file" accept="image/*">
+                                </div>
+                                <div id="edit-input-url-container" style="display: none;">
+                                    <input class="form-control form-control-sm" type="url" id="edit-alimento-imagen-url" placeholder="URL">
+                                </div>
                             </div>
 
                             <div class="col-md-8">
@@ -375,7 +351,6 @@
                                         <select class="form-select" id="edit-alimento-categoria" required></select>
                                     </div>
                                 </div>
-
                                 <div class="section-title mt-0">Nutrición</div>
                                 <div class="row g-2">
                                     <div class="col-3">
@@ -395,13 +370,16 @@
                                         <input type="number" class="form-control" id="edit-alimento-grasas" required>
                                     </div>
                                 </div>
-
-                                <input type="hidden" id="edit-alimento-precio" value="0">
-                                <input type="hidden" id="edit-alimento-stock" value="0">
+                                <div class="mt-3">
+                                    <label class="form-label">Precio Unitario</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0 text-muted">$</span>
+                                        <input type="number" step="0.01" class="form-control" id="edit-alimento-precio" required>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-
                     <div class="modal-footer border-top-0 pt-0 pb-4 pe-4">
                         <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn btn-success rounded-pill px-4">Guardar Cambios</button>
@@ -415,14 +393,12 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/static/js/auth-guard.js"></script>
     <script src="/static/js/alimentos.js"></script>
-
     <script>
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('is-open');
             document.querySelector('.burger-btn').classList.toggle('is-active');
             document.querySelector('.menu-overlay').classList.toggle('is-visible');
         }
-
         document.getElementById('logout-button').addEventListener('click', () => {
             localStorage.removeItem("access_token");
             window.location.href = "login.html";

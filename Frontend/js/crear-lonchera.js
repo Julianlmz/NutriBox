@@ -1,4 +1,3 @@
-// crear-lonchera.js
 const API_URL = 'http://127.0.0.1:8000';
 
 let hijoSeleccionado = null;
@@ -8,10 +7,11 @@ let alimentosEnLonchera = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     cargarHijos();
+    cargarDirecciones();
     cargarAlimentos();
 });
 
-// Cargar hijos
+// --- CARGAR HIJOS ---
 async function cargarHijos() {
     try {
         const token = localStorage.getItem('access_token');
@@ -47,7 +47,53 @@ async function cargarHijos() {
     }
 }
 
-// Cargar restricciones del hijo
+// --- NUEVO: CARGAR DIRECCIONES ---
+async function cargarDirecciones() {
+    try {
+        const token = localStorage.getItem('access_token');
+        const response = await fetch(`${API_URL}/direcciones/`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const select = document.getElementById('select-direccion');
+
+        if (response.ok) {
+            const direcciones = await response.json();
+
+            // Validación: Si no tiene direcciones, bloquear o avisar
+            if (direcciones.length === 0) {
+                select.innerHTML = '<option value="">Sin direcciones registradas</option>';
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Faltan datos',
+                    text: 'Debes registrar al menos una dirección antes de crear una lonchera.',
+                    confirmButtonText: 'Ir a Direcciones',
+                    showCancelButton: true
+                }).then((result) => {
+                    if (result.isConfirmed) window.location.href = 'direcciones.html';
+                });
+                return;
+            }
+
+            select.innerHTML = '<option value="">Selecciona una dirección</option>';
+            direcciones.forEach(dir => {
+                const option = document.createElement('option');
+                option.value = dir.id;
+                // Mostrar si es principal para ayudar a elegir
+                const principalTexto = dir.principal ? ' (Principal)' : '';
+                option.textContent = `${dir.nombre || 'Casa'} - ${dir.direccion}${principalTexto}`;
+                select.appendChild(option);
+            });
+
+        } else {
+            select.innerHTML = '<option value="">Error al cargar</option>';
+        }
+    } catch (error) {
+        console.error('Error direcciones:', error);
+    }
+}
+
+// --- CARGAR RESTRICCIONES ---
 async function cargarRestriccionesHijo(hijoId) {
     try {
         const token = localStorage.getItem('access_token');
@@ -67,7 +113,7 @@ async function cargarRestriccionesHijo(hijoId) {
     }
 }
 
-// Cargar todos los alimentos
+// --- CARGAR ALIMENTOS ---
 async function cargarAlimentos() {
     try {
         const token = localStorage.getItem('access_token');
@@ -90,15 +136,12 @@ async function cargarAlimentos() {
     }
 }
 
-// Verificar si un alimento tiene restricciones para el hijo
 function tieneRestriccion(alimento) {
-    // Aquí deberías verificar si el alimento está asociado a alguna restricción del hijo
-    // Por ahora retornamos false, pero deberías implementar el endpoint para obtener
-    // los alimentos asociados a cada restricción
+    // Lógica básica: si implementas validación real en backend, esto es visual
     return false;
 }
 
-// Renderizar lista de alimentos
+// --- RENDERIZAR ALIMENTOS ---
 function renderizarAlimentos() {
     const container = document.getElementById('lista-alimentos');
 
@@ -142,12 +185,11 @@ function renderizarAlimentos() {
     }).join('');
 }
 
-// Agregar alimento a la lonchera
+// --- AGREGAR ALIMENTO A ARRAY LOCAL ---
 function agregarAlimento(alimentoId) {
     const alimento = alimentosDisponibles.find(a => a.id === alimentoId);
     if (!alimento) return;
 
-    // Agregar directamente 1 unidad (100g por defecto)
     const cantidad = 100; // gramos por defecto
     const factor = cantidad / 100;
     const calorias = Math.round(alimento.calorias_por_100g * factor);
@@ -166,16 +208,16 @@ function agregarAlimento(alimentoId) {
     renderizarAlimentosLonchera();
     renderizarAlimentos();
 
-    Swal.fire({
-        icon: 'success',
-        title: '¡Agregado!',
-        text: `${alimento.nombre} agregado a la lonchera`,
-        timer: 1000,
-        showConfirmButton: false
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true
     });
+    Toast.fire({ icon: 'success', title: 'Agregado' });
 }
 
-// Eliminar alimento de la lonchera
 function eliminarAlimento(alimentoId) {
     alimentosEnLonchera = alimentosEnLonchera.filter(a => a.id !== alimentoId);
     actualizarResumen();
@@ -183,7 +225,6 @@ function eliminarAlimento(alimentoId) {
     renderizarAlimentos();
 }
 
-// Renderizar alimentos en la lonchera
 function renderizarAlimentosLonchera() {
     const container = document.getElementById('alimentos-lonchera');
 
@@ -212,7 +253,6 @@ function renderizarAlimentosLonchera() {
     `).join('');
 }
 
-// Actualizar resumen
 function actualizarResumen() {
     const totalAlimentos = alimentosEnLonchera.length;
     const totalCalorias = alimentosEnLonchera.reduce((sum, a) => sum + a.calorias, 0);
@@ -223,21 +263,31 @@ function actualizarResumen() {
     document.getElementById('total-precio').textContent = totalPrecio.toFixed(2);
 }
 
-// Crear lonchera
+// --- CREAR LONCHERA (FINAL) ---
 async function crearLonchera() {
     try {
-        // Validaciones
+        // 1. Validar Hijo
         if (!hijoSeleccionado) {
             Swal.fire('Error', 'Debes seleccionar un hijo', 'error');
             return;
         }
 
+        // 2. Validar Dirección (NUEVO)
+        const selectDireccion = document.getElementById('select-direccion');
+        const direccionId = selectDireccion.value;
+        if (!direccionId) {
+            Swal.fire('Error', 'Debes seleccionar una dirección de entrega', 'warning');
+            return;
+        }
+
+        // 3. Validar Nombre
         const nombreLonchera = document.getElementById('nombre-lonchera').value.trim();
         if (!nombreLonchera) {
             Swal.fire('Error', 'Debes ingresar un nombre para la lonchera', 'error');
             return;
         }
 
+        // 4. Validar Alimentos
         if (alimentosEnLonchera.length === 0) {
             Swal.fire('Error', 'Debes agregar al menos un alimento', 'error');
             return;
@@ -251,33 +301,28 @@ async function crearLonchera() {
 
         const token = localStorage.getItem('access_token');
 
-        // Obtener el usuario autenticado (padre)
+        // Obtener usuario actual para el ID
         const userResponse = await fetch(`${API_URL}/usuario/me`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
 
-        if (!userResponse.ok) {
-            throw new Error('No se pudo obtener usuario autenticado');
-        }
-
+        if (!userResponse.ok) throw new Error('Error de sesión');
         const currentUser = await userResponse.json();
-        console.log('Usuario autenticado:', currentUser);
 
-        // Calcular totales
         const totalCalorias = alimentosEnLonchera.reduce((sum, a) => sum + a.calorias, 0);
         const totalPrecio = alimentosEnLonchera.reduce((sum, a) => sum + a.precio, 0);
 
-        // 1. Crear lonchera con el ID del PADRE autenticado
+        // PREPARAR DATOS (INCLUYENDO DIRECCIÓN)
         const dataLonchera = {
             nombre: nombreLonchera,
             descripcion: `Lonchera para ${document.getElementById('select-hijo').selectedOptions[0].text}`,
             calorias: totalCalorias,
             precio: parseFloat(totalPrecio.toFixed(2)),
-            usuario_id: currentUser.id  // ID del PADRE, no del hijo
+            usuario_id: currentUser.id,
+            direccion_id: parseInt(direccionId) // <--- CAMPO NUEVO ENVIADO
         };
 
-        console.log('Datos de lonchera a crear:', dataLonchera);
-
+        // ENVIAR AL BACKEND
         const responseLonchera = await fetch(`${API_URL}/lonchera/`, {
             method: 'POST',
             headers: {
@@ -287,41 +332,33 @@ async function crearLonchera() {
             body: JSON.stringify(dataLonchera)
         });
 
-        console.log('Response status:', responseLonchera.status);
-        console.log('Response ok:', responseLonchera.ok);
-
         if (!responseLonchera.ok) {
             const errorData = await responseLonchera.json();
-            console.error('Error al crear:', errorData);
             throw new Error(errorData.detail || 'Error al crear lonchera');
         }
 
         const loncheraCreada = await responseLonchera.json();
-        console.log('Lonchera creada:', loncheraCreada);
 
-        // 2. Agregar alimentos a la lonchera
+        // AGREGAR ALIMENTOS INDIVIDUALMENTE
         for (const alimento of alimentosEnLonchera) {
-            const dataAlimento = {
-                alimento_id: alimento.id,
-                cantidad_gramos: alimento.cantidad
-            };
-
             await fetch(`${API_URL}/lonchera/${loncheraCreada.id}/alimento`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(dataAlimento)
+                body: JSON.stringify({
+                    alimento_id: alimento.id,
+                    cantidad_gramos: alimento.cantidad
+                })
             });
         }
 
         Swal.close();
-
         Swal.fire({
             icon: 'success',
             title: '¡Lonchera creada!',
-            text: 'La lonchera se ha creado exitosamente',
+            text: 'Tu pedido ha sido registrado con éxito.',
             confirmButtonColor: '#4CAF50'
         }).then(() => {
             window.location.href = 'loncheras.html';
@@ -330,6 +367,6 @@ async function crearLonchera() {
     } catch (error) {
         Swal.close();
         console.error('Error:', error);
-        Swal.fire('Error', 'No se pudo crear la lonchera', 'error');
+        Swal.fire('Error', error.message || 'No se pudo crear la lonchera', 'error');
     }
 }

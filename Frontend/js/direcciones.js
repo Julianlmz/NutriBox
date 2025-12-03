@@ -4,6 +4,15 @@
 
 const API_BASE_URL = "http://127.0.0.1:8000";
 
+// Función para obtener headers con token
+function getAuthHeaders() {
+    const token = localStorage.getItem('access_token');
+    return {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+    };
+}
+
 // Variable global para almacenar direcciones
 window.direcciones = [];
 
@@ -14,7 +23,7 @@ async function loadDirecciones() {
     try {
         const response = await fetch(`${API_BASE_URL}/direcciones/`, {
             method: 'GET',
-            headers: AUTH_HEADERS
+            headers: getAuthHeaders()
         });
 
         if (!response.ok) {
@@ -117,10 +126,7 @@ async function guardarDireccion(event) {
 
         const response = await fetch(url, {
             method: method,
-            headers: {
-                ...AUTH_HEADERS,
-                'Content-Type': 'application/json'
-            },
+            headers: getAuthHeaders(),
             body: JSON.stringify(data)
         });
 
@@ -136,7 +142,6 @@ async function guardarDireccion(event) {
 
         // Limpiar formulario
         document.getElementById('form-direccion').reset();
-        // Restaurar Bogotá como valor predeterminado
         document.getElementById('direccion-ciudad').value = "Bogotá";
 
         // Mostrar éxito
@@ -180,7 +185,7 @@ async function deleteDireccion(direccionId) {
     try {
         const response = await fetch(`${API_BASE_URL}/direcciones/${direccionId}`, {
             method: 'DELETE',
-            headers: AUTH_HEADERS
+            headers: getAuthHeaders()
         });
 
         if (response.status === 204 || response.ok) {
@@ -235,7 +240,7 @@ async function setPrincipal(direccionId) {
     try {
         const response = await fetch(`${API_BASE_URL}/direcciones/${direccionId}/principal`, {
             method: 'PUT',
-            headers: AUTH_HEADERS
+            headers: getAuthHeaders()
         });
 
         if (!response.ok) {
@@ -269,7 +274,7 @@ function showAddDireccionModal() {
     if (form) form.reset();
 
     document.getElementById('direccion-id').value = '';
-    document.getElementById('direccion-ciudad').value = 'Bogotá'; // Restaurar Bogotá
+    document.getElementById('direccion-ciudad').value = 'Bogotá';
     document.getElementById('modalTitle').innerText = 'Nueva Dirección';
 
     const modalElement = document.getElementById('modalDireccion');
