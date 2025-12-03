@@ -374,6 +374,21 @@ class RestriccionAlimento(SQLModel, table=True):
 
 
 # ====================================================================
+# TABLA INTERMEDIA: RESTRICCIÓN - HIJO
+# ====================================================================
+
+class RestriccionHijo(SQLModel, table=True):
+    """
+    Tabla intermedia Many-to-Many entre Restricción y Usuario (Hijo).
+    Representa qué restricciones alimentarias tiene cada hijo.
+    """
+    __tablename__ = "restriccion_hijo"
+
+    hijo_id: int = Field(foreign_key="usuario.id", primary_key=True)
+    restriccion_id: int = Field(foreign_key="restriccion.id", primary_key=True)
+    fecha_asociacion: datetime = Field(default_factory=datetime.now)
+
+# ====================================================================
 # LONCHERA
 # ====================================================================
 
@@ -706,6 +721,7 @@ Perfil.model_rebuild()
 Alimento.model_rebuild()
 Restriccion.model_rebuild()
 RestriccionAlimento.model_rebuild()
+RestriccionHijo.model_rebuild()
 LoncheraAlimento.model_rebuild()
 Producto.model_rebuild()
 Pedido.model_rebuild()

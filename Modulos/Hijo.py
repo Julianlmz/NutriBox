@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from Core.database import SessionDep
 from Core.seguridad import hashear_password
 from Core.supabase_client import upload_to_bucket
-from Modulos.models import Usuario, Perfil
+from Modulos.models import Usuario, Perfil, Restriccion, RestriccionHijo
 
 router = APIRouter(tags=["Hijos"], prefix="/hijo")
 
@@ -205,3 +205,95 @@ async def eliminar_hijo(hijo_id: int, session: SessionDep):
     session.add(hijo)
     await session.commit()
     return
+
+
+# ===== ENDPOINTS PARA RESTRICCIONES =====
+
+@router.post("/{hijo_id}/restriccion/{restriccion_id}", status_code=201)
+async def asociar_restriccion(
+        hijo_id: int,
+        restriccion_id: int,
+        session: SessionDep
+):
+    """Asociar una restricción a un hijo"""
+    # Verificar que el hijo existe
+    hijo = await session.get(Usuario, hijo_id)
+    if not hijo:
+        raise HTTPException(status_code=404, detail="Hijo no encontrado")
+
+    # Verificar que la restricción existe
+    restriccion = await session.get(Restriccion, restriccion_id)
+    if not restriccion:
+        raise HTTPException(status_code=404, detail="Restricción no encontrada")
+
+    # Verificar si ya existe la asociación
+    query = select(RestriccionHijo).where(
+        RestriccionHijo.hijo_id == hijo_id,
+        RestriccionHijo.restriccion_id == restriccion_id
+    )
+    result = await session.execute(query)
+    existe = result.scalars().first()
+
+    if existe:
+        raise HTTPException(status_code=409, detail="La restricción ya está asociada a este hijo")
+
+    # Crear la asociación
+    asociacion = RestriccionHijo(hijo_id=hijo_id, restriccion_id=restriccion_id)
+    session.add(asociacion)
+    await session.commit()
+
+    return {"message": "Restricción asociada correctamente"}
+
+
+@router.delete("/{hijo_id}/restriccion/{restriccion_id}", status_code=204)
+async def desasociar_restriccion(
+        hijo_id: int,
+        restriccion_id: int,
+        session: SessionDep
+):
+    """Desasociar una restricción de un hijo"""
+    # Buscar la asociación
+    query = select(RestriccionHijo).where(
+        RestriccionHijo.hijo_id == hijo_id,
+        RestriccionHijo.restriccion_id == restriccion_id
+    )
+    result = await session.execute(query)
+    asociacion = result.scalars().first()
+
+    if not asociacion:
+        raise HTTPException(status_code=404, detail="Restricción no asociada a este hijo")
+
+    await session.delete(asociacion)
+    await session.commit()
+    return
+
+
+@router.get("/{hijo_id}/restricciones", response_model=List[dict])
+async def listar_restricciones_hijo(
+        hijo_id: int,
+        session: SessionDep
+):
+    """Listar todas las restricciones de un hijo"""
+    # Verificar que el hijo existe
+    hijo = await session.get(Usuario, hijo_id)
+    if not hijo:
+        raise HTTPException(status_code=404, detail="Hijo no encontrado")
+
+    # Obtener restricciones
+    query = (
+        select(Restriccion)
+        .join(RestriccionHijo, Restriccion.id == RestriccionHijo.restriccion_id)
+        .where(RestriccionHijo.hijo_id == hijo_id)
+    )
+    result = await session.execute(query)
+    restricciones = result.scalars().all()
+
+    return [
+        {
+            "id": r.id,
+            "nombre": r.nombre,
+            "descripcion": r.descripcion,
+            "nivel_severidad": r.nivel_severidad
+        }
+        for r in restricciones
+    ]

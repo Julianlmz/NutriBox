@@ -1,7 +1,9 @@
 from fastapi import APIRouter, HTTPException, Query
 from Core.database import SessionDep
-from Modulos.models import (Restriccion, RestriccionCreate, RestriccionUpdate, RestriccionAlimento, Alimento, NivelSeveridad)
+from Modulos.models import (Restriccion, RestriccionCreate, RestriccionUpdate, RestriccionAlimento, Alimento,
+                            NivelSeveridad)
 from typing import List
+from sqlmodel import select
 
 router = APIRouter(tags=["Restricciones y Modulos"], prefix="/restriccion")
 
@@ -12,7 +14,7 @@ async def crear_restriccion(data: RestriccionCreate, session: SessionDep):
     Crea una nueva restricción alimentaria o alergia.
 
     Args:
-        data: Servicios de la restricción (nombre, descripción, nivel_severidad)
+        data: Datos de la restricción (nombre, descripción, nivel_severidad)
         session: Sesión de base de datos
 
     Returns:
@@ -22,10 +24,10 @@ async def crear_restriccion(data: RestriccionCreate, session: SessionDep):
         HTTPException 409: Si ya existe una restricción con el mismo nombre
         HTTPException 400: Si los datos son inválidos
     """
-    # Verificar si ya existe restricción con ese nombre
-    restriccion_existente = session.query(Restriccion).filter(
-        Restriccion.nombre == data.nombre
-    ).first()
+    # Verificar si ya existe restricción con ese nombre (ASYNC)
+    query = select(Restriccion).where(Restriccion.nombre == data.nombre)
+    result = await session.execute(query)
+    restriccion_existente = result.scalars().first()
 
     if restriccion_existente:
         raise HTTPException(
@@ -35,8 +37,8 @@ async def crear_restriccion(data: RestriccionCreate, session: SessionDep):
 
     restriccion = Restriccion(**data.model_dump())
     session.add(restriccion)
-    session.commit()
-    session.refresh(restriccion)
+    await session.commit()
+    await session.refresh(restriccion)
     return restriccion
 
 
@@ -59,12 +61,13 @@ async def listar_restricciones(
         - GET /restriccion/ - Todas las restricciones
         - GET /restriccion/?nivel_severidad=Alto - Solo restricciones de alta severidad
     """
-    query = session.query(Restriccion)
+    query = select(Restriccion)
 
     if nivel_severidad:
-        query = query.filter(Restriccion.nivel_severidad == nivel_severidad)
+        query = query.where(Restriccion.nivel_severidad == nivel_severidad)
 
-    restricciones = query.all()
+    result = await session.execute(query)
+    restricciones = result.scalars().all()
     return restricciones
 
 
@@ -78,12 +81,12 @@ async def obtener_restriccion(restriccion_id: int, session: SessionDep):
         session: Sesión de base de datos
 
     Returns:
-        Restriccion: Servicios de la restricción
+        Restriccion: Datos de la restricción
 
     Raises:
         HTTPException 404: Si la restricción no existe
     """
-    restriccion = session.get(Restriccion, restriccion_id)
+    restriccion = await session.get(Restriccion, restriccion_id)
     if not restriccion:
         raise HTTPException(status_code=404, detail="Restricción no encontrada")
     return restriccion
@@ -110,7 +113,7 @@ async def actualizar_restriccion(
         HTTPException 404: Si la restricción no existe
         HTTPException 400: Si no se proporcionan datos
     """
-    restriccion = session.get(Restriccion, restriccion_id)
+    restriccion = await session.get(Restriccion, restriccion_id)
     if not restriccion:
         raise HTTPException(status_code=404, detail="Restricción no encontrada")
 
@@ -124,9 +127,9 @@ async def actualizar_restriccion(
 
     # Verificar nombre duplicado si se está actualizando
     if "nombre" in update_data and restriccion.nombre != update_data["nombre"]:
-        restriccion_existente = session.query(Restriccion).filter(
-            Restriccion.nombre == update_data["nombre"]
-        ).first()
+        query = select(Restriccion).where(Restriccion.nombre == update_data["nombre"])
+        result = await session.execute(query)
+        restriccion_existente = result.scalars().first()
         if restriccion_existente:
             raise HTTPException(
                 status_code=409,
@@ -137,8 +140,9 @@ async def actualizar_restriccion(
     for key, value in update_data.items():
         setattr(restriccion, key, value)
 
-    session.commit()
-    session.refresh(restriccion)
+    session.add(restriccion)
+    await session.commit()
+    await session.refresh(restriccion)
     return restriccion
 
 
@@ -159,12 +163,12 @@ async def eliminar_restriccion(restriccion_id: int, session: SessionDep):
     Raises:
         HTTPException 404: Si la restricción no existe
     """
-    restriccion = session.get(Restriccion, restriccion_id)
+    restriccion = await session.get(Restriccion, restriccion_id)
     if not restriccion:
         raise HTTPException(status_code=404, detail="Restricción no encontrada")
 
-    session.delete(restriccion)
-    session.commit()
+    await session.delete(restriccion)
+    await session.commit()
     return
 
 
@@ -189,8 +193,8 @@ async def asociar_alimento(
         HTTPException 404: Si la restricción o alimento no existen
         HTTPException 409: Si la asociación ya existe
     """
-    restriccion = session.get(Restriccion, restriccion_id)
-    alimento = session.get(Alimento, alimento_id)
+    restriccion = await session.get(Restriccion, restriccion_id)
+    alimento = await session.get(Alimento, alimento_id)
 
     if not restriccion:
         raise HTTPException(status_code=404, detail="Restricción no encontrada")
@@ -198,10 +202,12 @@ async def asociar_alimento(
         raise HTTPException(status_code=404, detail="Alimento no encontrado")
 
     # Verificar si ya existe la asociación
-    asociacion_existente = session.query(RestriccionAlimento).filter(
+    query = select(RestriccionAlimento).where(
         RestriccionAlimento.restriccion_id == restriccion_id,
         RestriccionAlimento.alimento_id == alimento_id
-    ).first()
+    )
+    result = await session.execute(query)
+    asociacion_existente = result.scalars().first()
 
     if asociacion_existente:
         raise HTTPException(
@@ -215,7 +221,7 @@ async def asociar_alimento(
         alimento_id=alimento_id
     )
     session.add(asociacion)
-    session.commit()
+    await session.commit()
 
     return {
         "message": "Alimento asociado exitosamente",
@@ -244,10 +250,12 @@ async def desasociar_alimento(
     Raises:
         HTTPException 404: Si la asociación no existe
     """
-    asociacion = session.query(RestriccionAlimento).filter(
+    query = select(RestriccionAlimento).where(
         RestriccionAlimento.restriccion_id == restriccion_id,
         RestriccionAlimento.alimento_id == alimento_id
-    ).first()
+    )
+    result = await session.execute(query)
+    asociacion = result.scalars().first()
 
     if not asociacion:
         raise HTTPException(
@@ -255,8 +263,8 @@ async def desasociar_alimento(
             detail="La asociación no existe"
         )
 
-    session.delete(asociacion)
-    session.commit()
+    await session.delete(asociacion)
+    await session.commit()
     return
 
 
@@ -275,7 +283,7 @@ async def listar_alimentos_restriccion(restriccion_id: int, session: SessionDep)
     Raises:
         HTTPException 404: Si la restricción no existe
     """
-    restriccion = session.get(Restriccion, restriccion_id)
+    restriccion = await session.get(Restriccion, restriccion_id)
     if not restriccion:
         raise HTTPException(status_code=404, detail="Restricción no encontrada")
 
@@ -320,26 +328,31 @@ async def buscar_alimentos_compatibles(
     """
     if not restriccion_ids:
         # Si no hay restricciones, devolver todos los alimentos activos
-        return session.query(Alimento).filter(Alimento.is_active == True).all()
+        query = select(Alimento).where(Alimento.is_active == True)
+        result = await session.execute(query)
+        return result.scalars().all()
 
     # Obtener IDs de alimentos con las restricciones especificadas
     alimentos_restringidos_ids = set()
     for restriccion_id in restriccion_ids:
-        asociaciones = session.query(RestriccionAlimento).filter(
+        query = select(RestriccionAlimento).where(
             RestriccionAlimento.restriccion_id == restriccion_id
-        ).all()
+        )
+        result = await session.execute(query)
+        asociaciones = result.scalars().all()
         alimentos_restringidos_ids.update(a.alimento_id for a in asociaciones)
 
     # Obtener alimentos que NO están en la lista de restringidos
     if alimentos_restringidos_ids:
-        alimentos_compatibles = session.query(Alimento).filter(
+        query = select(Alimento).where(
             Alimento.is_active == True,
             ~Alimento.id.in_(alimentos_restringidos_ids)
-        ).all()
+        )
     else:
-        alimentos_compatibles = session.query(Alimento).filter(
-            Alimento.is_active == True
-        ).all()
+        query = select(Alimento).where(Alimento.is_active == True)
+
+    result = await session.execute(query)
+    alimentos_compatibles = result.scalars().all()
 
     return alimentos_compatibles
 
@@ -356,18 +369,25 @@ async def obtener_estadisticas(session: SessionDep):
         dict: Estadísticas de restricciones por severidad y alimentos afectados
     """
     # Total de restricciones
-    total_restricciones = session.query(Restriccion).count()
+    query_total = select(Restriccion)
+    result_total = await session.execute(query_total)
+    total_restricciones = len(result_total.scalars().all())
 
     # Por nivel de severidad
     por_severidad = {}
     for nivel in NivelSeveridad:
-        count = session.query(Restriccion).filter(
+        query = select(Restriccion).where(
             Restriccion.nivel_severidad == nivel
-        ).count()
+        )
+        result = await session.execute(query)
+        count = len(result.scalars().all())
         por_severidad[nivel.value] = count
 
     # Alimentos más restringidos
-    alimentos_restricciones = session.query(RestriccionAlimento).all()
+    query_asoc = select(RestriccionAlimento)
+    result_asoc = await session.execute(query_asoc)
+    alimentos_restricciones = result_asoc.scalars().all()
+
     alimento_count = {}
     for ar in alimentos_restricciones:
         alimento_id = ar.alimento_id
@@ -378,7 +398,7 @@ async def obtener_estadisticas(session: SessionDep):
     # Top 5 alimentos más restringidos
     top_restringidos = []
     for alimento_id in sorted(alimento_count, key=alimento_count.get, reverse=True)[:5]:
-        alimento = session.get(Alimento, alimento_id)
+        alimento = await session.get(Alimento, alimento_id)
         if alimento:
             top_restringidos.append({
                 "id": alimento.id,

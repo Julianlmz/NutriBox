@@ -4,272 +4,220 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - NutriBox</title>
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet" href="/static/css/style.css">
-
     <style>
-        /* --- VARIABLES --- */
-        :root {
-            --glass-bg: rgba(255, 255, 255, 0.85);
-            --primary-nb: #4CAF50; /* VERDE */
-            --primary-dark-nb: #388E3C;
-            --text-sidebar: #6c757d;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f0f2f5;
-            overflow-x: hidden;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        /* FONDO BLOBS */
-        .bg-blobs {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; pointer-events: none;
-        }
-        .blob-green {
-            position: absolute; top: -10%; left: -10%; width: 60%; height: 70%;
-            background: radial-gradient(circle, rgba(76,175,80,0.15) 0%, rgba(255,255,255,0) 70%);
-            border-radius: 50%; filter: blur(80px);
-        }
-        .blob-blue {
-            position: absolute; bottom: -10%; right: -10%; width: 60%; height: 70%;
-            background: radial-gradient(circle, rgba(33,150,243,0.10) 0%, rgba(255,255,255,0) 70%);
-            border-radius: 50%; filter: blur(80px);
-        }
-
-        /* CONTENEDOR PRINCIPAL */
-        .dashboard-container {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            border-radius: 30px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.05);
-            width: 100%; max-width: 1400px; min-height: 90vh;
-            overflow: hidden;
-            display: flex;
-            position: relative;
-            flex-direction: column;
-        }
-
-        /* --- NAVBAR SUPERIOR --- */
-        .top-navbar {
-            padding: 15px 30px;
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            background: rgba(255,255,255,0.6);
-            z-index: 1001;
-            min-height: 70px;
-        }
-
-        .logo-area {
-            display: flex; align-items: center; gap: 10px; text-decoration: none;
-        }
+        :root { --primary-nb: #4CAF50; --primary-dark-nb: #388E3C; }
+        body { font-family: 'Poppins', sans-serif; background-color: #f0f2f5; overflow-x: hidden; min-height: 100vh; padding: 20px; }
+        .bg-blobs { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+        .blob-green { position: absolute; top: -10%; left: -10%; width: 60%; height: 70%; background: radial-gradient(circle, rgba(76,175,80,0.15) 0%, rgba(255,255,255,0) 70%); border-radius: 50%; filter: blur(80px); }
+        .blob-blue { position: absolute; bottom: -10%; right: -10%; width: 60%; height: 70%; background: radial-gradient(circle, rgba(33,150,243,0.10) 0%, rgba(255,255,255,0) 70%); border-radius: 50%; filter: blur(80px); }
+        .dashboard-container { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); width: 100%; max-width: 1400px; min-height: 90vh; overflow: hidden; display: flex; position: relative; flex-direction: column; margin: 0 auto; }
+        .top-navbar { padding: 15px 30px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); background: rgba(255,255,255,0.6); z-index: 1001; min-height: 70px; }
+        .logo-area { display: flex; align-items: center; gap: 10px; text-decoration: none; }
         .logo-icon { font-size: 1.8rem; color: var(--primary-nb); }
         .logo-text { font-size: 1.3rem; font-weight: 700; color: #333; letter-spacing: -0.5px; }
-
-        /* BOTÓN HAMBURGUESA */
-        .burger-btn {
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            width: 45px; height: 45px; background: white; border: 1px solid #eee; border-radius: 12px;
-            cursor: pointer; z-index: 1200; box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: all 0.3s;
-        }
+        .burger-btn { display: flex; flex-direction: column; justify-content: center; align-items: center; width: 45px; height: 45px; background: white; border: 1px solid #eee; border-radius: 12px; cursor: pointer; z-index: 1200; box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: all 0.3s; }
         .burger-btn:hover { background: #f9f9f9; }
-
-        .burger-line {
-            width: 24px; height: 3px; background-color: #333; border-radius: 2px; margin: 2px 0; transition: all 0.3s;
-        }
+        .burger-line { width: 24px; height: 3px; background-color: #333; border-radius: 2px; margin: 2px 0; transition: all 0.3s; }
         .burger-btn.is-active .burger-line:nth-child(1) { transform: translateY(7px) rotate(45deg); }
         .burger-btn.is-active .burger-line:nth-child(2) { opacity: 0; }
         .burger-btn.is-active .burger-line:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-
-        /* --- SIDEBAR (DESPLEGABLE) --- */
-        .sidebar-menu {
-            position: absolute; /* Flotante sobre el contenido */
-            top: 0; left: 0; height: 100%; width: 280px;
-            background: white;
-            box-shadow: 10px 0 30px rgba(0,0,0,0.1);
-            padding: 90px 20px 30px 20px; /* Padding top extra para librar navbar */
-            display: flex; flex-direction: column;
-            transform: translateX(-100%); /* OCULTO POR DEFECTO */
-            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-            z-index: 1000;
-            overflow-y: auto; /* Scroll si hay muchas opciones */
-        }
-        .sidebar-menu.is-open { transform: translateX(0); } /* CLASE PARA MOSTRAR */
-
+        .sidebar-menu { position: absolute; top: 0; left: 0; height: 100%; width: 280px; background: white; box-shadow: 10px 0 30px rgba(0,0,0,0.1); padding: 90px 20px 30px 20px; display: flex; flex-direction: column; transform: translateX(-100%); transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 1000; overflow-y: auto; }
+        .sidebar-menu.is-open { transform: translateX(0); }
         .nav-title { font-size: 0.7rem; font-weight: 700; color: #999; text-transform: uppercase; margin-top: 20px; margin-bottom: 10px; padding-left: 10px; letter-spacing: 1px; }
         .nav-item { display: flex; align-items: center; padding: 12px 15px; color: #666; text-decoration: none; border-radius: 15px; margin-bottom: 5px; font-weight: 500; font-size: 0.95rem; transition: all 0.2s; }
         .nav-item i { width: 24px; margin-right: 10px; text-align: center; font-size: 1.1rem; color: #888; }
         .nav-item:hover { background-color: #f0fdf4; color: #333; }
         .nav-item.active { background-color: var(--primary-nb); color: white; box-shadow: 0 8px 20px rgba(76, 175, 80, 0.25); }
         .nav-item.active i { color: white; }
-
-        /* --- CONTENIDO PRINCIPAL --- */
         .main-area { flex-grow: 1; display: flex; position: relative; overflow: hidden; }
-        .content-section {
-            flex-grow: 1;
-            padding: 40px;
-            overflow-y: auto;
-            height: 100%;
-            width: 100%;
-            transition: filter 0.3s;
-            max-height: calc(90vh - 70px);
-        }
-        /* Efecto de desenfoque al abrir menú */
+        .content-section { flex-grow: 1; padding: 40px; overflow-y: auto; height: 100%; width: 100%; transition: filter 0.3s; max-height: calc(90vh - 70px); }
         .content-section.menu-open { filter: blur(3px); pointer-events: none; }
-
-        /* Header Usuario */
-        .header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
-
-        /* Botón Mi Perfil */
-        .profile-btn {
-            background: white; padding: 8px 15px 8px 8px; border-radius: 50px;
-            display: flex; align-items: center; gap: 10px; text-decoration: none; color: #333;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; transition: transform 0.2s;
-        }
-        .profile-btn:hover { transform: translateY(-2px); }
-        .user-avatar { width: 35px; height: 35px; border-radius: 50%; background: #e8f5e9; color: var(--primary-nb); display: flex; align-items: center; justify-content: center; font-weight: 700; }
-
-        /* Stats */
-        .stat-card { background: white; border-radius: 24px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.03); height: 100%; transition: transform 0.3s ease; }
-        .stat-card:hover { transform: translateY(-5px); }
-        .stat-icon { width: 50px; height: 50px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 15px; }
-        .stat-green { background: #e8f5e9; color: #4CAF50; } .stat-yellow { background: #fff8e1; color: #FFC107; } .stat-blue { background: #e3f2fd; color: #2196F3; }
-        .bar-green { background: #4CAF50; } .bar-yellow { background: #FFC107; } .bar-blue { background: #2196F3; }
-        .stat-val { font-size: 2rem; font-weight: 800; color: #333; line-height: 1; }
-        .stat-name { font-size: 0.8rem; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 0.5px; }
-        .progress-mini { height: 4px; border-radius: 10px; margin-top: 15px; background-color: #f0f0f0; }
-        .progress-bar-custom { height: 100%; border-radius: 10px; }
-
-        /* Accesos */
-        .quick-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
-        .quick-btn { background: white; border-radius: 20px; padding: 25px; border: 1px solid transparent; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 15px; text-decoration: none; transition: all 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.02); }
-        .quick-btn:hover { border-color: var(--primary-nb); transform: translateY(-5px); box-shadow: 0 15px 30px rgba(76,175,80,0.1); }
-        .quick-icon-circle { width: 60px; height: 60px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
-
-        /* Overlay Oscuro para cuando el menú abre */
-        .menu-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.2); z-index: 999; display: none;
-            backdrop-filter: blur(2px);
-        }
+        .menu-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.2); z-index: 999; display: none; backdrop-filter: blur(2px); }
         .menu-overlay.is-visible { display: block; }
 
-        /* Responsive */
-        @media (max-width: 992px) {
-            .content-section { padding: 20px; }
-            .dashboard-container { border-radius: 0; height: auto; min-height: 100vh; background: rgba(255,255,255,0.6); }
-        }
+        .page-header { margin-bottom: 3rem; }
+        .page-title { font-size: 2.5rem; font-weight: 700; color: #2c3e50; margin-bottom: 0.5rem; }
+        .page-subtitle { color: #7f8c8d; font-size: 1.1rem; }
+
+        .stat-card { background: white; border-radius: 20px; padding: 2rem; box-shadow: 0 2px 15px rgba(0,0,0,0.08); transition: all 0.3s; border-left: 4px solid transparent; position: relative; overflow: hidden; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.12); }
+        .stat-card.card-green { border-left-color: #4CAF50; }
+        .stat-card.card-green .stat-icon { background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%); }
+        .stat-card.card-blue { border-left-color: #2196F3; }
+        .stat-card.card-blue .stat-icon { background: linear-gradient(135deg, #2196F3 0%, #42A5F5 100%); }
+        .stat-card.card-orange { border-left-color: #FF9800; }
+        .stat-card.card-orange .stat-icon { background: linear-gradient(135deg, #FF9800 0%, #FFA726 100%); }
+        .stat-icon { width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white; margin-bottom: 1.5rem; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+        .stat-number { font-size: 3rem; font-weight: 700; color: #2c3e50; margin-bottom: 0.5rem; line-height: 1; }
+        .stat-label { color: #7f8c8d; font-size: 1rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-trend { position: absolute; top: 1rem; right: 1.5rem; font-size: 0.85rem; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+        .trend-up { background: #e8f5e9; color: #4CAF50; }
+
+        .quick-actions { background: white; border-radius: 20px; padding: 2rem; box-shadow: 0 2px 15px rgba(0,0,0,0.08); margin-top: 2rem; }
+        .quick-actions-title { font-size: 1.3rem; font-weight: 700; color: #2c3e50; margin-bottom: 1.5rem; }
+        .action-btn { display: flex; align-items: center; gap: 15px; padding: 1.2rem; background: #f8f9fa; border-radius: 15px; text-decoration: none; color: #2c3e50; margin-bottom: 1rem; transition: all 0.3s; border: 2px solid transparent; }
+        .action-btn:hover { background: #e8f5e9; border-color: var(--primary-nb); transform: translateX(5px); }
+        .action-icon { width: 50px; height: 50px; background: linear-gradient(135deg, var(--primary-nb) 0%, var(--primary-dark-nb) 100%); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .action-content h4 { margin: 0; font-size: 1rem; font-weight: 600; color: #2c3e50; }
+        .action-content p { margin: 0; font-size: 0.85rem; color: #7f8c8d; }
+
+        @media (max-width: 992px) { .content-section { padding: 20px; } .dashboard-container { border-radius: 0; height: auto; min-height: 100vh; } .stat-number { font-size: 2rem; } }
     </style>
 </head>
 <body>
-
-    <div class="bg-blobs">
-        <div class="blob-green"></div>
-        <div class="blob-blue"></div>
-    </div>
-
+    <div class="bg-blobs"><div class="blob-green"></div><div class="blob-blue"></div></div>
     <div class="dashboard-container">
-
         <div class="top-navbar">
             <div class="d-flex align-items-center gap-3">
                 <button class="burger-btn" onclick="toggleSidebar()">
-                    <span class="burger-line"></span>
-                    <span class="burger-line"></span>
-                    <span class="burger-line"></span>
+                    <span class="burger-line"></span><span class="burger-line"></span><span class="burger-line"></span>
                 </button>
                 <a href="dashboard.html" class="logo-area mb-0">
-                    <i class="fas fa-leaf logo-icon"></i>
-                    <span class="logo-text">NutriBox</span>
+                    <i class="fas fa-leaf logo-icon"></i><span class="logo-text">NutriBox</span>
                 </a>
             </div>
+            <div id="userName" style="color: #666; font-weight: 500;"></div>
         </div>
-
         <div class="main-area">
-
             <div class="menu-overlay" onclick="toggleSidebar()"></div>
-
             <aside class="sidebar-menu" id="sidebar">
                 <nav class="d-flex flex-column gap-1 flex-grow-1">
                     <a href="dashboard.html" class="nav-item active"><i class="fas fa-th-large"></i> Dashboard</a>
-
                     <div class="nav-title">GESTIÓN</div>
                     <a href="hijos.html" class="nav-item"><i class="fas fa-child"></i> Mis Hijos</a>
                     <a href="crear-lonchera.html" class="nav-item"><i class="fas fa-plus-circle"></i> Crear Lonchera</a>
-                    <a href="mis-loncheras.html" class="nav-item"><i class="fas fa-calendar-check"></i> Historial</a>
-
+                    <a href="loncheras.html" class="nav-item"><i class="fas fa-calendar-check"></i> Loncheras</a>
+                    <div class="nav-title">ANÁLISIS</div>
+                    <a href="estadisticas.html" class="nav-item"><i class="fas fa-chart-line"></i> Estadísticas</a>
                     <div class="nav-title">CUENTA</div>
                     <a href="direcciones.html" class="nav-item"><i class="fas fa-map-marker-alt"></i> Direcciones</a>
                     <a href="restricciones.html" class="nav-item"><i class="fas fa-shield-alt"></i> Restricciones</a>
                     <a href="alimentos.html" class="nav-item"><i class="fas fa-utensils"></i> Alimentos</a>
                 </nav>
                 <div class="mt-auto pt-3 border-top border-light">
-                     <button id="logout-button" class="nav-item w-100 border-0 bg-transparent text-danger ps-0"><i class="fas fa-sign-out-alt text-danger"></i> Cerrar Sesión</button>
+                     <button id="logout-button" class="nav-item w-100 border-0 bg-transparent text-danger ps-0" style="cursor: pointer;">
+                         <i class="fas fa-sign-out-alt text-danger"></i> Cerrar Sesión
+                     </button>
                 </div>
             </aside>
-
             <main class="content-section" id="main-content">
+                <div class="page-header">
+                    <h1 class="page-title">Dashboard</h1>
+                    <p class="page-subtitle">Resumen general de tu cuenta</p>
+                </div>
 
-                <div class="header-area">
-                    <div>
-                        <h1 class="fw-bold text-dark m-0">Hola, <span id="userName" style="color: #4CAF50;">Usuario</span> 👋</h1>
-                        <p class="text-muted m-0">Resumen de tu actividad hoy.</p>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="stat-card card-green">
+                            <span class="stat-trend trend-up">Activos</span>
+                            <div class="stat-icon"><i class="fas fa-child"></i></div>
+                            <div class="stat-number" id="total-hijos">0</div>
+                            <div class="stat-label">Hijos Registrados</div>
+                        </div>
                     </div>
-                    <a href="perfil.html" class="profile-btn d-none d-md-flex">
-                        <span class="fw-bold small">Mi Perfil</span>
-                        <div class="user-avatar"><i class="fas fa-user"></i></div>
+                    <div class="col-md-4">
+                        <div class="stat-card card-blue">
+                            <span class="stat-trend trend-up">Total</span>
+                            <div class="stat-icon"><i class="fas fa-box"></i></div>
+                            <div class="stat-number" id="total-loncheras">0</div>
+                            <div class="stat-label">Loncheras Creadas</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card card-orange">
+                            <span class="stat-trend trend-up">Guardadas</span>
+                            <div class="stat-icon"><i class="fas fa-map-marker-alt"></i></div>
+                            <div class="stat-number" id="total-direcciones">0</div>
+                            <div class="stat-label">Direcciones</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <h3 class="quick-actions-title">Acciones Rápidas</h3>
+                    <a href="crear-lonchera.html" class="action-btn">
+                        <div class="action-icon"><i class="fas fa-plus"></i></div>
+                        <div class="action-content">
+                            <h4>Crear Nueva Lonchera</h4>
+                            <p>Arma una lonchera nutritiva para tus hijos</p>
+                        </div>
                     </a>
-                </div>
-
-                <div class="row g-4 mb-5">
-                    <div class="col-md-4"><div class="stat-card"><div class="d-flex align-items-center"><div class="stat-icon stat-green"><i class="fas fa-child"></i></div><div><div class="stat-val" id="totalHijos">0</div><div class="stat-name">Hijos</div></div></div><div class="progress-mini"><div class="progress-bar-custom bar-green" style="width: 100%"></div></div></div></div>
-                    <div class="col-md-4"><div class="stat-card"><div class="d-flex align-items-center"><div class="stat-icon stat-yellow"><i class="fas fa-box-open"></i></div><div><div class="stat-val" id="totalLoncheras">0</div><div class="stat-name">Loncheras</div></div></div><div class="progress-mini"><div class="progress-bar-custom bar-yellow" style="width: 65%"></div></div></div></div>
-                    <div class="col-md-4"><div class="stat-card"><div class="d-flex align-items-center"><div class="stat-icon stat-blue"><i class="fas fa-map-marker-alt"></i></div><div><div class="stat-val"><span id="totalDirecciones">0</span><span class="fs-5 text-muted fw-light" style="display:none;">/3</span></div><div class="stat-name">Direcciones</div></div></div><div class="progress-mini"><div class="progress-bar-custom bar-blue" style="width: 40%"></div></div></div></div>
-                </div>
-
-                <h5 class="fw-bold text-dark mb-4">Acceso Rápido</h5>
-                <div class="quick-grid">
-                    <a href="crear-lonchera.html" class="quick-btn"><div class="quick-icon-circle" style="background:#10b981;"><i class="fas fa-plus"></i></div><div><h6 class="fw-bold text-dark mb-1">Crear Lonchera</h6><small class="text-muted">Armar menú</small></div></a>
-                    <a href="hijos.html" class="quick-btn"><div class="quick-icon-circle" style="background:#3b82f6;"><i class="fas fa-users"></i></div><div><h6 class="fw-bold text-dark mb-1">Mis Hijos</h6><small class="text-muted">Gestionar</small></div></a>
-                    <a href="restricciones.html" class="quick-btn"><div class="quick-icon-circle" style="background:#ef4444;"><i class="fas fa-shield-alt"></i></div><div><h6 class="fw-bold text-dark mb-1">Restricciones</h6><small class="text-muted">Seguridad</small></div></a>
-                    <a href="estadisticas.html" class="quick-btn"><div class="quick-icon-circle" style="background:#f59e0b;"><i class="fas fa-chart-pie"></i></div><div><h6 class="fw-bold text-dark mb-1">Reportes</h6><small class="text-muted">Consumo</small></div></a>
+                    <a href="hijos.html" class="action-btn">
+                        <div class="action-icon"><i class="fas fa-user-plus"></i></div>
+                        <div class="action-content">
+                            <h4>Agregar Hijo</h4>
+                            <p>Registra un nuevo perfil de hijo</p>
+                        </div>
+                    </a>
+                    <a href="estadisticas.html" class="action-btn">
+                        <div class="action-icon"><i class="fas fa-chart-pie"></i></div>
+                        <div class="action-content">
+                            <h4>Ver Estadísticas</h4>
+                            <p>Analiza los datos de nutrición de tus hijos</p>
+                        </div>
+                    </a>
                 </div>
             </main>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- ELIMINADOS: config.js, utils.js, api.js -->
-    <script src="/static/js/auth-guard.js"></script>
-    <script src="/static/js/dashboard.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        const API_URL = 'http://127.0.0.1:8000';
+
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('is-open');
             document.querySelector('.burger-btn').classList.toggle('is-active');
-            document.querySelector('.menu-overlay').classList.toggle('is-visible'); // Muestra overlay
+            document.querySelector('.menu-overlay').classList.toggle('is-visible');
+            document.getElementById('main-content').classList.toggle('menu-open');
         }
-        // CORRECCIÓN: La función logout debe ser globalmente accesible si se define en otro script (auth-guard.js)
-        document.getElementById('logout-button').addEventListener('click', () => {
-            // Llamamos directamente a la función si está definida globalmente en auth-guard.js
-            if(typeof setupLogoutButton === 'function') {
-                document.getElementById('logout-button').click(); // Simular click del botón principal que llama a la función global
-            } else {
-                 // Si setupLogoutButton ya maneja el logout, solo forzamos la acción
-                 localStorage.removeItem("access_token");
-                 window.location.href = "login.html";
-            }
+
+        document.getElementById('logout-button')?.addEventListener('click', () => {
+            localStorage.removeItem("access_token");
+            window.location.href = "login.html";
         });
 
+        // Cargar estadísticas
+        async function cargarEstadisticas() {
+            try {
+                const token = localStorage.getItem('access_token');
+                if (!token) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Cargar hijos
+                const hijosRes = await fetch(`${API_URL}/hijo/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const hijos = await hijosRes.json();
+                document.getElementById('total-hijos').textContent = hijos.length;
+
+                // Cargar loncheras
+                const loncherasRes = await fetch(`${API_URL}/lonchera/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const loncheras = await loncherasRes.json();
+                document.getElementById('total-loncheras').textContent = loncheras.length;
+
+                // Cargar direcciones
+                const direccionesRes = await fetch(`${API_URL}/direccion/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const direcciones = await direccionesRes.json();
+                document.getElementById('total-direcciones').textContent = direcciones.length;
+
+            } catch (error) {
+                console.error('Error al cargar estadísticas:', error);
+                document.getElementById('total-hijos').textContent = '0';
+                document.getElementById('total-loncheras').textContent = '0';
+                document.getElementById('total-direcciones').textContent = '0';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', cargarEstadisticas);
     </script>
 </body>
 </html>
