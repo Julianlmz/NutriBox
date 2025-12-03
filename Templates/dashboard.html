@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="/static/css/style.css">
 
     <style>
         /* --- VARIABLES --- */
@@ -248,11 +248,9 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="js/config.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/api.js"></script>
-    <script src="js/auth-guard.js"></script>
-    <script src="js/dashboard.js"></script>
+    <!-- ELIMINADOS: config.js, utils.js, api.js -->
+    <script src="/static/js/auth-guard.js"></script>
+    <script src="/static/js/dashboard.js"></script>
 
     <script>
         function toggleSidebar() {
@@ -260,7 +258,18 @@
             document.querySelector('.burger-btn').classList.toggle('is-active');
             document.querySelector('.menu-overlay').classList.toggle('is-visible'); // Muestra overlay
         }
-        document.getElementById('logout-button').addEventListener('click', () => { logout(); });
+        // CORRECCIÓN: La función logout debe ser globalmente accesible si se define en otro script (auth-guard.js)
+        document.getElementById('logout-button').addEventListener('click', () => {
+            // Llamamos directamente a la función si está definida globalmente en auth-guard.js
+            if(typeof setupLogoutButton === 'function') {
+                document.getElementById('logout-button').click(); // Simular click del botón principal que llama a la función global
+            } else {
+                 // Si setupLogoutButton ya maneja el logout, solo forzamos la acción
+                 localStorage.removeItem("access_token");
+                 window.location.href = "login.html";
+            }
+        });
+
     </script>
 </body>
 </html>
