@@ -9,29 +9,33 @@ from Core.database import SessionDep
 from Core.seguridad import verificar_password
 from Modulos.models import Usuario
 
-SECRET_KEY = "A]m42[GBVb.59=!"
+SECRET_KEY = "nutribox_secret_key_2025_super_secure_change_in_production_12345678"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 1440
 
 router = APIRouter(
     prefix="/auth",
     tags=["Autenticación"]
 )
 
+
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
 
 async def get_user(session: AsyncSession, email: str) -> Usuario | None:
     statement = select(Usuario).where(Usuario.email == email)
     result = await session.execute(statement)
     return result.scalars().first()
+
 
 async def authenticate_user(session: AsyncSession, email: str, password: str) -> Usuario | None:
     usuario = await get_user(session, email)
@@ -40,6 +44,7 @@ async def authenticate_user(session: AsyncSession, email: str, password: str) ->
     if not verificar_password(password, usuario.hashed_password):
         return None
     return usuario
+
 
 @router.post("/token")
 async def login_para_access_token(
@@ -66,7 +71,9 @@ async def login_para_access_token(
 
     return {"access_token": access_token, "token_type": "bearer"}
 
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
+
 
 async def get_current_user(
         session: SessionDep,
@@ -82,7 +89,8 @@ async def get_current_user(
         email: str = payload.get("sub")
         if email is None:
             raise credentials_exception
-    except JWTError:
+    except JWTError as e:
+        print(f"Error JWT: {e}")  # ✅ Para debugging
         raise credentials_exception
 
     usuario = await get_user(session, email=email)

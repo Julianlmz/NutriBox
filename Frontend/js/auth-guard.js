@@ -3,15 +3,17 @@ const AUTH_HEADERS = new Headers();
 AUTH_HEADERS.append("Authorization", `Bearer ${TOKEN}`);
 AUTH_HEADERS.append("Content-Type", "application/json");
 
-// 2. Función Guardián
+console.log("Token encontrado:", TOKEN ? "Sí" : "No");
+
 (function () {
     if (!TOKEN) {
         console.error("No hay token. Redirigiendo al login.");
         window.location.href = "login.html";
+    } else {
+        console.log("Token válido, continuando...");
     }
 })();
 
-// 3. Función de Cerrar Sesión (para usar en cualquier página)
 function setupLogoutButton() {
     const logoutButton = document.getElementById("logout-button");
     if (logoutButton) {
@@ -28,9 +30,9 @@ function setupLogoutButton() {
     }
 }
 
-// 4. Función para gestionar errores de token
 function gestionarErrorDeAutenticacion(error) {
     console.error("Error de autenticación:", error.message);
+    console.error("Stack completo:", error); // ✅ Más info
     localStorage.removeItem("access_token");
     Swal.fire({
         icon: 'error',
