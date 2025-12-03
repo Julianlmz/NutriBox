@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="/static/css/style.css">
 
     <style>
         /* --- COLORES --- */
@@ -126,11 +126,18 @@
                         <p class="text-muted small mt-2">Crea tu cuenta para comenzar.</p>
                     </div>
 
-                    <form id="registerForm" onsubmit="handleRegister(event)">
+                    <!-- CORRECCIÓN: ID register-form para coincidir con JS y sin onsubmit -->
+                    <form id="register-form">
 
                         <div class="mb-3">
-                            <label for="nombre" class="form-label">Nombre Completo</label>
+                            <label for="nombre" class="form-label">Nombre</label>
                             <input type="text" id="nombre" class="form-control rounded-4" placeholder="Tu nombre" required>
+                        </div>
+
+                        <!-- CORRECCIÓN: Agregado campo Apellido requerido por register.js -->
+                        <div class="mb-3">
+                            <label for="apellido" class="form-label">Apellido</label>
+                            <input type="text" id="apellido" class="form-control rounded-4" placeholder="Tu apellido" required>
                         </div>
 
                         <div class="mb-3">
@@ -173,65 +180,8 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="js/config.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/api.js"></script>
 
-    <script>
-        const handleRegister = async (event) => {
-            event.preventDefault();
+    <script src="/static/js/register.js"></script>
 
-            const nombre = document.getElementById('nombre').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
-
-            // Validación de contraseña
-            if (password !== confirmPassword) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Las contraseñas no coinciden',
-                    confirmButtonColor: '#4CAF50'
-                });
-                return;
-            }
-
-            // Llama a la API (asumiendo que API.register existe en tu api.js)
-            // Enviamos 'Free' como membresía por defecto ya que quitamos el selector
-            try {
-                // Simulamos el loading visual
-                Swal.fire({ title: 'Creando cuenta...', didOpen: () => Swal.showLoading() });
-
-                await API.register({
-                    nombre,
-                    email,
-                    password,
-                    membresia: "Free", // Valor por defecto interno
-                    rol: 'Usuario'
-                });
-
-                Swal.close();
-
-                Swal.fire({
-                    icon: 'success',
-                    title: '¡Registro exitoso!',
-                    text: 'Tu cuenta ha sido creada. Ahora puedes iniciar sesión.',
-                    confirmButtonColor: '#4CAF50'
-                }).then(() => {
-                    window.location.href = 'login.html';
-                });
-
-            } catch (error) {
-                Swal.close();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: error.message || 'No se pudo completar el registro',
-                    confirmButtonColor: '#d33'
-                });
-            }
-        };
-    </script>
 </body>
 </html>
