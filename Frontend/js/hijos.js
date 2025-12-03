@@ -2,75 +2,119 @@
 // HIJOS.JS - Gestión de Perfiles de Hijos
 // ========================================
 
-// Variable global para almacenar hijos
 window.hijos = [];
 
-// ========================================
-// FUNCIÓN: Cargar Hijos desde la API
-// ========================================
-async function loadHijos() {
-    try {
-        console.log("Cargando hijos...");
+// --- Utilidades Visuales ---
+function toggleImageInput(tipo) {
+    const containerUrl = document.getElementById('input-url-container');
+    const containerFile = document.getElementById('input-file-container');
 
-        const response = await fetch("/hijo/", {
-            method: 'GET',
-            headers: AUTH_HEADERS
-        });
+    if (!containerUrl || !containerFile) return;
 
-        if (!response.ok) {
-            throw new Error('Error al cargar hijos');
-        }
-
-        window.hijos = await response.json();
-        console.log("Hijos cargados:", window.hijos);
-
-        renderHijos();
-
-    } catch (error) {
-        console.error("Error al cargar hijos:", error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'No se pudieron cargar los perfiles de hijos'
-        });
+    if (tipo === 'url') {
+        containerUrl.style.display = 'block';
+        containerFile.style.display = 'none';
+        const fileInput = document.getElementById('hijo-imagen-archivo');
+        if(fileInput) fileInput.value = "";
+    } else {
+        containerUrl.style.display = 'none';
+        containerFile.style.display = 'block';
     }
 }
 
-// ========================================
-// FUNCIÓN: Renderizar Hijos en el DOM
-// ========================================
+function showAddChildModal() {
+    const form = document.getElementById('form-hijo');
+    if(form) form.reset();
+    document.getElementById('hijo-id').value = '';
+
+    const title = document.getElementById('modalTitle');
+    if(title) title.innerHTML = 'Nuevo Perfil';
+
+    const radioUrl = document.getElementById('option-url');
+    if(radioUrl) {
+        radioUrl.checked = true;
+        toggleImageInput('url');
+    }
+
+    new bootstrap.Modal(document.getElementById('modalHijo')).show();
+}
+
+function showEditChildModal(id) {
+    const hijo = window.hijos.find(h => h.id === id);
+    if (!hijo) return;
+
+    document.getElementById('hijo-id').value = hijo.id;
+    document.getElementById('hijo-nombre').value = hijo.nombre;
+    document.getElementById('hijo-apellido').value = hijo.apellido || '';
+    document.getElementById('hijo-edad').value = hijo.edad || '';
+
+    let genero = "Otro";
+    // Extraer género de la bio si existe
+    if (hijo.genero) genero = hijo.genero;
+
+    const generoSelect = document.getElementById('hijo-genero');
+    if(generoSelect) generoSelect.value = genero;
+
+    // Foto
+    const currentFoto = hijo.foto_perfil || "";
+    document.getElementById('hijo-imagen-url').value = currentFoto;
+
+    document.getElementById('modalTitle').innerHTML = 'Editar Perfil';
+    new bootstrap.Modal(document.getElementById('modalHijo')).show();
+}
+
+// --- Carga de Datos ---
+async function loadHijos() {
+    try {
+        const response = await fetch("/hijo/", { method: 'GET', headers: AUTH_HEADERS });
+        if (response.ok) {
+            window.hijos = await response.json();
+            renderHijos();
+        } else {
+            console.warn("No se pudieron cargar hijos. Status:", response.status);
+        }
+    } catch (error) {
+        console.error("Error red:", error);
+    }
+}
+
+// --- Renderizado ---
 function renderHijos() {
     const container = document.getElementById("hijosContainer");
-
-    if (!container) {
-        console.error("Contenedor hijosContainer no encontrado");
-        return;
-    }
+    if (!container) return;
 
     if (!window.hijos || window.hijos.length === 0) {
         container.innerHTML = `
-            <div class="col-12 empty-state">
-                <i class="fas fa-child empty-icon"></i>
-                <h5>No tienes hijos registrados</h5>
-                <button class="btn btn-outline-success rounded-pill mt-3" onclick="showAddChildModal()">Agregar Primero</button>
+            <div class="col-12 text-center py-5">
+                <i class="fas fa-child fa-3x text-muted opacity-25 mb-3"></i>
+                <h5 class="text-muted">No tienes hijos registrados</h5>
+                <button class="btn btn-success rounded-pill mt-3 px-4" onclick="showAddChildModal()">
+                    <i class="fas fa-plus me-2"></i>Agregar Primero
+                </button>
             </div>`;
         return;
     }
 
     container.innerHTML = window.hijos.map(hijo => `
-        <div class="col-xl-3 col-lg-4 col-md-6">
-            <div class="child-card">
+        <div class="col-md-6 col-lg-4 col-xl-3">
+            <div class="child-card h-100">
                 <div class="child-header">
-                    <div class="child-avatar"><i class="fas fa-user"></i></div>
+                    <div class="child-avatar">
+                        <img src="${hijo.foto_perfil || 'https://cdn-icons-png.flaticon.com/512/3011/3011270.png'}" 
+                             style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                    </div>
                     <div class="child-info">
                         <h5>${hijo.nombre} ${hijo.apellido || ''}</h5>
-                        <span>${hijo.edad || '?'} años</span>
+                        <span>${hijo.edad ? hijo.edad + ' años' : ''}</span>
                     </div>
                 </div>
                 <div class="child-actions">
-                    <a href="crear-lonchera.html?hijoId=${hijo.id}" class="btn-action-main">
-                        <i class="fas fa-utensils me-1"></i> Lonchera
+                    <a href="crear-lonchera.html?hijoId=${hijo.id}" class="btn-action-main text-decoration-none">
+                        Lonchera
                     </a>
+                    <button class="btn-icon" onclick="showEditChildModal(${hijo.id})">
+                        <i class="fas fa-pen text-primary"></i>
+                    </button>
                     <button class="btn-icon btn-delete" onclick="deleteHijo(${hijo.id})">
                         <i class="fas fa-trash-alt"></i>
                     </button>
@@ -80,157 +124,115 @@ function renderHijos() {
     `).join("");
 }
 
-// ========================================
-// FUNCIÓN: Eliminar Hijo
-// ========================================
-async function deleteHijo(hijoId) {
-    try {
-        const result = await Swal.fire({
-            title: '¿Eliminar perfil?',
-            text: "Esta acción no se puede deshacer",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar'
-        });
-
-        if (result.isConfirmed) {
-            const response = await fetch(`/hijo/${hijoId}`, {
-                method: 'DELETE',
-                headers: AUTH_HEADERS
-            });
-
-            if (response.ok || response.status === 204) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Eliminado',
-                    text: 'El perfil ha sido eliminado',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-
-                await loadHijos();
-            } else {
-                throw new Error('Error al eliminar');
-            }
-        }
-    } catch (error) {
-        console.error("Error al eliminar hijo:", error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'No se pudo eliminar el perfil'
-        });
-    }
-}
-
-// ========================================
-// FUNCIÓN: Guardar/Crear Hijo
-// ========================================
+// --- Guardar (FormData) ---
 async function guardarHijo(event) {
     event.preventDefault();
 
-    const nombre = document.getElementById('hijo-nombre').value;
-    const apellido = document.getElementById('hijo-apellido')?.value || '';
-    const edad = parseInt(document.getElementById('hijo-edad').value);
-    const genero = document.getElementById('hijo-genero')?.value || '';
+    const id = document.getElementById('hijo-id').value;
+    const isEdit = !!id;
 
-    // Generar un email único para el hijo (requerido por el backend)
-    const email = `hijo_${nombre.toLowerCase()}_${Date.now()}@nutribox.local`;
-    const password = `password123`; // Password por defecto
+    const formData = new FormData();
+    formData.append('nombre', document.getElementById('hijo-nombre').value.trim());
+    formData.append('apellido', document.getElementById('hijo-apellido').value.trim() || 'Apellido');
+    formData.append('edad', document.getElementById('hijo-edad').value);
+    formData.append('genero', document.getElementById('hijo-genero').value);
+
+    if (!isEdit) {
+        formData.append('email', `hijo_${Date.now()}@nutribox.local`);
+        formData.append('password', 'password123');
+    }
+
+    // Imagen
+    const tipoImagen = document.querySelector('input[name="tipoImagen"]:checked').value;
+    formData.append('tipo_imagen', tipoImagen);
+
+    if (tipoImagen === 'url') {
+        const urlVal = document.getElementById('hijo-imagen-url').value;
+        formData.append('imagen_url', urlVal);
+    } else {
+        const fileInput = document.getElementById('hijo-imagen-archivo');
+        if (fileInput.files[0]) {
+            formData.append('imagen_archivo', fileInput.files[0]);
+        }
+    }
 
     try {
-        const response = await fetch("/hijo/", {
-            method: 'POST',
-            headers: AUTH_HEADERS,
-            body: JSON.stringify({
-                nombre: nombre,
-                apellido: apellido,
-                email: email,
-                password: password
-                // Si tu modelo Hijo tiene más campos, agrégalos aquí
-            })
+        const url = isEdit ? `/hijo/${id}` : "/hijo/";
+        const method = isEdit ? "PUT" : "POST";
+        const token = localStorage.getItem("access_token");
+
+        Swal.fire({ title: 'Guardando...', didOpen: () => Swal.showLoading() });
+
+        const response = await fetch(url, {
+            method: method,
+            headers: { 'Authorization': `Bearer ${token}` }, // FormData maneja su propio Content-Type
+            body: formData
         });
 
+        // --- MANEJO DE ERRORES ROBUSTO ---
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || 'Error al guardar');
+            const text = await response.text(); // Leemos texto crudo primero
+            let errorMsg = 'Error en el servidor';
+            try {
+                const json = JSON.parse(text);
+                errorMsg = json.detail || errorMsg;
+            } catch (e) {
+                // Si falla el parseo, es HTML o Texto plano (Error 500 duro)
+                console.error("Respuesta no JSON:", text);
+                errorMsg = "Error interno del servidor (Revisar logs)";
+            }
+            throw new Error(errorMsg);
         }
 
-        const nuevoHijo = await response.json();
-        console.log("Hijo creado:", nuevoHijo);
+        // Éxito
+        const modal = bootstrap.Modal.getInstance(document.getElementById('modalHijo'));
+        if(modal) modal.hide();
 
-        // Cerrar modal
-        const modalElement = document.getElementById('modalHijo');
-        const modal = bootstrap.Modal.getInstance(modalElement);
-        if (modal) modal.hide();
-
-        // Limpiar formulario
-        document.getElementById('form-hijo').reset();
-
-        // Mostrar éxito
-        Swal.fire({
-            icon: 'success',
-            title: '¡Guardado!',
-            text: 'Perfil creado correctamente',
-            timer: 1500,
-            showConfirmButton: false
-        });
-
-        // Recargar lista
-        await loadHijos();
+        Swal.fire({ icon: 'success', title: '¡Guardado!', timer: 1500, showConfirmButton: false });
+        loadHijos();
 
     } catch (error) {
-        console.error("Error al guardar hijo:", error);
+        console.error(error);
         Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: error.message || 'No se pudo guardar el perfil'
+            text: error.message
         });
     }
 }
 
-// ========================================
-// FUNCIÓN: Mostrar Modal para Agregar
-// ========================================
-function showAddChildModal() {
-    const form = document.getElementById('form-hijo');
-    if (form) form.reset();
-
-    document.getElementById('hijo-id').value = '';
-    document.getElementById('modalTitle').innerText = 'Nuevo Perfil';
-
-    const modalElement = document.getElementById('modalHijo');
-    const modal = new bootstrap.Modal(modalElement);
-    modal.show();
-}
-
-// ========================================
-// FUNCIÓN: Logout
-// ========================================
-function logout() {
-    localStorage.removeItem("access_token");
-    Swal.fire({
-        icon: 'success',
-        title: '¡Hasta luego!',
-        timer: 1500,
-        showConfirmButton: false
-    }).then(() => {
-        window.location.href = "login.html";
+async function deleteHijo(id) {
+    const result = await Swal.fire({
+        title: '¿Estás seguro?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'Sí, eliminar'
     });
+
+    if (result.isConfirmed) {
+        try {
+            await fetch(`/hijo/${id}`, { method: 'DELETE', headers: AUTH_HEADERS });
+            Swal.fire('Eliminado', '', 'success');
+            loadHijos();
+        } catch (e) { Swal.fire('Error', 'No se pudo eliminar', 'error'); }
+    }
 }
 
-// ========================================
-// INICIALIZACIÓN
-// ========================================
-document.addEventListener("DOMContentLoaded", function() {
-    console.log("hijos.js inicializado");
+document.addEventListener("DOMContentLoaded", () => {
+    if (!localStorage.getItem("access_token")) {
+        window.location.href = "login.html";
+        return;
+    }
 
-    // Cargar hijos al inicio
+    const form = document.getElementById("form-hijo");
+    if(form) {
+        // Evitar listeners duplicados
+        const newForm = form.cloneNode(true);
+        form.parentNode.replaceChild(newForm, form);
+        newForm.addEventListener("submit", guardarHijo);
+    }
+
     loadHijos();
-
-    // Configurar logout
-    setupLogoutButton();
+    if(typeof setupLogoutButton === 'function') setupLogoutButton();
 });

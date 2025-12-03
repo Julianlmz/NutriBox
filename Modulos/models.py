@@ -63,10 +63,8 @@ class UsuarioBase(SQLModel):
     Attributes:
         nombre: Nombre del usuario (3-50 caracteres, solo letras)
         apellido: Apellido del usuario (3-50 caracteres, solo letras)
-        localidad: Localidad/ciudad del usuario
         edad: Edad del usuario (1-120 años)
         rol: Rol del usuario (Padre o Hijo)
-        cedula: Cédula única del usuario (formato numérico)
         email: Email opcional del usuario
     """
     nombre: str = Field(min_length=3, max_length=50, description="Nombre del usuario")
@@ -193,8 +191,8 @@ class Perfil(PerfilBase, table=True):
     """
     id: Optional[int] = Field(default=None, primary_key=True)
     usuario_id: int = Field(foreign_key="usuario.id", unique=True)
-
     usuario: Optional[Usuario] = Relationship(back_populates="perfil")
+    foto_url: Optional[str] = Field(default=None)
 
 
 class PerfilCreate(PerfilBase):
