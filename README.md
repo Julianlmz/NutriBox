@@ -100,6 +100,7 @@ NutriBox/
 ├── requirements.txt            # Dependencias Python
 ├── .env.example                # Variables de entorno (ejemplo)
 └── README.md                   # Este archivo
+```
 
 Prerrequisitos
 
@@ -113,41 +114,42 @@ Prerrequisitos
 
 Pasos de Instalación
 
+    
     Clonar el repositorio
     Bash
-
-git clone [https://github.com/tu-usuario/nutribox.git](https://github.com/tu-usuario/nutribox.git)
-cd nutribox
+    git clone [https://github.com/tu-usuario/nutribox.git](https://github.com/tu-usuario/nutribox.git)
+    cd nutribox
+    
 
 Crear entorno virtual
-Bash
-
-python -m venv venv
+    Bash
+    
+    python -m venv venv
 
 # Windows
-venv\Scripts\activate
+    venv\Scripts\activate
 
 # Linux/Mac
-source venv/bin/activate
+    source venv/bin/activate
 
 Instalar dependencias
-Bash
-
-pip install -r requirements.txt
+    Bash
+    
+    pip install -r requirements.txt
 
 Configurar variables de entorno Crea un archivo .env en la raíz del proyecto basándote en .env.example:
 Fragmento de código
 
 # Base de datos (opcional - usa SQLite si no se configura)
-POSTGRESQL_ADDON_URI=postgresql://usuario:password@localhost:5432/nutribox
+    POSTGRESQL_ADDON_URI=postgresql://usuario:password@localhost:5432/nutribox
 
 # Supabase Storage (opcional - para subir imágenes)
-SUPABASE_URL=[https://tu-proyecto.supabase.co](https://tu-proyecto.supabase.co)
-SUPABASE_KEY=tu-api-key-aqui
-SUPABASE_BUCKET=nutribox-images
+    SUPABASE_URL=[https://tu-proyecto.supabase.co](https://tu-proyecto.supabase.co)
+    SUPABASE_KEY=tu-api-key-aqui
+    SUPABASE_BUCKET=nutribox-images
 
 # Seguridad
-SECRET_KEY=tu_clave_secreta
+    SECRET_KEY=tu_clave_secreta
 
 Ejecutar la aplicación
 Bash
@@ -175,46 +177,46 @@ El sistema utiliza JWT (JSON Web Tokens).
 Ejemplo de Uso (Frontend):
 JavaScript
 
-// Login
-const response = await fetch('/auth/token', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-  body: 'username=usuario@email.com&password=tu-password'
-});
-
-const { access_token, user_id } = await response.json();
-localStorage.setItem('access_token', access_token);
-localStorage.setItem('user_id', user_id);
-
-// Petición autenticada
-fetch('/hijo/', {
-  headers: { 'Authorization': `Bearer ${access_token}` }
-});
+    // Login
+    const response = await fetch('/auth/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'username=usuario@email.com&password=tu-password'
+    });
+    
+    const { access_token, user_id } = await response.json();
+    localStorage.setItem('access_token', access_token);
+    localStorage.setItem('user_id', user_id);
+    
+    // Petición autenticada
+    fetch('/hijo/', {
+      headers: { 'Authorization': `Bearer ${access_token}` }
+    });
 
 📊 Modelos de Datos
 Relaciones de Base de Datos
 Plaintext
 
-┌─────────────┐
-│   Usuario   │──┐
-│  (Padre)    │  │ 1:N
-└─────────────┘  │
-                 ├──> ┌─────────────┐
-                 │    │    Hijo     │
-                 │    └─────────────┘
-                 │         │ N:M
-                 │         └──> ┌──────────────┐
-                 │              │ Restricción  │
-                 │              └──────────────┘
-                 │                     │ N:M
-                 │                     └──> ┌────────────┐
-                 └──> ┌──────────┐          │  Alimento  │
-                      │ Lonchera │<────N:M──┘
-                      └──────────┘
-                           │ N:1
-                           └──> ┌────────────┐
-                                │ Dirección  │
-                                └────────────┘
+    ┌─────────────┐
+    │   Usuario   │──┐
+    │  (Padre)    │  │ 1:N
+    └─────────────┘  │
+                     ├──> ┌─────────────┐
+                     │    │    Hijo     │
+                     │    └─────────────┘
+                     │         │ N:M
+                     │         └──> ┌──────────────┐
+                     │              │ Restricción  │
+                     │              └──────────────┘
+                     │                     │ N:M
+                     │                     └──> ┌────────────┐
+                     └──> ┌──────────┐          │  Alimento  │
+                          │ Lonchera │<────N:M──┘
+                          └──────────┘
+                               │ N:1
+                               └──> ┌────────────┐
+                                    │ Dirección  │
+                                    └────────────┘
 
 🎨 Características del Frontend
 Diseño UI/UX
@@ -255,35 +257,23 @@ NutriBox incluye 5 algoritmos de ordenamiento y optimización:
 
 📡 API Endpoints (Resumen)
 Método	Endpoint	Descripción
-POST	/auth/token	Iniciar sesión (Login)
-POST	/usuario/	Registrar usuario
-GET	/hijo/	Listar hijos del usuario
-GET	/alimento/	Listar catálogo de alimentos
-POST	/loncheras	Crear nueva lonchera
-POST	/restriccion/	Crear restricción/alergia
-GET	/direcciones/	Listar direcciones
-🚢 Despliegue
-Producción (Render/Railway)
-Bash
 
-# Comando de arranque
-gunicorn main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+    POST	/auth/token	Iniciar sesión (Login)
+    POST	/usuario/	Registrar usuario
+    GET	/hijo/	Listar hijos del usuario
+    GET	/alimento/	Listar catálogo de alimentos
+    POST	/loncheras	Crear nueva lonchera
+    POST	/restriccion/	Crear restricción/alergia
+    GET	/direcciones/	Listar direcciones
 
-Docker (Opcional)
-Dockerfile
-
-FROM python:3.11-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY . .
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "main:app"]
 
 📝 Licencia y Autores
 
 Autor: Julián Leal - 67001277
 
-Institución: Universidad Católica de Colombia - Facultad de Ingeniería
+Institución: Universidad Católica de Colombia
+
+Link: https://nutribox.onrender.com
 
 Año: 2025
 
