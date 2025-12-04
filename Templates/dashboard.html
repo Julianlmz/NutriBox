@@ -79,7 +79,14 @@
                     <i class="fas fa-leaf logo-icon"></i><span class="logo-text">NutriBox</span>
                 </a>
             </div>
-            <div id="userName" style="color: #666; font-weight: 500;"></div>
+
+            <a href="perfil.html" class="d-flex align-items-center gap-2 text-decoration-none" title="Ir a mi perfil">
+                <span id="userName" style="color: #666; font-weight: 500;">Cargando...</span>
+                <div style="width: 40px; height: 40px; background: #e8f5e9; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-user text-success"></i>
+                </div>
+            </a>
+
         </div>
         <div class="main-area">
             <div class="menu-overlay" onclick="toggleSidebar()"></div>
@@ -105,7 +112,7 @@
             </aside>
             <main class="content-section" id="main-content">
                 <div class="page-header">
-                    <h1 class="page-title">Dashboard</h1>
+                    <h1 class="page-title" id="page-title">Dashboard</h1>
                     <p class="page-subtitle">Resumen general de tu cuenta</p>
                 </div>
 
@@ -164,6 +171,9 @@
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/static/js/auth-guard.js"></script>
+
     <script>
         const API_URL = 'http://127.0.0.1:8000';
 
@@ -174,13 +184,17 @@
             document.getElementById('main-content').classList.toggle('menu-open');
         }
 
-        document.getElementById('logout-button')?.addEventListener('click', () => {
-            localStorage.removeItem("access_token");
-            window.location.href = "login.html";
-        });
+        // Configurar botón logout
+        if (typeof setupLogoutButton === 'function') {
+            setupLogoutButton();
+        } else {
+            document.getElementById('logout-button')?.addEventListener('click', () => {
+                localStorage.removeItem("access_token");
+                window.location.href = "login.html";
+            });
+        }
 
-        // Cargar estadísticas
-        async function cargarEstadisticas() {
+        async function cargarDatos() {
             try {
                 const token = localStorage.getItem('access_token');
                 if (!token) {
@@ -188,36 +202,53 @@
                     return;
                 }
 
-                // Cargar hijos
-                const hijosRes = await fetch(`${API_URL}/hijo/`, {
+                // 1. Obtener información del Usuario
+                const userRes = await fetch(`${API_URL}/usuario/me`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                const hijos = await hijosRes.json();
-                document.getElementById('total-hijos').textContent = hijos.length;
 
-                // Cargar loncheras
-                const loncherasRes = await fetch(`${API_URL}/lonchera/`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const loncheras = await loncherasRes.json();
-                document.getElementById('total-loncheras').textContent = loncheras.length;
+                if (userRes.ok) {
+                    const user = await userRes.json();
+                    const nombre = user.nombre || 'Usuario';
 
-                // Cargar direcciones
-                const direccionesRes = await fetch(`${API_URL}/direccion/`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const direcciones = await direccionesRes.json();
-                document.getElementById('total-direcciones').textContent = direcciones.length;
+                    // Navbar (Arriba derecha)
+                    const userNav = document.getElementById('userName');
+                    if(userNav) userNav.textContent = nombre;
+
+                    // Título Principal
+                    const pageTitle = document.getElementById('page-title');
+                    if(pageTitle) pageTitle.textContent = `Bienvenid@, ${nombre}`;
+                }
+
+                // 2. Cargar Estadísticas
+                const [hijosRes, loncherasRes, direccionesRes] = await Promise.all([
+                    fetch(`${API_URL}/hijo/`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch(`${API_URL}/lonchera/`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch(`${API_URL}/direcciones/?usuario_id=${localStorage.getItem('user_id')}`, { headers: { 'Authorization': `Bearer ${token}` } })
+                ]);
+
+                if (hijosRes.ok) {
+                    const hijos = await hijosRes.json();
+                    document.getElementById('total-hijos').textContent = hijos.length;
+                }
+                if (loncherasRes.ok) {
+                    const loncheras = await loncherasRes.json();
+                    document.getElementById('total-loncheras').textContent = loncheras.length;
+                }
+                if (direccionesRes.ok) {
+                    const direcciones = await direccionesRes.json();
+                    document.getElementById('total-direcciones').textContent = direcciones.length;
+                }
 
             } catch (error) {
-                console.error('Error al cargar estadísticas:', error);
+                console.error('Error al cargar datos:', error);
                 document.getElementById('total-hijos').textContent = '0';
                 document.getElementById('total-loncheras').textContent = '0';
                 document.getElementById('total-direcciones').textContent = '0';
             }
         }
 
-        document.addEventListener('DOMContentLoaded', cargarEstadisticas);
+        document.addEventListener('DOMContentLoaded', cargarDatos);
     </script>
 </body>
 </html>

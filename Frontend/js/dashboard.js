@@ -28,9 +28,18 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     })
     .then(usuario => {
+        // 1. Actualizar nombre en el Navbar (si existe)
         const userNameElement = document.getElementById("userName");
         if (userNameElement) {
             userNameElement.textContent = usuario.nombre;
+        }
+
+        // 2. CAMBIO PRINCIPAL: Actualizar el Título Grande "Dashboard"
+        const pageTitle = document.getElementById("page-title");
+        if (pageTitle) {
+            // Capitalizar primera letra por estética
+            const nombre = usuario.nombre.charAt(0).toUpperCase() + usuario.nombre.slice(1);
+            pageTitle.textContent = `Bienvenid@, ${nombre}`;
         }
 
         // Cargar estadísticas reales
@@ -49,73 +58,38 @@ async function cargarEstadisticas() {
         const token = localStorage.getItem('access_token');
         if (!token) return;
 
-        // Mostrar loading en las tarjetas
+        // Elementos del DOM
         const totalHijos = document.getElementById('total-hijos');
         const totalLoncheras = document.getElementById('total-loncheras');
         const totalDirecciones = document.getElementById('total-direcciones');
 
-        if (totalHijos) totalHijos.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-        if (totalLoncheras) totalLoncheras.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-        if (totalDirecciones) totalDirecciones.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        // Mostrar loading
+        if (totalHijos) totalHijos.innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size: 1.5rem"></i>';
+        if (totalLoncheras) totalLoncheras.innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size: 1.5rem"></i>';
+        if (totalDirecciones) totalDirecciones.innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size: 1.5rem"></i>';
 
-        // Cargar datos en paralelo
+        // Peticiones
         const [hijosRes, loncherasRes, direccionesRes] = await Promise.all([
-            fetch(`${API_URL}/hijo/`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            }),
-            fetch(`${API_URL}/lonchera/`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            }),
-            fetch(`${API_URL}/direccion/`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            })
+            fetch(`${API_URL}/hijo/`, { headers: { 'Authorization': `Bearer ${token}` } }),
+            fetch(`${API_URL}/lonchera/`, { headers: { 'Authorization': `Bearer ${token}` } }),
+            fetch(`${API_URL}/direcciones/?usuario_id=${localStorage.getItem('user_id')}`, { headers: { 'Authorization': `Bearer ${token}` } }) // Corrección en URL direcciones
         ]);
 
         const hijos = hijosRes.ok ? await hijosRes.json() : [];
         const loncheras = loncherasRes.ok ? await loncherasRes.json() : [];
         const direcciones = direccionesRes.ok ? await direccionesRes.json() : [];
 
-        // Actualizar contadores con animación
+        // Actualizar contadores
         if (totalHijos) animarContador(totalHijos, hijos.length);
         if (totalLoncheras) animarContador(totalLoncheras, loncheras.length);
         if (totalDirecciones) animarContador(totalDirecciones, direcciones.length);
 
-        // También actualizar IDs antiguos si existen
-        const totalHijosOld = document.getElementById("totalHijos");
-        const totalLoncherasOld = document.getElementById("totalLoncheras");
-        const totalDireccionesOld = document.getElementById("totalDirecciones");
-        
-        if (totalHijosOld) totalHijosOld.textContent = hijos.length;
-        if (totalLoncherasOld) totalLoncherasOld.textContent = loncheras.length;
-        if (totalDireccionesOld) totalDireccionesOld.textContent = direcciones.length;
-
     } catch (error) {
         console.error('Error al cargar estadísticas:', error);
-        
-        // Mostrar 0 en caso de error
-        const totalHijos = document.getElementById('total-hijos');
-        const totalLoncheras = document.getElementById('total-loncheras');
-        const totalDirecciones = document.getElementById('total-direcciones');
-        
-        if (totalHijos) totalHijos.textContent = '0';
-        if (totalLoncheras) totalLoncheras.textContent = '0';
-        if (totalDirecciones) totalDirecciones.textContent = '0';
     }
 }
 
-// Animar contador
+// Función de animación simple
 function animarContador(elemento, valorFinal) {
-    let valorActual = 0;
-    const duracion = 1000;
-    const incremento = valorFinal / (duracion / 16);
-
-    const intervalo = setInterval(() => {
-        valorActual += incremento;
-        if (valorActual >= valorFinal) {
-            elemento.textContent = valorFinal;
-            clearInterval(intervalo);
-        } else {
-            elemento.textContent = Math.floor(valorActual);
-        }
-    }, 16);
+    elemento.textContent = valorFinal; // Actualización directa para evitar parpadeos
 }
