@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import Session, select
+from sqlmodel import select
 from typing import List
-from Core.database import get_session
+from Core.database import SessionDep
 from Modulos.models import (
     Lonchera,
     LoncheraCreate,
@@ -23,18 +23,18 @@ router = APIRouter()
 # CREAR LONCHERA
 # ====================================================================
 @router.post("/loncheras", response_model=Lonchera, tags=["Loncheras"])
-def crear_lonchera(lonchera: LoncheraCreate, session: Session = Depends(get_session)):
+async def crear_lonchera(lonchera: LoncheraCreate, session: SessionDep):
     """
     Crea una nueva lonchera para un usuario.
     """
     # Verificar que el usuario existe
-    usuario_db = session.get(Usuario, lonchera.usuario_id)
+    usuario_db = await session.get(Usuario, lonchera.usuario_id)
     if not usuario_db:
         raise HTTPException(status_code=404, detail=f"Usuario con ID {lonchera.usuario_id} no encontrado")
 
     # Verificar que la dirección existe y pertenece al usuario
     if lonchera.direccion_id:
-        direccion_db = session.get(Direccion, lonchera.direccion_id)
+        direccion_db = await session.get(Direccion, lonchera.direccion_id)
         if not direccion_db:
             raise HTTPException(status_code=404, detail=f"Dirección con ID {lonchera.direccion_id} no encontrada")
         if direccion_db.usuario_id != lonchera.usuario_id:
@@ -46,8 +46,8 @@ def crear_lonchera(lonchera: LoncheraCreate, session: Session = Depends(get_sess
     # Crear la lonchera
     nueva_lonchera = Lonchera(**lonchera.model_dump())
     session.add(nueva_lonchera)
-    session.commit()
-    session.refresh(nueva_lonchera)
+    await session.commit()
+    await session.refresh(nueva_lonchera)
 
     return nueva_lonchera
 
@@ -56,16 +56,17 @@ def crear_lonchera(lonchera: LoncheraCreate, session: Session = Depends(get_sess
 # LISTAR LONCHERAS
 # ====================================================================
 @router.get("/loncheras", response_model=List[Lonchera], tags=["Loncheras"])
-def listar_loncheras(
+async def listar_loncheras(
         skip: int = 0,
         limit: int = 100,
-        session: Session = Depends(get_session)
+        session: SessionDep = None
 ):
     """
     Lista todas las loncheras activas con paginación.
     """
     statement = select(Lonchera).where(Lonchera.is_active == True).offset(skip).limit(limit)
-    loncheras = session.exec(statement).all()
+    result = await session.execute(statement)
+    loncheras = result.scalars().all()
     return loncheras
 
 
@@ -73,17 +74,17 @@ def listar_loncheras(
 # OBTENER LONCHERA POR ID
 # ====================================================================
 @router.get("/loncheras/{lonchera_id}", response_model=LoncheraConRelaciones, tags=["Loncheras"])
-def obtener_lonchera(lonchera_id: int, session: Session = Depends(get_session)):
+async def obtener_lonchera(lonchera_id: int, session: SessionDep):
     """
     Obtiene una lonchera específica con sus relaciones (usuario y alimentos).
     """
-    lonchera = session.get(Lonchera, lonchera_id)
+    lonchera = await session.get(Lonchera, lonchera_id)
 
     if not lonchera or not lonchera.is_active:
         raise HTTPException(status_code=404, detail=f"Lonchera con ID {lonchera_id} no encontrada")
 
     # Obtener usuario
-    usuario = session.get(Usuario, lonchera.usuario_id)
+    usuario = await session.get(Usuario, lonchera.usuario_id)
     usuario_resumen = UsuarioResumen(
         id=usuario.id,
         nombre=usuario.nombre,
@@ -91,10 +92,24 @@ def obtener_lonchera(lonchera_id: int, session: Session = Depends(get_session)):
         is_active=usuario.is_active
     )
 
-    # Obtener alimentos de la lonchera
+    # Obtener alimentos de la lonchera (esto requiere carga explícita o iteración cuidadosa en async)
+    # Como SQLModel async lazy loading es complejo, hacemos queries directas o asumimos eager loading configurado
+    # Aquí usaremos una estrategia segura obteniendo los alimentos manualmente
+
+    # Recargar lonchera con relaciones si es necesario, o buscar items manualmente
+    # Por simplicidad en este fix, iteramos lo que ya cargó o hacemos queries
+
     alimentos_detalle = []
-    for la in lonchera.alimentos:
-        alimento = session.get(Alimento, la.alimento_id)
+    # Nota: Acceder a lonchera.alimentos podría fallar si no se cargó con selectinload.
+    # Pero si falla, el fix ideal es usar selectinload en la query inicial.
+    # Asumimos que la sesión maneja esto o hacemos query manual:
+
+    query_items = select(LoncheraAlimento).where(LoncheraAlimento.lonchera_id == lonchera_id)
+    result_items = await session.execute(query_items)
+    items_lonchera = result_items.scalars().all()
+
+    for la in items_lonchera:
+        alimento = await session.get(Alimento, la.alimento_id)
         if alimento:
             calorias_porcion = (alimento.calorias_por_100g * la.cantidad_gramos) / 100
             precio_porcion = (alimento.precio_unitario * la.cantidad_gramos) / 100
@@ -127,15 +142,15 @@ def obtener_lonchera(lonchera_id: int, session: Session = Depends(get_session)):
 # ACTUALIZAR LONCHERA
 # ====================================================================
 @router.patch("/loncheras/{lonchera_id}", response_model=Lonchera, tags=["Loncheras"])
-def actualizar_lonchera(
+async def actualizar_lonchera(
         lonchera_id: int,
         lonchera_data: LoncheraUpdate,
-        session: Session = Depends(get_session)
+        session: SessionDep
 ):
     """
     Actualiza los datos básicos de una lonchera.
     """
-    lonchera_db = session.get(Lonchera, lonchera_id)
+    lonchera_db = await session.get(Lonchera, lonchera_id)
 
     if not lonchera_db or not lonchera_db.is_active:
         raise HTTPException(status_code=404, detail=f"Lonchera con ID {lonchera_id} no encontrada")
@@ -146,8 +161,8 @@ def actualizar_lonchera(
         setattr(lonchera_db, key, value)
 
     session.add(lonchera_db)
-    session.commit()
-    session.refresh(lonchera_db)
+    await session.commit()
+    await session.refresh(lonchera_db)
 
     return lonchera_db
 
@@ -156,18 +171,18 @@ def actualizar_lonchera(
 # ELIMINAR LONCHERA (SOFT DELETE)
 # ====================================================================
 @router.delete("/loncheras/{lonchera_id}", tags=["Loncheras"])
-def eliminar_lonchera(lonchera_id: int, session: Session = Depends(get_session)):
+async def eliminar_lonchera(lonchera_id: int, session: SessionDep):
     """
     Elimina (desactiva) una lonchera.
     """
-    lonchera_db = session.get(Lonchera, lonchera_id)
+    lonchera_db = await session.get(Lonchera, lonchera_id)
 
     if not lonchera_db or not lonchera_db.is_active:
         raise HTTPException(status_code=404, detail=f"Lonchera con ID {lonchera_id} no encontrada")
 
     lonchera_db.is_active = False
     session.add(lonchera_db)
-    session.commit()
+    await session.commit()
 
     return {"mensaje": f"Lonchera con ID {lonchera_id} eliminada exitosamente"}
 
@@ -176,19 +191,19 @@ def eliminar_lonchera(lonchera_id: int, session: Session = Depends(get_session))
 # AGREGAR ALIMENTO A LONCHERA
 # ====================================================================
 @router.post("/loncheras/{lonchera_id}/alimentos", response_model=Lonchera, tags=["Loncheras"])
-def agregar_alimento_a_lonchera(
+async def agregar_alimento_a_lonchera(
         lonchera_id: int,
         alimento_data: AgregarAlimento,
-        session: Session = Depends(get_session)
+        session: SessionDep
 ):
     """
     Agrega un alimento a una lonchera y recalcula calorías y precio.
     """
-    lonchera = session.get(Lonchera, lonchera_id)
+    lonchera = await session.get(Lonchera, lonchera_id)
     if not lonchera or not lonchera.is_active:
         raise HTTPException(status_code=404, detail=f"Lonchera con ID {lonchera_id} no encontrada")
 
-    alimento = session.get(Alimento, alimento_data.alimento_id)
+    alimento = await session.get(Alimento, alimento_data.alimento_id)
     if not alimento or not alimento.is_active:
         raise HTTPException(status_code=404, detail=f"Alimento con ID {alimento_data.alimento_id} no encontrado")
 
@@ -197,7 +212,8 @@ def agregar_alimento_a_lonchera(
         LoncheraAlimento.lonchera_id == lonchera_id,
         LoncheraAlimento.alimento_id == alimento_data.alimento_id
     )
-    relacion_existente = session.exec(statement).first()
+    result = await session.execute(statement)
+    relacion_existente = result.scalars().first()
 
     if relacion_existente:
         # Actualizar cantidad
@@ -220,8 +236,8 @@ def agregar_alimento_a_lonchera(
     lonchera.precio = round(lonchera.precio + precio_aporte, 2)
 
     session.add(lonchera)
-    session.commit()
-    session.refresh(lonchera)
+    await session.commit()
+    await session.refresh(lonchera)
 
     return lonchera
 
@@ -230,19 +246,19 @@ def agregar_alimento_a_lonchera(
 # ELIMINAR ALIMENTO DE LONCHERA
 # ====================================================================
 @router.delete("/loncheras/{lonchera_id}/alimentos/{alimento_id}", response_model=Lonchera, tags=["Loncheras"])
-def eliminar_alimento_de_lonchera(
+async def eliminar_alimento_de_lonchera(
         lonchera_id: int,
         alimento_id: int,
-        session: Session = Depends(get_session)
+        session: SessionDep
 ):
     """
     Elimina un alimento de una lonchera y recalcula calorías y precio.
     """
-    lonchera = session.get(Lonchera, lonchera_id)
+    lonchera = await session.get(Lonchera, lonchera_id)
     if not lonchera or not lonchera.is_active:
         raise HTTPException(status_code=404, detail=f"Lonchera con ID {lonchera_id} no encontrada")
 
-    alimento = session.get(Alimento, alimento_id)
+    alimento = await session.get(Alimento, alimento_id)
     if not alimento:
         raise HTTPException(status_code=404, detail=f"Alimento con ID {alimento_id} no encontrado")
 
@@ -251,7 +267,8 @@ def eliminar_alimento_de_lonchera(
         LoncheraAlimento.lonchera_id == lonchera_id,
         LoncheraAlimento.alimento_id == alimento_id
     )
-    relacion = session.exec(statement).first()
+    result = await session.execute(statement)
+    relacion = result.scalars().first()
 
     if not relacion:
         raise HTTPException(
@@ -269,8 +286,8 @@ def eliminar_alimento_de_lonchera(
     # Eliminar la relación
     session.delete(relacion)
     session.add(lonchera)
-    session.commit()
-    session.refresh(lonchera)
+    await session.commit()
+    await session.refresh(lonchera)
 
     return lonchera
 
@@ -279,14 +296,14 @@ def eliminar_alimento_de_lonchera(
 # LISTAR LONCHERAS POR USUARIO
 # ====================================================================
 @router.get("/usuarios/{usuario_id}/loncheras", response_model=List[Lonchera], tags=["Loncheras"])
-def listar_loncheras_usuario(
+async def listar_loncheras_usuario(
         usuario_id: int,
-        session: Session = Depends(get_session)
+        session: SessionDep
 ):
     """
     Lista todas las loncheras activas de un usuario específico.
     """
-    usuario = session.get(Usuario, usuario_id)
+    usuario = await session.get(Usuario, usuario_id)
     if not usuario:
         raise HTTPException(status_code=404, detail=f"Usuario con ID {usuario_id} no encontrado")
 
@@ -294,6 +311,7 @@ def listar_loncheras_usuario(
         Lonchera.usuario_id == usuario_id,
         Lonchera.is_active == True
     )
-    loncheras = session.exec(statement).all()
+    result = await session.execute(statement)
+    loncheras = result.scalars().all()
 
     return loncheras

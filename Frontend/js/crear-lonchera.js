@@ -47,11 +47,18 @@ async function cargarHijos() {
     }
 }
 
-// --- NUEVO: CARGAR DIRECCIONES ---
+// --- CARGAR DIRECCIONES ---
 async function cargarDirecciones() {
     try {
         const token = localStorage.getItem('access_token');
-        const response = await fetch(`${API_URL}/direcciones/`, {
+        const userId = localStorage.getItem('user_id');
+
+        if (!userId) {
+            console.error("No se encontró el ID de usuario");
+            return;
+        }
+
+        const response = await fetch(`${API_URL}/direcciones/?usuario_id=${userId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
 
@@ -60,7 +67,6 @@ async function cargarDirecciones() {
         if (response.ok) {
             const direcciones = await response.json();
 
-            // Validación: Si no tiene direcciones, bloquear o avisar
             if (direcciones.length === 0) {
                 select.innerHTML = '<option value="">Sin direcciones registradas</option>';
                 Swal.fire({
@@ -79,17 +85,19 @@ async function cargarDirecciones() {
             direcciones.forEach(dir => {
                 const option = document.createElement('option');
                 option.value = dir.id;
-                // Mostrar si es principal para ayudar a elegir
                 const principalTexto = dir.principal ? ' (Principal)' : '';
                 option.textContent = `${dir.nombre || 'Casa'} - ${dir.direccion}${principalTexto}`;
                 select.appendChild(option);
             });
 
         } else {
+            console.error("Error backend:", await response.text());
             select.innerHTML = '<option value="">Error al cargar</option>';
         }
     } catch (error) {
         console.error('Error direcciones:', error);
+        const select = document.getElementById('select-direccion');
+        if(select) select.innerHTML = '<option value="">Error de conexión</option>';
     }
 }
 
@@ -137,8 +145,7 @@ async function cargarAlimentos() {
 }
 
 function tieneRestriccion(alimento) {
-    // Lógica básica: si implementas validación real en backend, esto es visual
-    return false;
+    return false; // Lógica de restricción visual si se requiere
 }
 
 // --- RENDERIZAR ALIMENTOS ---
@@ -185,8 +192,8 @@ function renderizarAlimentos() {
     }).join('');
 }
 
-// --- AGREGAR ALIMENTO A ARRAY LOCAL ---
-function agregarAlimento(alimentoId) {
+// --- FUNCIONES GLOBALES (ACCESIBLES DESDE EL HTML) ---
+window.agregarAlimento = function(alimentoId) {
     const alimento = alimentosDisponibles.find(a => a.id === alimentoId);
     if (!alimento) return;
 
@@ -218,13 +225,14 @@ function agregarAlimento(alimentoId) {
     Toast.fire({ icon: 'success', title: 'Agregado' });
 }
 
-function eliminarAlimento(alimentoId) {
+window.eliminarAlimento = function(alimentoId) {
     alimentosEnLonchera = alimentosEnLonchera.filter(a => a.id !== alimentoId);
     actualizarResumen();
     renderizarAlimentosLonchera();
     renderizarAlimentos();
 }
 
+// --- RENDERIZAR LISTA LATERAL ---
 function renderizarAlimentosLonchera() {
     const container = document.getElementById('alimentos-lonchera');
 
@@ -264,15 +272,13 @@ function actualizarResumen() {
 }
 
 // --- CREAR LONCHERA (FINAL) ---
-async function crearLonchera() {
+window.crearLonchera = async function() {
     try {
-        // 1. Validar Hijo
         if (!hijoSeleccionado) {
             Swal.fire('Error', 'Debes seleccionar un hijo', 'error');
             return;
         }
 
-        // 2. Validar Dirección (NUEVO)
         const selectDireccion = document.getElementById('select-direccion');
         const direccionId = selectDireccion.value;
         if (!direccionId) {
@@ -280,14 +286,12 @@ async function crearLonchera() {
             return;
         }
 
-        // 3. Validar Nombre
         const nombreLonchera = document.getElementById('nombre-lonchera').value.trim();
         if (!nombreLonchera) {
             Swal.fire('Error', 'Debes ingresar un nombre para la lonchera', 'error');
             return;
         }
 
-        // 4. Validar Alimentos
         if (alimentosEnLonchera.length === 0) {
             Swal.fire('Error', 'Debes agregar al menos un alimento', 'error');
             return;
@@ -300,30 +304,22 @@ async function crearLonchera() {
         });
 
         const token = localStorage.getItem('access_token');
-
-        // Obtener usuario actual para el ID
-        const userResponse = await fetch(`${API_URL}/usuario/me`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        if (!userResponse.ok) throw new Error('Error de sesión');
-        const currentUser = await userResponse.json();
+        const userId = localStorage.getItem('user_id');
 
         const totalCalorias = alimentosEnLonchera.reduce((sum, a) => sum + a.calorias, 0);
         const totalPrecio = alimentosEnLonchera.reduce((sum, a) => sum + a.precio, 0);
 
-        // PREPARAR DATOS (INCLUYENDO DIRECCIÓN)
         const dataLonchera = {
             nombre: nombreLonchera,
             descripcion: `Lonchera para ${document.getElementById('select-hijo').selectedOptions[0].text}`,
             calorias: totalCalorias,
             precio: parseFloat(totalPrecio.toFixed(2)),
-            usuario_id: currentUser.id,
-            direccion_id: parseInt(direccionId) // <--- CAMPO NUEVO ENVIADO
+            usuario_id: parseInt(userId),
+            direccion_id: parseInt(direccionId)
         };
 
-        // ENVIAR AL BACKEND
-        const responseLonchera = await fetch(`${API_URL}/lonchera/`, {
+        // 1. CREAR LONCHERA (CORREGIDO: URL SIN PREFIJO EXTRA)
+        const responseLonchera = await fetch(`${API_URL}/loncheras`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -339,9 +335,9 @@ async function crearLonchera() {
 
         const loncheraCreada = await responseLonchera.json();
 
-        // AGREGAR ALIMENTOS INDIVIDUALMENTE
+        // 2. AGREGAR ALIMENTOS (CORREGIDO: URL SIN PREFIJO EXTRA)
         for (const alimento of alimentosEnLonchera) {
-            await fetch(`${API_URL}/lonchera/${loncheraCreada.id}/alimento`, {
+            await fetch(`${API_URL}/loncheras/${loncheraCreada.id}/alimentos`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
