@@ -1,142 +1,198 @@
-from fastapi import APIRouter, HTTPException, Depends
-from Core.database import SessionDep
+from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import select
 from typing import List
-from Core.auth import get_current_user
-# IMPORTACIÓN CLAVE: Usamos los modelos de models.py para que no haya conflictos
+from Core.database import SessionDep
 from Modulos.models import Usuario, Direccion, DireccionCreate, DireccionUpdate
 
-router = APIRouter(prefix="/direcciones", tags=["Direcciones"])
+router = APIRouter()
 
-@router.post("/", response_model=Direccion, status_code=201)
-async def crear_direccion(
-        data: DireccionCreate,
-        session: SessionDep,
-        current_user: Usuario = Depends(get_current_user)
-):
-    # Si marca como principal, desmarcar las demás
-    if data.principal:
-        query = select(Direccion).where(
-            Direccion.usuario_id == current_user.id,
-            Direccion.principal == True
-        )
-        result = await session.execute(query)
-        direcciones_principales = result.scalars().all()
-        for dir in direcciones_principales:
-            dir.principal = False
-            session.add(dir)
 
-    # Crear la dirección usando el modelo de la base de datos
-    direccion = Direccion(
-        **data.model_dump(),
-        usuario_id=current_user.id
-    )
-    session.add(direccion)
-    await session.commit()
-    await session.refresh(direccion)
-    return direccion
-
-@router.get("/", response_model=List[Direccion])
+# ====================================================================
+# LISTAR TODAS LAS DIRECCIONES POR USUARIO (QUERY PARAM)
+# ====================================================================
+@router.get("/direcciones/", response_model=List[Direccion], tags=["Direcciones"])
 async def listar_direcciones(
-        session: SessionDep,
-        current_user: Usuario = Depends(get_current_user)
+        usuario_id: int,
+        session: SessionDep
 ):
-    # Filtrar solo las direcciones del usuario actual
-    query = select(Direccion).where(Direccion.usuario_id == current_user.id)
-    result = await session.execute(query)
-    return result.scalars().all()
+    """
+    Lista todas las direcciones de un usuario específico usando query parameter.
+    Ejemplo: GET /direcciones/?usuario_id=1
+    """
+    # Verificar que el usuario existe
+    usuario = await session.get(Usuario, usuario_id)
+    if not usuario:
+        raise HTTPException(status_code=404, detail=f"Usuario con ID {usuario_id} no encontrado")
 
-@router.get("/{direccion_id}", response_model=Direccion)
-async def obtener_direccion(
-        direccion_id: int,
-        session: SessionDep,
-        current_user: Usuario = Depends(get_current_user)
+    # Obtener todas las direcciones del usuario
+    statement = select(Direccion).where(Direccion.usuario_id == usuario_id)
+    result = await session.execute(statement)
+    direcciones = result.scalars().all()
+
+    return direcciones
+
+
+# ====================================================================
+# CREAR DIRECCIÓN
+# ====================================================================
+@router.post("/usuarios/{usuario_id}/direcciones", response_model=Direccion, tags=["Direcciones"])
+async def crear_direccion(
+        usuario_id: int,
+        direccion_data: DireccionCreate,
+        session: SessionDep
 ):
-    direccion = await session.get(Direccion, direccion_id)
-    if not direccion:
-        raise HTTPException(status_code=404, detail="Dirección no encontrada")
+    """
+    Crea una nueva dirección para un usuario específico.
+    """
+    # Verificar que el usuario existe
+    usuario = await session.get(Usuario, usuario_id)
+    if not usuario:
+        raise HTTPException(status_code=404, detail=f"Usuario con ID {usuario_id} no encontrado")
 
-    if direccion.usuario_id != current_user.id:
-        raise HTTPException(status_code=403, detail="No tienes permiso para ver esta dirección")
+    # Si la nueva dirección es principal, quitar el flag de las demás
+    if direccion_data.principal:
+        statement = select(Direccion).where(Direccion.usuario_id == usuario_id)
+        result = await session.execute(statement)
+        direcciones_existentes = result.scalars().all()
+        for dir_existente in direcciones_existentes:
+            dir_existente.principal = False
+            session.add(dir_existente)
 
-    return direccion
+    # Crear la nueva dirección
+    nueva_direccion = Direccion(
+        **direccion_data.model_dump(),
+        usuario_id=usuario_id
+    )
 
-@router.put("/{direccion_id}", response_model=Direccion)
+    session.add(nueva_direccion)
+    await session.commit()
+    await session.refresh(nueva_direccion)
+
+    return nueva_direccion
+
+
+# ====================================================================
+# LISTAR DIRECCIONES DE UN USUARIO
+# ====================================================================
+@router.get("/usuarios/{usuario_id}/direcciones", response_model=List[Direccion], tags=["Direcciones"])
+async def listar_direcciones_usuario(
+        usuario_id: int,
+        session: SessionDep
+):
+    """
+    Lista todas las direcciones de un usuario específico.
+    """
+    # Verificar que el usuario existe
+    usuario = await session.get(Usuario, usuario_id)
+    if not usuario:
+        raise HTTPException(status_code=404, detail=f"Usuario con ID {usuario_id} no encontrado")
+
+    # Obtener todas las direcciones del usuario
+    statement = select(Direccion).where(Direccion.usuario_id == usuario_id)
+    result = await session.execute(statement)
+    direcciones = result.scalars().all()
+
+    return direcciones
+
+
+# ====================================================================
+# ACTUALIZAR DIRECCIÓN
+# ====================================================================
+@router.patch("/direcciones/{direccion_id}", response_model=Direccion, tags=["Direcciones"])
 async def actualizar_direccion(
         direccion_id: int,
-        data: DireccionUpdate,
-        session: SessionDep,
-        current_user: Usuario = Depends(get_current_user)
+        direccion_data: DireccionUpdate,
+        session: SessionDep
 ):
+    """
+    Actualiza una dirección existente.
+    """
     direccion = await session.get(Direccion, direccion_id)
     if not direccion:
-        raise HTTPException(status_code=404, detail="Dirección no encontrada")
+        raise HTTPException(status_code=404, detail=f"Dirección con ID {direccion_id} no encontrada")
 
-    if direccion.usuario_id != current_user.id:
-        raise HTTPException(status_code=403, detail="No tienes permiso para editar esta dirección")
-
-    if data.principal:
-        query = select(Direccion).where(
-            Direccion.usuario_id == current_user.id,
-            Direccion.principal == True,
+    # Si se marca como principal, quitar el flag de las demás direcciones del mismo usuario
+    if direccion_data.principal:
+        statement = select(Direccion).where(
+            Direccion.usuario_id == direccion.usuario_id,
             Direccion.id != direccion_id
         )
-        result = await session.execute(query)
-        direcciones_principales = result.scalars().all()
-        for dir in direcciones_principales:
-            dir.principal = False
-            session.add(dir)
+        result = await session.execute(statement)
+        otras_direcciones = result.scalars().all()
+        for otra_dir in otras_direcciones:
+            otra_dir.principal = False
+            session.add(otra_dir)
 
-    for key, value in data.model_dump(exclude_unset=True).items():
+    # Actualizar los campos proporcionados
+    datos_actualizacion = direccion_data.model_dump(exclude_unset=True)
+    for key, value in datos_actualizacion.items():
         setattr(direccion, key, value)
 
     session.add(direccion)
     await session.commit()
     await session.refresh(direccion)
+
     return direccion
 
-@router.put("/{direccion_id}/principal", response_model=Direccion)
-async def establecer_principal(
+
+# ====================================================================
+# ELIMINAR DIRECCIÓN
+# ====================================================================
+@router.delete("/direcciones/{direccion_id}", tags=["Direcciones"])
+async def eliminar_direccion(
         direccion_id: int,
-        session: SessionDep,
-        current_user: Usuario = Depends(get_current_user)
+        session: SessionDep
 ):
+    """
+    Elimina una dirección específica.
+    """
     direccion = await session.get(Direccion, direccion_id)
     if not direccion:
-        raise HTTPException(status_code=404, detail="Dirección no encontrada")
+        raise HTTPException(status_code=404, detail=f"Dirección con ID {direccion_id} no encontrada")
 
-    if direccion.usuario_id != current_user.id:
-        raise HTTPException(status_code=403, detail="No tienes permiso")
+    # Verificar si hay loncheras asociadas a esta dirección
+    if direccion.loncheras:
+        raise HTTPException(
+            status_code=400,
+            detail=f"No se puede eliminar la dirección porque tiene {len(direccion.loncheras)} lonchera(s) asociada(s)"
+        )
 
-    query = select(Direccion).where(
-        Direccion.usuario_id == current_user.id,
-        Direccion.principal == True
+    await session.delete(direccion)
+    await session.commit()
+
+    return {"mensaje": f"Dirección con ID {direccion_id} eliminada exitosamente"}
+
+
+# ====================================================================
+# MARCAR DIRECCIÓN COMO PRINCIPAL
+# ====================================================================
+@router.post("/direcciones/{direccion_id}/principal", response_model=Direccion, tags=["Direcciones"])
+async def marcar_como_principal(
+        direccion_id: int,
+        session: SessionDep
+):
+    """
+    Marca una dirección como principal y quita el flag de las demás direcciones del usuario.
+    """
+    direccion = await session.get(Direccion, direccion_id)
+    if not direccion:
+        raise HTTPException(status_code=404, detail=f"Dirección con ID {direccion_id} no encontrada")
+
+    # Quitar el flag principal de todas las direcciones del usuario
+    statement = select(Direccion).where(
+        Direccion.usuario_id == direccion.usuario_id,
+        Direccion.id != direccion_id
     )
-    result = await session.execute(query)
-    direcciones_principales = result.scalars().all()
-    for dir in direcciones_principales:
-        dir.principal = False
-        session.add(dir)
+    result = await session.execute(statement)
+    otras_direcciones = result.scalars().all()
+    for otra_dir in otras_direcciones:
+        otra_dir.principal = False
+        session.add(otra_dir)
 
+    # Marcar esta dirección como principal
     direccion.principal = True
     session.add(direccion)
     await session.commit()
     await session.refresh(direccion)
+
     return direccion
-
-@router.delete("/{direccion_id}", status_code=204)
-async def eliminar_direccion(
-        direccion_id: int,
-        session: SessionDep,
-        current_user: Usuario = Depends(get_current_user)
-):
-    direccion = await session.get(Direccion, direccion_id)
-    if not direccion:
-        raise HTTPException(status_code=404, detail="Dirección no encontrada")
-
-    if direccion.usuario_id != current_user.id:
-        raise HTTPException(status_code=403, detail="No tienes permiso para eliminar esta dirección")
-
-    await session.delete(direccion)
-    await session.commit()
-    return

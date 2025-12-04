@@ -65,11 +65,15 @@ async def login_para_access_token(
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": usuario.email},
+        data={"sub": usuario.email, "user_id": usuario.id},  # ✅ AGREGADO user_id al token
         expires_delta=access_token_expires
     )
 
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user_id": usuario.id  # ✅ AGREGADO user_id en la respuesta
+    }
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")

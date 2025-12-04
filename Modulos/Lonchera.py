@@ -1,384 +1,299 @@
-from fastapi import APIRouter, HTTPException, Query, Depends
-from Core.database import SessionDep
+from fastapi import APIRouter, Depends, HTTPException
+from sqlmodel import Session, select
+from typing import List
+from Core.database import get_session
 from Modulos.models import (
-    Lonchera, LoncheraCreate, LoncheraUpdate, LoncheraAlimento,
-    AgregarAlimento, Usuario, Alimento, RestriccionAlimento,
-    Direccion  # Importamos la dirección del modelo
+    Lonchera,
+    LoncheraCreate,
+    LoncheraUpdate,
+    LoncheraConRelaciones,
+    Usuario,
+    UsuarioResumen,
+    Alimento,
+    LoncheraAlimento,
+    AgregarAlimento,
+    LoncheraAlimentoDetalle,
+    Direccion
 )
-from typing import List, Annotated
-from Core.auth import get_current_user
-from sqlmodel import select
-from sqlalchemy.orm import selectinload
 
-router = APIRouter(tags=["Loncheras"], prefix="/lonchera")
+router = APIRouter()
 
 
-@router.post("/", response_model=Lonchera, status_code=201)
-async def crear_lonchera(data: LoncheraCreate, session: SessionDep):
+# ====================================================================
+# CREAR LONCHERA
+# ====================================================================
+@router.post("/loncheras", response_model=Lonchera, tags=["Loncheras"])
+def crear_lonchera(lonchera: LoncheraCreate, session: Session = Depends(get_session)):
     """
-    Crea una nueva lonchera para un usuario, validando el hijo y la dirección.
+    Crea una nueva lonchera para un usuario.
     """
-    # 1. Validar Usuario (Padre, que es el creador/dueño de la dirección)
-    usuario = await session.get(Usuario, data.usuario_id)
-    if not usuario or not usuario.is_active:
-        raise HTTPException(status_code=404, detail="Usuario (creador/padre) no encontrado o inactivo")
+    # Verificar que el usuario existe
+    usuario_db = session.get(Usuario, lonchera.usuario_id)
+    if not usuario_db:
+        raise HTTPException(status_code=404, detail=f"Usuario con ID {lonchera.usuario_id} no encontrado")
 
-    # 2. Validar Dirección
-    if data.direccion_id:
-        direccion = await session.get(Direccion, data.direccion_id)
-        if not direccion:
-            raise HTTPException(status_code=404, detail="Dirección no encontrada")
+    # Verificar que la dirección existe y pertenece al usuario
+    if lonchera.direccion_id:
+        direccion_db = session.get(Direccion, lonchera.direccion_id)
+        if not direccion_db:
+            raise HTTPException(status_code=404, detail=f"Dirección con ID {lonchera.direccion_id} no encontrada")
+        if direccion_db.usuario_id != lonchera.usuario_id:
+            raise HTTPException(
+                status_code=400,
+                detail="La dirección seleccionada no pertenece al usuario"
+            )
 
-        # Seguridad: Verificar que la dirección pertenezca al usuario creador
-        if direccion.usuario_id != data.usuario_id:
-            raise HTTPException(status_code=403, detail="La dirección no pertenece al usuario creador")
-    else:
-        raise HTTPException(status_code=400, detail="Se requiere una dirección de entrega")
+    # Crear la lonchera
+    nueva_lonchera = Lonchera(**lonchera.model_dump())
+    session.add(nueva_lonchera)
+    session.commit()
+    session.refresh(nueva_lonchera)
 
-    # 3. Crear Lonchera
-    lonchera = Lonchera(**data.model_dump())
-    session.add(lonchera)
-
-    await session.commit()
-    await session.refresh(lonchera)
-    return lonchera
+    return nueva_lonchera
 
 
-@router.get("/", response_model=List[Lonchera])
-async def listar_loncheras_del_usuario_actual(
-        session: SessionDep,
-        current_user: Annotated[Usuario, Depends(get_current_user)],
-        incluir_inactivas: bool = Query(default=False)
+# ====================================================================
+# LISTAR LONCHERAS
+# ====================================================================
+@router.get("/loncheras", response_model=List[Lonchera], tags=["Loncheras"])
+def listar_loncheras(
+        skip: int = 0,
+        limit: int = 100,
+        session: Session = Depends(get_session)
 ):
     """
-    Lista las loncheras del usuario actual.
+    Lista todas las loncheras activas con paginación.
     """
-    # Consulta con eager loading para traer la dirección si es necesario
-    query = select(Lonchera).where(Lonchera.usuario_id == current_user.id).options(
-        selectinload(Lonchera.direccion)
-    )
-
-    if not incluir_inactivas:
-        query = query.where(Lonchera.is_active == True)
-
-    result = await session.execute(query)
-    loncheras = result.scalars().all()
+    statement = select(Lonchera).where(Lonchera.is_active == True).offset(skip).limit(limit)
+    loncheras = session.exec(statement).all()
     return loncheras
 
 
-@router.get("/{lonchera_id}", response_model=Lonchera)
-async def obtener_lonchera(lonchera_id: int, session: SessionDep):
+# ====================================================================
+# OBTENER LONCHERA POR ID
+# ====================================================================
+@router.get("/loncheras/{lonchera_id}", response_model=LoncheraConRelaciones, tags=["Loncheras"])
+def obtener_lonchera(lonchera_id: int, session: Session = Depends(get_session)):
     """
-    Obtiene una lonchera por ID cargando sus alimentos y dirección.
+    Obtiene una lonchera específica con sus relaciones (usuario y alimentos).
     """
-    query = select(Lonchera).where(Lonchera.id == lonchera_id).options(
-        selectinload(Lonchera.alimentos).selectinload(LoncheraAlimento.alimento),
-        selectinload(Lonchera.direccion)  # Incluir la dirección en la carga
-    )
-    result = await session.execute(query)
-    lonchera = result.scalars().first()
+    lonchera = session.get(Lonchera, lonchera_id)
 
     if not lonchera or not lonchera.is_active:
-        raise HTTPException(status_code=404, detail="Lonchera no encontrada")
-    return lonchera
+        raise HTTPException(status_code=404, detail=f"Lonchera con ID {lonchera_id} no encontrada")
+
+    # Obtener usuario
+    usuario = session.get(Usuario, lonchera.usuario_id)
+    usuario_resumen = UsuarioResumen(
+        id=usuario.id,
+        nombre=usuario.nombre,
+        apellido=usuario.apellido,
+        is_active=usuario.is_active
+    )
+
+    # Obtener alimentos de la lonchera
+    alimentos_detalle = []
+    for la in lonchera.alimentos:
+        alimento = session.get(Alimento, la.alimento_id)
+        if alimento:
+            calorias_porcion = (alimento.calorias_por_100g * la.cantidad_gramos) / 100
+            precio_porcion = (alimento.precio_unitario * la.cantidad_gramos) / 100
+
+            alimentos_detalle.append(
+                LoncheraAlimentoDetalle(
+                    alimento_id=alimento.id,
+                    nombre_alimento=alimento.nombre,
+                    cantidad_gramos=la.cantidad_gramos,
+                    calorias_porcion=round(calorias_porcion, 2),
+                    precio_porcion=round(precio_porcion, 2)
+                )
+            )
+
+    return LoncheraConRelaciones(
+        id=lonchera.id,
+        nombre=lonchera.nombre,
+        descripcion=lonchera.descripcion,
+        calorias=lonchera.calorias,
+        precio=lonchera.precio,
+        direccion_id=lonchera.direccion_id,
+        usuario_id=lonchera.usuario_id,
+        fecha_creacion=lonchera.fecha_creacion,
+        usuario=usuario_resumen,
+        alimentos=alimentos_detalle
+    )
 
 
-# --- Resto del código se mantiene igual ---
-
-@router.patch("/{lonchera_id}", response_model=Lonchera)
-async def actualizar_lonchera(
+# ====================================================================
+# ACTUALIZAR LONCHERA
+# ====================================================================
+@router.patch("/loncheras/{lonchera_id}", response_model=Lonchera, tags=["Loncheras"])
+def actualizar_lonchera(
         lonchera_id: int,
-        data: LoncheraUpdate,
-        session: SessionDep
+        lonchera_data: LoncheraUpdate,
+        session: Session = Depends(get_session)
 ):
-    lonchera = await obtener_lonchera(lonchera_id, session)
+    """
+    Actualiza los datos básicos de una lonchera.
+    """
+    lonchera_db = session.get(Lonchera, lonchera_id)
 
-    update_data = data.model_dump(exclude_unset=True)
+    if not lonchera_db or not lonchera_db.is_active:
+        raise HTTPException(status_code=404, detail=f"Lonchera con ID {lonchera_id} no encontrada")
 
-    if not update_data:
-        raise HTTPException(
-            status_code=400,
-            detail="No se proporcionaron datos para actualizar"
+    # Actualizar campos proporcionados
+    datos_actualizacion = lonchera_data.model_dump(exclude_unset=True)
+    for key, value in datos_actualizacion.items():
+        setattr(lonchera_db, key, value)
+
+    session.add(lonchera_db)
+    session.commit()
+    session.refresh(lonchera_db)
+
+    return lonchera_db
+
+
+# ====================================================================
+# ELIMINAR LONCHERA (SOFT DELETE)
+# ====================================================================
+@router.delete("/loncheras/{lonchera_id}", tags=["Loncheras"])
+def eliminar_lonchera(lonchera_id: int, session: Session = Depends(get_session)):
+    """
+    Elimina (desactiva) una lonchera.
+    """
+    lonchera_db = session.get(Lonchera, lonchera_id)
+
+    if not lonchera_db or not lonchera_db.is_active:
+        raise HTTPException(status_code=404, detail=f"Lonchera con ID {lonchera_id} no encontrada")
+
+    lonchera_db.is_active = False
+    session.add(lonchera_db)
+    session.commit()
+
+    return {"mensaje": f"Lonchera con ID {lonchera_id} eliminada exitosamente"}
+
+
+# ====================================================================
+# AGREGAR ALIMENTO A LONCHERA
+# ====================================================================
+@router.post("/loncheras/{lonchera_id}/alimentos", response_model=Lonchera, tags=["Loncheras"])
+def agregar_alimento_a_lonchera(
+        lonchera_id: int,
+        alimento_data: AgregarAlimento,
+        session: Session = Depends(get_session)
+):
+    """
+    Agrega un alimento a una lonchera y recalcula calorías y precio.
+    """
+    lonchera = session.get(Lonchera, lonchera_id)
+    if not lonchera or not lonchera.is_active:
+        raise HTTPException(status_code=404, detail=f"Lonchera con ID {lonchera_id} no encontrada")
+
+    alimento = session.get(Alimento, alimento_data.alimento_id)
+    if not alimento or not alimento.is_active:
+        raise HTTPException(status_code=404, detail=f"Alimento con ID {alimento_data.alimento_id} no encontrado")
+
+    # Verificar si el alimento ya está en la lonchera
+    statement = select(LoncheraAlimento).where(
+        LoncheraAlimento.lonchera_id == lonchera_id,
+        LoncheraAlimento.alimento_id == alimento_data.alimento_id
+    )
+    relacion_existente = session.exec(statement).first()
+
+    if relacion_existente:
+        # Actualizar cantidad
+        relacion_existente.cantidad_gramos += alimento_data.cantidad_gramos
+        session.add(relacion_existente)
+    else:
+        # Crear nueva relación
+        nueva_relacion = LoncheraAlimento(
+            lonchera_id=lonchera_id,
+            alimento_id=alimento_data.alimento_id,
+            cantidad_gramos=alimento_data.cantidad_gramos
         )
+        session.add(nueva_relacion)
 
-    for key, value in update_data.items():
-        setattr(lonchera, key, value)
+    # Recalcular calorías y precio
+    calorias_aporte = (alimento.calorias_por_100g * alimento_data.cantidad_gramos) / 100
+    precio_aporte = (alimento.precio_unitario * alimento_data.cantidad_gramos) / 100
+
+    lonchera.calorias = int(lonchera.calorias + calorias_aporte)
+    lonchera.precio = round(lonchera.precio + precio_aporte, 2)
 
     session.add(lonchera)
-    await session.commit()
-    await session.refresh(lonchera)
+    session.commit()
+    session.refresh(lonchera)
+
     return lonchera
 
 
-@router.delete("/{lonchera_id}", status_code=204)
-async def eliminar_lonchera(
-        lonchera_id: int,
-        session: SessionDep,
-        hard_delete: bool = Query(default=False)
-):
-    lonchera = await session.get(Lonchera, lonchera_id)
-    if not lonchera:
-        raise HTTPException(status_code=404, detail="Lonchera no encontrada")
-
-    if hard_delete:
-        await session.delete(lonchera)
-    else:
-        lonchera.is_active = False
-        session.add(lonchera)
-
-    await session.commit()
-    return
-
-
-@router.post("/{lonchera_id}/alimento", status_code=201)
-async def agregar_alimento(
-        lonchera_id: int,
-        data: AgregarAlimento,
-        session: SessionDep
-):
-    lonchera = await obtener_lonchera(lonchera_id, session)
-    alimento = await session.get(Alimento, data.alimento_id)
-
-    if not alimento or not alimento.is_active:
-        raise HTTPException(status_code=404, detail="Alimento no encontrado o inactivo")
-
-    if data.cantidad_gramos <= 0:
-        raise HTTPException(status_code=400, detail="La cantidad debe ser mayor a 0")
-
-    query = select(LoncheraAlimento).where(
-        LoncheraAlimento.lonchera_id == lonchera_id,
-        LoncheraAlimento.alimento_id == data.alimento_id
-    )
-    result = await session.execute(query)
-    existing = result.scalars().first()
-
-    if existing:
-        existing.cantidad_gramos = data.cantidad_gramos
-        mensaje = "Cantidad del alimento actualizada"
-        session.add(existing)
-    else:
-        la = LoncheraAlimento(
-            lonchera_id=lonchera_id,
-            alimento_id=data.alimento_id,
-            cantidad_gramos=data.cantidad_gramos
-        )
-        session.add(la)
-        mensaje = "Alimento agregado a la lonchera"
-
-    await session.commit()
-
-    await session.refresh(lonchera)
-    await _recalcular_totales_lonchera(lonchera, session)
-
-    factor = data.cantidad_gramos / 100
-    calorias_alimento = factor * alimento.calorias_por_100g
-    precio_alimento = factor * alimento.precio_unitario
-
-    return {
-        "message": mensaje,
-        "lonchera_id": lonchera_id,
-        "alimento": {
-            "id": alimento.id,
-            "nombre": alimento.nombre,
-            "cantidad_gramos": data.cantidad_gramos,
-            "calorias_aportadas": round(calorias_alimento, 2),
-            "precio_aportado": round(precio_alimento, 2)
-        },
-        "totales_lonchera": {
-            "calorias": lonchera.calorias,
-            "precio": lonchera.precio
-        }
-    }
-
-
-@router.delete("/{lonchera_id}/alimento/{alimento_id}", status_code=204)
-async def quitar_alimento(
+# ====================================================================
+# ELIMINAR ALIMENTO DE LONCHERA
+# ====================================================================
+@router.delete("/loncheras/{lonchera_id}/alimentos/{alimento_id}", response_model=Lonchera, tags=["Loncheras"])
+def eliminar_alimento_de_lonchera(
         lonchera_id: int,
         alimento_id: int,
-        session: SessionDep
+        session: Session = Depends(get_session)
 ):
-    lonchera = await obtener_lonchera(lonchera_id, session)
+    """
+    Elimina un alimento de una lonchera y recalcula calorías y precio.
+    """
+    lonchera = session.get(Lonchera, lonchera_id)
+    if not lonchera or not lonchera.is_active:
+        raise HTTPException(status_code=404, detail=f"Lonchera con ID {lonchera_id} no encontrada")
 
-    query = select(LoncheraAlimento).where(
+    alimento = session.get(Alimento, alimento_id)
+    if not alimento:
+        raise HTTPException(status_code=404, detail=f"Alimento con ID {alimento_id} no encontrado")
+
+    # Buscar la relación
+    statement = select(LoncheraAlimento).where(
         LoncheraAlimento.lonchera_id == lonchera_id,
         LoncheraAlimento.alimento_id == alimento_id
     )
-    result = await session.execute(query)
-    la = result.scalars().first()
+    relacion = session.exec(statement).first()
 
-    if not la:
+    if not relacion:
         raise HTTPException(
             status_code=404,
-            detail="El alimento no está en la lonchera"
+            detail=f"Alimento con ID {alimento_id} no está en la lonchera {lonchera_id}"
         )
 
-    await session.delete(la)
-    await session.commit()
+    # Recalcular calorías y precio (restar)
+    calorias_restar = (alimento.calorias_por_100g * relacion.cantidad_gramos) / 100
+    precio_restar = (alimento.precio_unitario * relacion.cantidad_gramos) / 100
 
-    await session.refresh(lonchera)
-    await _recalcular_totales_lonchera(lonchera, session)
-    return
+    lonchera.calorias = max(0, int(lonchera.calorias - calorias_restar))
+    lonchera.precio = max(0.0, round(lonchera.precio - precio_restar, 2))
 
-
-@router.get("/{lonchera_id}/alimentos")
-async def listar_alimentos_lonchera(lonchera_id: int, session: SessionDep):
-    lonchera = await obtener_lonchera(lonchera_id, session)
-
-    alimentos_info = []
-    total_calorias = 0
-    total_proteinas = 0
-    total_carbohidratos = 0
-    total_grasas = 0
-    total_precio = 0
-
-    for la in lonchera.alimentos:
-        if not la.alimento: continue
-
-        factor = la.cantidad_gramos / 100
-        calorias = factor * la.alimento.calorias_por_100g
-        proteinas = factor * la.alimento.proteinas_por_100g
-        carbohidratos = factor * la.alimento.carbohidratos_por_100g
-        grasas = factor * la.alimento.grasas_por_100g
-        precio = factor * la.alimento.precio_unitario
-
-        alimentos_info.append({
-            "alimento_id": la.alimento_id,
-            "nombre": la.alimento.nombre,
-            "categoria": la.alimento.categoria,
-            "cantidad_gramos": la.cantidad_gramos,
-            "calorias": round(calorias, 2),
-            "proteinas": round(proteinas, 2),
-            "carbohidratos": round(carbohidratos, 2),
-            "grasas": round(grasas, 2),
-            "precio": round(precio, 2)
-        })
-
-        total_calorias += calorias
-        total_proteinas += proteinas
-        total_carbohidratos += carbohidratos
-        total_grasas += grasas
-        total_precio += precio
-
-    return {
-        "lonchera_id": lonchera_id,
-        "nombre": lonchera.nombre,
-        "descripcion": lonchera.descripcion,
-        "alimentos": alimentos_info,
-        "totales": {
-            "calorias": round(total_calorias, 2),
-            "proteinas": round(total_proteinas, 2),
-            "carbohidratos": round(total_carbohidratos, 2),
-            "grasas": round(total_grasas, 2),
-            "precio": round(total_precio, 2)
-        },
-        "total_alimentos": len(alimentos_info)
-    }
-
-
-@router.get("/{lonchera_id}/completo")
-async def obtener_lonchera_completa(lonchera_id: int, session: SessionDep):
-    lonchera = await obtener_lonchera(lonchera_id, session)
-
-    usuario = await session.get(Usuario, lonchera.usuario_id)
-
-    usuario_info = {
-        "id": usuario.id,
-        "nombre": usuario.nombre,
-        "apellido": usuario.apellido
-    }
-
-    alimentos_info = []
-    for la in lonchera.alimentos:
-        if not la.alimento: continue
-        alimentos_info.append({
-            "id": la.alimento.id,
-            "nombre": la.alimento.nombre,
-            "cantidad_gramos": la.cantidad_gramos,
-            "categoria": la.alimento.categoria
-        })
-
-    return {
-        "lonchera": {
-            "id": lonchera.id,
-            "nombre": lonchera.nombre,
-            "descripcion": lonchera.descripcion,
-            "precio": lonchera.precio,
-            "calorias": lonchera.calorias,
-            "is_active": lonchera.is_active,
-            # Incluir la dirección de entrega
-            "direccion_entrega": f"{lonchera.direccion.direccion} ({lonchera.direccion.nombre})" if lonchera.direccion else "No asignada"
-        },
-        "usuario": usuario_info,
-        "alimentos": alimentos_info,
-        "total_alimentos": len(alimentos_info)
-    }
-
-
-@router.get("/{lonchera_id}/validar-restricciones")
-async def validar_restricciones_lonchera(
-        lonchera_id: int,
-        session: SessionDep,
-        restriccion_ids: List[int] = Query(default=[])
-):
-    lonchera = await obtener_lonchera(lonchera_id, session)
-
-    if not restriccion_ids:
-        return {
-            "lonchera_id": lonchera_id,
-            "mensaje": "No se especificaron restricciones para validar",
-            "es_segura": True,
-            "alimentos_problematicos": []
-        }
-
-    alimentos_restringidos = {}
-    for restriccion_id in restriccion_ids:
-        query = select(RestriccionAlimento).where(RestriccionAlimento.restriccion_id == restriccion_id)
-        result = await session.execute(query)
-        asociaciones = result.scalars().all()
-
-        for asoc in asociaciones:
-            alimentos_restringidos[asoc.alimento_id] = restriccion_id
-
-    alimentos_problematicos = []
-    for la in lonchera.alimentos:
-        if la.alimento_id in alimentos_restringidos:
-            alimentos_problematicos.append({
-                "alimento_id": la.alimento.id,
-                "nombre": la.alimento.nombre,
-                "cantidad_gramos": la.cantidad_gramos,
-                "restriccion_id": alimentos_restringidos[la.alimento_id]
-            })
-
-    es_segura = len(alimentos_problematicos) == 0
-
-    return {
-        "lonchera_id": lonchera_id,
-        "nombre_lonchera": lonchera.nombre,
-        "es_segura": es_segura,
-        "total_alimentos": len(lonchera.alimentos),
-        "alimentos_problematicos": alimentos_problematicos,
-        "mensaje": "Lonchera segura" if es_segura else "⚠️ Contiene alimentos con restricciones"
-    }
-
-
-async def _recalcular_totales_lonchera(lonchera: Lonchera, session: SessionDep):
-    query = select(LoncheraAlimento).where(LoncheraAlimento.lonchera_id == lonchera.id).options(
-        selectinload(LoncheraAlimento.alimento))
-    result = await session.execute(query)
-    items = result.scalars().all()
-
-    total_calorias = 0
-    total_precio = 0
-
-    for la in items:
-        if la.alimento:
-            factor = la.cantidad_gramos / 100
-            total_calorias += factor * la.alimento.calorias_por_100g
-            total_precio += factor * la.alimento.precio_unitario
-
-    lonchera.calorias = int(round(total_calorias))
-    lonchera.precio = round(total_precio, 2)
-
+    # Eliminar la relación
+    session.delete(relacion)
     session.add(lonchera)
-    await session.commit()
-    await session.refresh(lonchera)
+    session.commit()
+    session.refresh(lonchera)
+
+    return lonchera
+
+
+# ====================================================================
+# LISTAR LONCHERAS POR USUARIO
+# ====================================================================
+@router.get("/usuarios/{usuario_id}/loncheras", response_model=List[Lonchera], tags=["Loncheras"])
+def listar_loncheras_usuario(
+        usuario_id: int,
+        session: Session = Depends(get_session)
+):
+    """
+    Lista todas las loncheras activas de un usuario específico.
+    """
+    usuario = session.get(Usuario, usuario_id)
+    if not usuario:
+        raise HTTPException(status_code=404, detail=f"Usuario con ID {usuario_id} no encontrado")
+
+    statement = select(Lonchera).where(
+        Lonchera.usuario_id == usuario_id,
+        Lonchera.is_active == True
+    )
+    loncheras = session.exec(statement).all()
+
+    return loncheras

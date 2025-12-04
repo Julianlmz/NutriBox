@@ -52,7 +52,9 @@ class Direccion(DireccionBase, table=True):
     usuario_id: int = Field(foreign_key="usuario.id")
     fecha_creacion: datetime = Field(default_factory=datetime.now)
 
+    # ✅ CORREGIDO: Relaciones bidireccionales
     usuario: Optional["Usuario"] = Relationship(back_populates="direcciones")
+    loncheras: List["Lonchera"] = Relationship(back_populates="direccion")
 
 class DireccionCreate(DireccionBase):
     pass
@@ -86,11 +88,12 @@ class Usuario(UsuarioBase, table=True):
     hashed_password: str = Field(index=True)
     is_active: bool = Field(default=True, description="Indica si el usuario está activo")
 
+    # ✅ CORREGIDO: Agregada relación con direcciones
     loncheras: List["Lonchera"] = Relationship(back_populates="usuario")
     perfil: Optional["Perfil"] = Relationship(back_populates="usuario", sa_relationship_kwargs={"uselist": False})
     pedidos: List["Pedido"] = Relationship(back_populates="usuario")
     historial: List["HistorialEliminacion"] = Relationship(back_populates="usuario_eliminador")
-    #direcciones: List["Direccion"] = Relationship(back_populates="usuario") # RELACIÓN CON LA NUEVA TABLA DIRECCION
+    direcciones: List["Direccion"] = Relationship(back_populates="usuario")
 
 
 class UsuarioCreate(UsuarioBase):
@@ -127,7 +130,7 @@ class UsuarioConRelaciones(UsuarioBase):
 
 
 # ====================================================================
-# PERFIL / ALIMENTO / RESTRICCIÓN (SIN CAMBIOS)
+# PERFIL / ALIMENTO / RESTRICCIÓN
 # ====================================================================
 
 class PerfilBase(SQLModel):
@@ -271,7 +274,6 @@ class LoncheraBase(SQLModel):
     descripcion: str = Field(min_length=10, max_length=500, description="Descripción de la lonchera")
     calorias: int = Field(default=0, ge=0, description="Calorías totales")
     precio: float = Field(default=0, ge=0, description="Precio total")
-    direccion_id: Optional[int] = Field(default=None, description="ID de la direccion de entrega")
 
     @field_validator('precio')
     @classmethod
@@ -282,12 +284,13 @@ class LoncheraBase(SQLModel):
 class Lonchera(LoncheraBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     usuario_id: int = Field(foreign_key="usuario.id")
+    direccion_id: Optional[int] = Field(default=None, foreign_key="direcciones_v2.id")  # ✅ AGREGADO foreign_key
     fecha_creacion: datetime = Field(default_factory=datetime.now)
     is_active: bool = Field(default=True)
 
     usuario: Optional["Usuario"] = Relationship(back_populates="loncheras")
     alimentos: List["LoncheraAlimento"] = Relationship(back_populates="lonchera")
-   # direccion: Optional[Direccion] = Relationship() # Relación con el modelo Direccion
+    direccion: Optional["Direccion"] = Relationship(back_populates="loncheras")
 
 class LoncheraCreate(LoncheraBase):
     usuario_id: int = Field(description="ID del usuario creador")
@@ -350,7 +353,7 @@ class AgregarAlimento(SQLModel):
 
 
 # ====================================================================
-# PRODUCTO / PEDIDO / INVENTARIO / HISTORIAL (SIN CAMBIOS)
+# PRODUCTO / PEDIDO / INVENTARIO / HISTORIAL
 # ====================================================================
 
 class ProductoBase(SQLModel):

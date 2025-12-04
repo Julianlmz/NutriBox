@@ -8,7 +8,8 @@ from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from Core.database import create_tables
 from Modulos import Usuario, Alimento, Lonchera, Pedido, Restriccion, Algoritmos, Hijo
-from Servicios import Historial, Direccion
+from Servicios import Historial
+from Servicios.Direccion import router as direccion_router
 from Core import auth
 
 @asynccontextmanager
@@ -48,7 +49,7 @@ app.include_router(Pedido.router)
 app.include_router(Algoritmos.router)
 app.include_router(Hijo.router)
 app.include_router(Historial.router)
-app.include_router(Direccion.router)
+app.include_router(direccion_router)
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):

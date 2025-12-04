@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         const backendURL = "/auth/token";
 
-        // ✅ AGREGADO: Mostrar loading
+        // ✅ Mostrar loading
         Swal.fire({
             title: 'Iniciando sesión...',
             allowOutsideClick: false,
@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", function() {
             body: formData,
         })
         .then(response => {
-            console.log("Status:", response.status); // ✅ DEBUGGING
+            console.log("Status:", response.status);
             if (response.ok) {
                 return response.json();
             } else {
@@ -40,9 +40,11 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         })
         .then(data => {
-            console.log("Token recibido:", data.access_token); // ✅ DEBUGGING
+            console.log("Token recibido:", data.access_token);
+            console.log("User ID recibido:", data.user_id); // ✅ NUEVO
 
             localStorage.setItem("access_token", data.access_token);
+            localStorage.setItem("user_id", data.user_id); // ✅ AGREGADO
 
             Swal.fire({
                 icon: 'success',
@@ -55,7 +57,7 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         })
         .catch(error => {
-            console.error('Error completo:', error); // ✅ DEBUGGING
+            console.error('Error completo:', error);
             Swal.fire({
                 icon: 'error',
                 title: 'Error al iniciar sesión',

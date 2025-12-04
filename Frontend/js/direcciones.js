@@ -13,6 +13,11 @@ function getAuthHeaders() {
     };
 }
 
+// ✅ NUEVA: Función para obtener el ID del usuario
+function getUserId() {
+    return localStorage.getItem('user_id');
+}
+
 // Variable global para almacenar direcciones
 window.direcciones = [];
 
@@ -21,7 +26,13 @@ window.direcciones = [];
 // ============================================
 async function loadDirecciones() {
     try {
-        const response = await fetch(`${API_BASE_URL}/direcciones/`, {
+        const userId = getUserId();
+
+        if (!userId) {
+            throw new Error('Usuario no autenticado');
+        }
+
+        const response = await fetch(`${API_BASE_URL}/direcciones/?usuario_id=${userId}`, {
             method: 'GET',
             headers: getAuthHeaders()
         });
@@ -120,9 +131,9 @@ async function guardarDireccion(event) {
     try {
         const url = direccionId
             ? `${API_BASE_URL}/direcciones/${direccionId}`
-            : `${API_BASE_URL}/direcciones/`;
+            : `${API_BASE_URL}/usuarios/${getUserId()}/direcciones`;
 
-        const method = direccionId ? 'PUT' : 'POST';
+        const method = direccionId ? 'PATCH' : 'POST';
 
         const response = await fetch(url, {
             method: method,
@@ -239,7 +250,7 @@ function editDireccion(direccionId) {
 async function setPrincipal(direccionId) {
     try {
         const response = await fetch(`${API_BASE_URL}/direcciones/${direccionId}/principal`, {
-            method: 'PUT',
+            method: 'POST',
             headers: getAuthHeaders()
         });
 
