@@ -7,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from Core.database import create_tables
-from Modulos import Usuario, Alimento, Lonchera, Pedido, Restriccion, Algoritmos, Hijo
+from Modulos import Usuario, Alimento, Lonchera, Pedido, Restriccion, Algoritmos, Hijo, Perfil
 from Servicios import Historial
 from Servicios.Direccion import router as direccion_router
 from Core import auth
@@ -48,6 +48,7 @@ app.include_router(Restriccion.router)
 app.include_router(Pedido.router)
 app.include_router(Algoritmos.router)
 app.include_router(Hijo.router)
+app.include_router(Perfil.router)
 app.include_router(Historial.router)
 app.include_router(direccion_router)
 

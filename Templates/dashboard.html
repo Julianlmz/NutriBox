@@ -100,6 +100,7 @@
                     <div class="nav-title">ANÁLISIS</div>
                     <a href="estadisticas.html" class="nav-item"><i class="fas fa-chart-line"></i> Estadísticas</a>
                     <div class="nav-title">CUENTA</div>
+                    <a href="perfil.html" class="nav-item"><i class="fas fa-user-circle"></i> Mi Perfil</a>
                     <a href="direcciones.html" class="nav-item"><i class="fas fa-map-marker-alt"></i> Direcciones</a>
                     <a href="restricciones.html" class="nav-item"><i class="fas fa-shield-alt"></i> Restricciones</a>
                     <a href="alimentos.html" class="nav-item"><i class="fas fa-utensils"></i> Alimentos</a>
@@ -172,6 +173,7 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script src="/static/js/auth-guard.js"></script>
 
     <script>
@@ -184,7 +186,6 @@
             document.getElementById('main-content').classList.toggle('menu-open');
         }
 
-        // Configurar botón logout
         if (typeof setupLogoutButton === 'function') {
             setupLogoutButton();
         } else {
@@ -197,12 +198,14 @@
         async function cargarDatos() {
             try {
                 const token = localStorage.getItem('access_token');
-                if (!token) {
+                const userId = localStorage.getItem('user_id');
+
+                if (!token || !userId) {
                     window.location.href = 'login.html';
                     return;
                 }
 
-                // 1. Obtener información del Usuario
+                // 1. Obtener Usuario
                 const userRes = await fetch(`${API_URL}/usuario/me`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -211,20 +214,18 @@
                     const user = await userRes.json();
                     const nombre = user.nombre || 'Usuario';
 
-                    // Navbar (Arriba derecha)
                     const userNav = document.getElementById('userName');
                     if(userNav) userNav.textContent = nombre;
 
-                    // Título Principal
                     const pageTitle = document.getElementById('page-title');
                     if(pageTitle) pageTitle.textContent = `Bienvenid@, ${nombre}`;
                 }
 
-                // 2. Cargar Estadísticas
+                // 2. Cargar Estadísticas (Loncheras corregidas)
                 const [hijosRes, loncherasRes, direccionesRes] = await Promise.all([
                     fetch(`${API_URL}/hijo/`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                    fetch(`${API_URL}/lonchera/`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                    fetch(`${API_URL}/direcciones/?usuario_id=${localStorage.getItem('user_id')}`, { headers: { 'Authorization': `Bearer ${token}` } })
+                    fetch(`${API_URL}/usuarios/${userId}/loncheras`, { headers: { 'Authorization': `Bearer ${token}` } }), // CORREGIDO AQUÍ
+                    fetch(`${API_URL}/direcciones/?usuario_id=${userId}`, { headers: { 'Authorization': `Bearer ${token}` } })
                 ]);
 
                 if (hijosRes.ok) {
@@ -242,9 +243,6 @@
 
             } catch (error) {
                 console.error('Error al cargar datos:', error);
-                document.getElementById('total-hijos').textContent = '0';
-                document.getElementById('total-loncheras').textContent = '0';
-                document.getElementById('total-direcciones').textContent = '0';
             }
         }
 
