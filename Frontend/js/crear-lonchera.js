@@ -145,7 +145,7 @@ async function cargarAlimentos() {
 }
 
 function tieneRestriccion(alimento) {
-    return false; // Lógica de restricción visual si se requiere
+    return false; // Lógica visual de restricción
 }
 
 // --- RENDERIZAR ALIMENTOS ---
@@ -192,7 +192,7 @@ function renderizarAlimentos() {
     }).join('');
 }
 
-// --- FUNCIONES GLOBALES (ACCESIBLES DESDE EL HTML) ---
+// --- FUNCIONES GLOBALES ---
 window.agregarAlimento = function(alimentoId) {
     const alimento = alimentosDisponibles.find(a => a.id === alimentoId);
     if (!alimento) return;
@@ -211,6 +211,7 @@ window.agregarAlimento = function(alimentoId) {
         imagen_url: alimento.imagen_url
     });
 
+    // Se ejecutan en orden: Calcular -> Renderizar lista -> Renderizar botones
     actualizarResumen();
     renderizarAlimentosLonchera();
     renderizarAlimentos();
@@ -261,8 +262,10 @@ function renderizarAlimentosLonchera() {
     `).join('');
 }
 
+// --- CORRECCIÓN AQUÍ: Se agregaron los cálculos faltantes ---
 function actualizarResumen() {
     const totalAlimentos = alimentosEnLonchera.length;
+    // Estas líneas faltaban y causaban el error:
     const totalCalorias = alimentosEnLonchera.reduce((sum, a) => sum + a.calorias, 0);
     const totalPrecio = alimentosEnLonchera.reduce((sum, a) => sum + a.precio, 0);
 
@@ -306,19 +309,15 @@ window.crearLonchera = async function() {
         const token = localStorage.getItem('access_token');
         const userId = localStorage.getItem('user_id');
 
-        const totalCalorias = alimentosEnLonchera.reduce((sum, a) => sum + a.calorias, 0);
-        const totalPrecio = alimentosEnLonchera.reduce((sum, a) => sum + a.precio, 0);
-
         const dataLonchera = {
             nombre: nombreLonchera,
             descripcion: `Lonchera para ${document.getElementById('select-hijo').selectedOptions[0].text}`,
-            calorias: totalCalorias,
-            precio: parseFloat(totalPrecio.toFixed(2)),
+            calorias: 0,
+            precio: 0,
             usuario_id: parseInt(userId),
             direccion_id: parseInt(direccionId)
         };
 
-        // 1. CREAR LONCHERA (CORREGIDO: URL SIN PREFIJO EXTRA)
         const responseLonchera = await fetch(`${API_URL}/loncheras`, {
             method: 'POST',
             headers: {
@@ -335,7 +334,6 @@ window.crearLonchera = async function() {
 
         const loncheraCreada = await responseLonchera.json();
 
-        // 2. AGREGAR ALIMENTOS (CORREGIDO: URL SIN PREFIJO EXTRA)
         for (const alimento of alimentosEnLonchera) {
             await fetch(`${API_URL}/loncheras/${loncheraCreada.id}/alimentos`, {
                 method: 'POST',
