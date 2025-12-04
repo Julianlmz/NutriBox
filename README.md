@@ -278,5 +278,3 @@ Link: https://nutribox.onrender.com
 Año: 2025
 
 Este proyecto fue desarrollado como trabajo académico para el curso de Estructura de Datos.
-
-<div align="center"> Hecho con ❤️ y mucho ☕ por estudiantes para familias. </div>
