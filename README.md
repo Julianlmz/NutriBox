@@ -276,5 +276,3 @@ Institución: Universidad Católica de Colombia
 Link: https://nutribox.onrender.com
 
 Año: 2025
-
-Este proyecto fue desarrollado como trabajo académico para el curso de Estructura de Datos.
