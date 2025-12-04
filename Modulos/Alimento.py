@@ -4,13 +4,14 @@ from sqlalchemy.orm import selectinload
 from Core.database import SessionDep
 from Modulos.models import (
     Alimento, AlimentoCreate, AlimentoUpdate,
-    AlimentoRead, # <--- IMPORTANTE: Asegúrate de importar esto
+    AlimentoRead,
     RestriccionAlimento
 )
 from Core.supabase_client import upload_to_bucket
 from typing import List, Optional
 
 router = APIRouter(tags=["Alimentos"], prefix="/alimento")
+
 
 @router.post("/", response_model=AlimentoRead, status_code=201)
 async def crear_alimento(
@@ -28,16 +29,19 @@ async def crear_alimento(
         imagen: Optional[UploadFile] = File(None)
 ):
     final_imagen_url = None
+    # Lógica de imagen
     if tipo_imagen == "file" and imagen and imagen.filename:
         final_imagen_url = await upload_to_bucket(imagen)
     elif tipo_imagen == "url" and imagen_url:
         final_imagen_url = imagen_url
 
+    # Validación de nombre duplicado
     query = select(Alimento).where(Alimento.nombre == nombre)
     result = await session.execute(query)
     if result.scalars().first():
         raise HTTPException(status_code=409, detail=f"Ya existe un alimento con el nombre '{nombre}'")
 
+    # Creación del objeto
     alimento = Alimento(
         nombre=nombre, categoria=categoria, calorias_por_100g=calorias_por_100g,
         proteinas_por_100g=proteinas_por_100g, carbohidratos_por_100g=carbohidratos_por_100g,
@@ -47,7 +51,16 @@ async def crear_alimento(
     session.add(alimento)
     await session.commit()
     await session.refresh(alimento)
-    return alimento
+
+    # --- CORRECCIÓN CRÍTICA ---
+    # Recargamos el alimento con sus relaciones para evitar el error 500 (MissingGreenlet)
+    # al intentar serializar 'restricciones' en la respuesta asíncrona.
+    query_reload = select(Alimento).where(Alimento.id == alimento.id).options(selectinload(Alimento.restricciones))
+    result_reload = await session.execute(query_reload)
+    alimento_completo = result_reload.scalars().first()
+
+    return alimento_completo
+
 
 @router.get("/", response_model=List[AlimentoRead])
 async def listar_alimentos(
@@ -60,6 +73,7 @@ async def listar_alimentos(
         query = query.where(Alimento.is_active == True)
     result = await session.execute(query)
     return result.scalars().all()
+
 
 @router.get("/{alimento_id}", response_model=AlimentoRead)
 async def obtener_alimento(alimento_id: int, session: SessionDep):
@@ -77,7 +91,11 @@ async def actualizar_parcial_alimento(
         data: AlimentoUpdate,
         session: SessionDep
 ):
-    alimento = await session.get(Alimento, alimento_id)
+    # Cargar con relaciones para poder devolver el modelo completo después
+    query = select(Alimento).where(Alimento.id == alimento_id).options(selectinload(Alimento.restricciones))
+    result = await session.execute(query)
+    alimento = result.scalars().first()
+
     if not alimento or not alimento.is_active:
         raise HTTPException(status_code=404, detail="Alimento no encontrado")
 
@@ -107,7 +125,11 @@ async def eliminar_alimento(alimento_id: int, session: SessionDep):
 
 @router.post("/{alimento_id}/upload-image", response_model=AlimentoRead)
 async def subir_imagen_alimento(alimento_id: int, session: SessionDep, imagen: UploadFile = File(...)):
-    alimento = await session.get(Alimento, alimento_id)
+    # Cargar con relaciones para evitar error 500 al retornar
+    query = select(Alimento).where(Alimento.id == alimento_id).options(selectinload(Alimento.restricciones))
+    result = await session.execute(query)
+    alimento = result.scalars().first()
+
     if not alimento:
         raise HTTPException(status_code=404, detail="Alimento no encontrado")
 

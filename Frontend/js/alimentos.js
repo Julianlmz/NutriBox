@@ -1,9 +1,10 @@
 // Nota: TOKEN y AUTH_HEADERS se definen globalmente en auth-guard.js
 
+// --- 1. Funciones de Utilidad Visual (Globales) ---
 function toggleImageInput(tipo) {
     const containerUrl = document.getElementById('input-url-container');
     const containerFile = document.getElementById('input-file-container');
-    // Lógica visual igual a hijos.js
+
     if (tipo === 'url') {
         containerUrl.style.display = 'block';
         containerFile.style.display = 'none';
@@ -31,14 +32,16 @@ function toggleEditImageInput(tipo) {
 }
 window.toggleEditImageInput = toggleEditImageInput;
 
+// --- 2. Inicialización al Cargar DOM ---
 document.addEventListener("DOMContentLoaded", function() {
+    // Configurar botón de logout si existe
     if (typeof setupLogoutButton === 'function') setupLogoutButton();
 
     const ALIMENTO_BASE_URL = "/alimento/";
     const modalEditar = new bootstrap.Modal(document.getElementById('modalEditarAlimento'));
     const CATEGORIAS = ["Frutas", "Vegetales", "Proteínas", "Lácteos", "Cereales", "Snacks", "Bebidas"];
 
-    // Llenar selects
+    // A. Llenar selects de categorías
     const selects = [document.getElementById("alimento-categoria"), document.getElementById("edit-alimento-categoria")];
     selects.forEach(select => {
         select.innerHTML = '<option value="">Seleccione Categoría</option>';
@@ -48,10 +51,10 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
-    // Inicializar visualización
+    // B. Inicializar estado visual del toggle
     if (document.getElementById('option-file')) toggleImageInput('file');
 
-    // Cargar Datos
+    // C. Cargar Datos Iniciales (Validando sesión primero)
     fetch("/usuario/me", { method: 'GET', headers: AUTH_HEADERS })
         .then(r => r.ok ? r.json() : Promise.reject())
         .then(() => cargarAlimentos())
@@ -67,11 +70,13 @@ document.addEventListener("DOMContentLoaded", function() {
     function renderAlimentos(alimentos) {
         const container = document.getElementById("lista-alimentos");
         if (!container) return;
+
         if (alimentos.length === 0) {
             container.innerHTML = '<div class="text-center text-muted p-5">No hay alimentos aún.</div>';
             return;
         }
 
+        // Agrupar alimentos por categoría
         const grupos = alimentos.reduce((acc, item) => {
             (acc[item.categoria] = acc[item.categoria] || []).push(item);
             return acc;
@@ -105,15 +110,23 @@ document.addEventListener("DOMContentLoaded", function() {
         container.innerHTML = html;
     }
 
-    // --- CREAR ALIMENTO (Lógica igual a Hijos) ---
+    // --- 3. CREAR ALIMENTO (Protegido contra Doble Submit y Espacios) ---
     document.getElementById("form-crear-alimento").addEventListener("submit", function(e) {
         e.preventDefault();
+
+        // BLOQUEO DE BOTÓN: Evita el error 409 por doble clic
+        const btnGuardar = this.querySelector('button[type="submit"]');
+        const textoOriginal = btnGuardar.innerText;
+        btnGuardar.disabled = true;
+        btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
         const formData = new FormData();
 
-        // Obtenemos el tipo (file o url)
+        // Capturar tipo de imagen
         const tipoImagen = document.querySelector('input[name="tipoImagen"]:checked').value;
-        formData.append("tipo_imagen", tipoImagen); // ¡Enviamos el tipo!
+        formData.append("tipo_imagen", tipoImagen);
 
+        // Capturar campos de texto
         formData.append("nombre", document.getElementById("alimento-nombre").value);
         formData.append("categoria", document.getElementById("alimento-categoria").value);
         formData.append("calorias_por_100g", document.getElementById("alimento-calorias").value);
@@ -123,10 +136,10 @@ document.addEventListener("DOMContentLoaded", function() {
         formData.append("precio_unitario", document.getElementById("alimento-precio").value);
         formData.append("stock_inicial", 0);
 
-        // Lógica idéntica a hijos.js
+        // Capturar imagen con limpieza (.trim)
         if (tipoImagen === 'url') {
-            const urlVal = document.getElementById('alimento-imagen-url').value;
-            formData.append("imagen_url", urlVal); // Enviamos como imagen_url
+            const urlVal = document.getElementById('alimento-imagen-url').value.trim();
+            formData.append("imagen_url", urlVal);
         } else {
             const fileInput = document.getElementById("alimento-imagen-file");
             if (fileInput.files[0]) {
@@ -134,8 +147,14 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
 
+        // Enviar al Backend
         fetch(ALIMENTO_BASE_URL, { method: 'POST', body: formData, headers: {'Authorization': `Bearer ${TOKEN}`} })
-        .then(r => r.ok ? r.json() : Promise.reject(r))
+        .then(async r => {
+            if (r.ok) return r.json();
+            // Intentar leer error del backend (ej: duplicado)
+            const errorData = await r.json().catch(() => ({}));
+            throw new Error(errorData.detail || 'Error desconocido al crear alimento');
+        })
         .then(() => {
             Swal.fire({icon: 'success', title: 'Guardado', timer: 1500, showConfirmButton: false});
             e.target.reset();
@@ -144,10 +163,18 @@ document.addEventListener("DOMContentLoaded", function() {
             toggleImageInput('file');
             cargarAlimentos();
         })
-        .catch(err => Swal.fire('Error', 'No se pudo crear', 'error'));
+        .catch(err => {
+            console.error(err);
+            Swal.fire('Atención', err.message, 'warning');
+        })
+        .finally(() => {
+            // RESTAURAR BOTÓN SIEMPRE (Éxito o Error)
+            btnGuardar.disabled = false;
+            btnGuardar.innerText = textoOriginal;
+        });
     });
 
-    // --- EDITAR ---
+    // --- 4. EDITAR ALIMENTO ---
     window.abrirModalEditar = function(id) {
         fetch(`${ALIMENTO_BASE_URL}${id}`, { headers: AUTH_HEADERS })
         .then(r => r.json())
@@ -164,6 +191,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const img = item.imagen_url || '';
             document.getElementById("edit-alimento-imagen-preview").src = img || 'https://via.placeholder.com/100';
 
+            // Configurar el toggle según lo que tenga el alimento
             if(img && img.startsWith('http') && !img.includes('supabase')) {
                 document.getElementById('edit-option-url').checked = true;
                 toggleEditImageInput('url');
@@ -182,6 +210,11 @@ document.addEventListener("DOMContentLoaded", function() {
         const id = document.getElementById("edit-alimento-id").value;
         const tipoImagen = document.querySelector('input[name="editTipoImagen"]:checked').value;
 
+        // También protegemos este botón
+        const btnGuardar = this.querySelector('button[type="submit"]');
+        btnGuardar.disabled = true;
+        btnGuardar.innerText = 'Guardando...';
+
         const data = {
             nombre: document.getElementById("edit-alimento-nombre").value,
             categoria: document.getElementById("edit-alimento-categoria").value,
@@ -193,7 +226,7 @@ document.addEventListener("DOMContentLoaded", function() {
         };
 
         if (tipoImagen === 'url') {
-            data.imagen_url = document.getElementById("edit-alimento-imagen-url").value;
+            data.imagen_url = document.getElementById("edit-alimento-imagen-url").value.trim();
         }
 
         fetch(`${ALIMENTO_BASE_URL}${id}`, {
@@ -201,27 +234,52 @@ document.addEventListener("DOMContentLoaded", function() {
             headers: { ...Object.fromEntries(AUTH_HEADERS), 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         })
-        .then(r => r.ok ? r.json() : Promise.reject())
-        .then(async () => {
+        .then(async r => {
+            if (!r.ok) throw new Error('Error al actualizar datos');
+
+            // Si es archivo, subirlo por separado
             const file = document.getElementById("edit-alimento-imagen-file").files[0];
             if (tipoImagen === 'file' && file) {
                 const fd = new FormData(); fd.append("imagen", file);
                 await fetch(`${ALIMENTO_BASE_URL}${id}/upload-image`, { method: 'POST', body: fd, headers: {'Authorization': `Bearer ${TOKEN}`} });
             }
+        })
+        .then(() => {
             modalEditar.hide();
             Swal.fire({icon: 'success', title: 'Actualizado', timer: 1500, showConfirmButton: false});
             cargarAlimentos();
         })
-        .catch(() => Swal.fire('Error', 'No se pudo actualizar', 'error'));
+        .catch((err) => {
+            console.error(err);
+            Swal.fire('Error', 'No se pudo actualizar el alimento', 'error');
+        })
+        .finally(() => {
+            btnGuardar.disabled = false;
+            btnGuardar.innerText = 'Guardar Cambios';
+        });
     });
 
+    // --- 5. BORRAR ALIMENTO ---
     window.borrarAlimento = function(id) {
         Swal.fire({
-            title: '¿Borrar?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí, borrar'
+            title: '¿Borrar alimento?',
+            text: "Esta acción no se puede deshacer",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, borrar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#d33'
         }).then((result) => {
             if (result.isConfirmed) {
                 fetch(`${ALIMENTO_BASE_URL}${id}`, { method: 'DELETE', headers: AUTH_HEADERS })
-                .then(() => { cargarAlimentos(); Swal.fire('Borrado', '', 'success'); });
+                .then(r => {
+                    if (r.ok) {
+                        cargarAlimentos();
+                        Swal.fire('Borrado', 'El alimento ha sido eliminado', 'success');
+                    } else {
+                        Swal.fire('Error', 'No se pudo eliminar', 'error');
+                    }
+                });
             }
         });
     };
