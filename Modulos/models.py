@@ -36,7 +36,7 @@ class EstadoPedido(str, Enum):
     CANCELADO = "Cancelado"
 
 # ====================================================================
-# DIRECCIÓN (MOVIDO ARRIBA PARA DEFINIR LA CLASE ANTES DE USARLA)
+# DIRECCIÓN
 # ====================================================================
 
 class DireccionBase(SQLModel):
@@ -46,13 +46,11 @@ class DireccionBase(SQLModel):
     principal: bool = Field(default=False)
 
 class Direccion(DireccionBase, table=True):
-    # USAMOS V2 PARA EVITAR CONFLICTOS EN AZURE CON LA TABLA VIEJA
     __tablename__ = "direcciones_v2"
     id: Optional[int] = Field(default=None, primary_key=True)
     usuario_id: int = Field(foreign_key="usuario.id")
     fecha_creacion: datetime = Field(default_factory=datetime.now)
 
-    # ✅ CORREGIDO: Relaciones bidireccionales
     usuario: Optional["Usuario"] = Relationship(back_populates="direcciones")
     loncheras: List["Lonchera"] = Relationship(back_populates="direccion")
 
@@ -88,7 +86,6 @@ class Usuario(UsuarioBase, table=True):
     hashed_password: str = Field(index=True)
     is_active: bool = Field(default=True, description="Indica si el usuario está activo")
 
-    # ✅ CORREGIDO: Agregada relación con direcciones
     loncheras: List["Lonchera"] = Relationship(back_populates="usuario")
     perfil: Optional["Perfil"] = Relationship(back_populates="usuario", sa_relationship_kwargs={"uselist": False})
     pedidos: List["Pedido"] = Relationship(back_populates="usuario")
@@ -266,7 +263,7 @@ class RestriccionHijo(SQLModel, table=True):
     fecha_asociacion: datetime = Field(default_factory=datetime.now)
 
 # ====================================================================
-# LONCHERA (CON REFERENCIA A LA NUEVA TABLA direcciones_v2)
+# LONCHERA
 # ====================================================================
 
 class LoncheraBase(SQLModel):
@@ -284,7 +281,7 @@ class LoncheraBase(SQLModel):
 class Lonchera(LoncheraBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     usuario_id: int = Field(foreign_key="usuario.id")
-    direccion_id: Optional[int] = Field(default=None, foreign_key="direcciones_v2.id")  # ✅ AGREGADO foreign_key
+    direccion_id: Optional[int] = Field(default=None, foreign_key="direcciones_v2.id")
     fecha_creacion: datetime = Field(default_factory=datetime.now)
     is_active: bool = Field(default=True)
 
@@ -478,7 +475,25 @@ class HistorialEliminacionCreate(HistorialEliminacionBase):
 
 
 # ====================================================================
-# RECONSTRUCCIÓN DE MODELOS (Necesario para SQLModel)
+# SCHEMAS DE LECTURA (PARA RESPUESTAS JSON CON RELACIONES)
+# ====================================================================
+
+class RestriccionAlimentoRead(SQLModel):
+    restriccion_id: int
+    alimento_id: int
+    fecha_asociacion: datetime
+
+class AlimentoRead(AlimentoBase):
+    id: int
+    imagen_url: Optional[str] = None
+    stock_actual: int
+    is_active: bool
+    # Esto es lo que permite ver las restricciones en el JSON
+    restricciones: List[RestriccionAlimentoRead] = []
+
+
+# ====================================================================
+# RECONSTRUCCIÓN DE MODELOS
 # ====================================================================
 
 Usuario.model_rebuild()
