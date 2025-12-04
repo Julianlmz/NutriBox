@@ -35,6 +35,7 @@ class EstadoPedido(str, Enum):
     ENTREGADO = "Entregado"
     CANCELADO = "Cancelado"
 
+
 # ====================================================================
 # DIRECCIÓN
 # ====================================================================
@@ -45,6 +46,7 @@ class DireccionBase(SQLModel):
     ciudad: Optional[str] = Field(default="Bogotá", max_length=100)
     principal: bool = Field(default=False)
 
+
 class Direccion(DireccionBase, table=True):
     __tablename__ = "direcciones_v2"
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -54,14 +56,17 @@ class Direccion(DireccionBase, table=True):
     usuario: Optional["Usuario"] = Relationship(back_populates="direcciones")
     loncheras: List["Lonchera"] = Relationship(back_populates="direccion")
 
+
 class DireccionCreate(DireccionBase):
     pass
+
 
 class DireccionUpdate(SQLModel):
     nombre: Optional[str] = None
     direccion: Optional[str] = None
     ciudad: Optional[str] = None
     principal: Optional[bool] = None
+
 
 # ====================================================================
 # USUARIO
@@ -85,6 +90,9 @@ class Usuario(UsuarioBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     hashed_password: str = Field(index=True)
     is_active: bool = Field(default=True, description="Indica si el usuario está activo")
+
+    # --- NUEVO CAMPO: Vincula al hijo con su padre ---
+    padre_id: Optional[int] = Field(default=None, foreign_key="usuario.id", description="ID del padre si es un hijo")
 
     loncheras: List["Lonchera"] = Relationship(back_populates="usuario")
     perfil: Optional["Perfil"] = Relationship(back_populates="usuario", sa_relationship_kwargs={"uselist": False})
@@ -262,6 +270,7 @@ class RestriccionHijo(SQLModel, table=True):
     restriccion_id: int = Field(foreign_key="restriccion.id", primary_key=True)
     fecha_asociacion: datetime = Field(default_factory=datetime.now)
 
+
 # ====================================================================
 # LONCHERA
 # ====================================================================
@@ -288,6 +297,7 @@ class Lonchera(LoncheraBase, table=True):
     usuario: Optional["Usuario"] = Relationship(back_populates="loncheras")
     alimentos: List["LoncheraAlimento"] = Relationship(back_populates="lonchera")
     direccion: Optional["Direccion"] = Relationship(back_populates="loncheras")
+
 
 class LoncheraCreate(LoncheraBase):
     usuario_id: int = Field(description="ID del usuario creador")
@@ -483,12 +493,12 @@ class RestriccionAlimentoRead(SQLModel):
     alimento_id: int
     fecha_asociacion: datetime
 
+
 class AlimentoRead(AlimentoBase):
     id: int
     imagen_url: Optional[str] = None
     stock_actual: int
     is_active: bool
-    # Esto es lo que permite ver las restricciones en el JSON
     restricciones: List[RestriccionAlimentoRead] = []
 
 

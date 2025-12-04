@@ -1,8 +1,4 @@
-// ============================================
-// DIRECCIONES.JS - Gestión de Direcciones
-// ============================================
-
-const API_BASE_URL = "http://127.0.0.1:8000";
+const API_BASE_URL = "";
 
 // Función para obtener headers con token
 function getAuthHeaders() {

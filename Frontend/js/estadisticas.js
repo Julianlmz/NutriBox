@@ -1,5 +1,5 @@
 // estadisticas.js
-const API_URL = 'http://127.0.0.1:8000';
+const API_URL = '';
 
 // Variables globales para las instancias de los gráficos
 let charts = {};
@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarNombreUsuario();
 });
 
-// Función para poner el nombre "Bienvenid@, Julian" en el navbar
 function cargarNombreUsuario() {
     const token = localStorage.getItem('access_token');
     if (!token) return;

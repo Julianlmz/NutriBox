@@ -1,5 +1,5 @@
-from fastapi import APIRouter, HTTPException, status, Form, UploadFile, File
-from typing import List, Optional
+from fastapi import APIRouter, HTTPException, status, Form, UploadFile, File, Depends
+from typing import List, Optional, Annotated
 from sqlmodel import select
 from sqlalchemy.orm import selectinload
 from pydantic import BaseModel
@@ -8,6 +8,7 @@ from Core.database import SessionDep
 from Core.seguridad import hashear_password
 from Core.supabase_client import upload_to_bucket
 from Modulos.models import Usuario, Perfil, Restriccion, RestriccionHijo
+from Core.auth import get_current_user
 
 router = APIRouter(tags=["Hijos"], prefix="/hijo")
 
@@ -29,7 +30,6 @@ def procesar_hijo(usuario: Usuario) -> HijoResponse:
     genero = "Otro"
     foto = "https://cdn-icons-png.flaticon.com/512/3011/3011270.png"
 
-    # IMPORTANTE: Esto funciona solo si 'usuario' ya viene con 'perfil' cargado
     if usuario.perfil:
         if usuario.perfil.foto_url:
             foto = usuario.perfil.foto_url
@@ -59,6 +59,7 @@ def procesar_hijo(usuario: Usuario) -> HijoResponse:
 @router.post("/", response_model=HijoResponse, status_code=201)
 async def crear_hijo(
         session: SessionDep,
+        current_user: Annotated[Usuario, Depends(get_current_user)],  # <--- Exigimos usuario autenticado
         nombre: str = Form(...),
         apellido: str = Form(...),
         edad: int = Form(5),
@@ -86,13 +87,14 @@ async def crear_hijo(
     except Exception as e:
         print(f"Error imagen: {e}")
 
-    # 3. Crear Usuario Base
+    # 3. Crear Usuario Base (HIJO)
     password_hash = hashear_password(password)
     nuevo_hijo = Usuario(
         nombre=nombre,
         apellido=apellido,
         email=email,
-        hashed_password=password_hash
+        hashed_password=password_hash,
+        padre_id=current_user.id  # <--- VINCULAMOS AL PADRE
     )
 
     session.add(nuevo_hijo)
@@ -109,8 +111,7 @@ async def crear_hijo(
     session.add(nuevo_perfil)
     await session.commit()
 
-    # --- FIX PARA "MissingGreenlet" ---
-    # En lugar de solo refresh(), hacemos una consulta que carga explícitamente el perfil
+    # Cargar perfil para la respuesta
     query_final = select(Usuario).where(Usuario.id == nuevo_hijo.id).options(
         selectinload(Usuario.perfil)
     )
@@ -121,9 +122,15 @@ async def crear_hijo(
 
 
 @router.get("/", response_model=List[HijoResponse])
-async def listar_hijos(session: SessionDep):
-    # Cargar usuarios CON su perfil listo (Eager Loading)
-    query = select(Usuario).where(Usuario.is_active == True).options(
+async def listar_hijos(
+        session: SessionDep,
+        current_user: Annotated[Usuario, Depends(get_current_user)]  # <--- Exigimos usuario autenticado
+):
+    # FILTRAR POR PADRE_ID
+    query = select(Usuario).where(
+        Usuario.is_active == True,
+        Usuario.padre_id == current_user.id  # <--- SOLO HIJOS DE ESTE USUARIO
+    ).options(
         selectinload(Usuario.perfil)
     )
     result = await session.execute(query)
@@ -131,8 +138,8 @@ async def listar_hijos(session: SessionDep):
 
     hijos = []
     for u in usuarios:
-        if (u.email and "hijo_" in u.email) or (u.perfil and u.perfil.bio and "Edad:" in u.perfil.bio):
-            hijos.append(procesar_hijo(u))
+        # Ya no necesitamos filtrar por email "hijo_" porque tenemos padre_id
+        hijos.append(procesar_hijo(u))
     return hijos
 
 
@@ -140,6 +147,7 @@ async def listar_hijos(session: SessionDep):
 async def actualizar_hijo(
         hijo_id: int,
         session: SessionDep,
+        current_user: Annotated[Usuario, Depends(get_current_user)],  # Seguridad
         nombre: str = Form(...),
         apellido: str = Form(...),
         edad: int = Form(...),
@@ -148,8 +156,12 @@ async def actualizar_hijo(
         imagen_url: Optional[str] = Form(None),
         imagen_archivo: Optional[UploadFile] = File(None)
 ):
-    # Buscar hijo cargando perfil de una vez
-    query = select(Usuario).where(Usuario.id == hijo_id).options(selectinload(Usuario.perfil))
+    # Buscar hijo asegurando que sea del usuario actual
+    query = select(Usuario).where(
+        Usuario.id == hijo_id,
+        Usuario.padre_id == current_user.id  # Seguridad extra
+    ).options(selectinload(Usuario.perfil))
+
     result = await session.execute(query)
     hijo = result.scalars().first()
 
@@ -159,7 +171,6 @@ async def actualizar_hijo(
     # Asegurar que el perfil existe
     perfil = hijo.perfil
     if not perfil:
-        # Buscar manual si falló la carga (raro pero seguro)
         q_p = select(Perfil).where(Perfil.usuario_id == hijo.id)
         res_p = await session.execute(q_p)
         perfil = res_p.scalars().first()
@@ -187,7 +198,7 @@ async def actualizar_hijo(
     session.add(perfil)
     await session.commit()
 
-    # Recargar completo para evitar error de lazy load
+    # Recargar completo
     query_reload = select(Usuario).where(Usuario.id == hijo.id).options(selectinload(Usuario.perfil))
     res_reload = await session.execute(query_reload)
     hijo_actualizado = res_reload.scalars().first()
@@ -196,9 +207,15 @@ async def actualizar_hijo(
 
 
 @router.delete("/{hijo_id}", status_code=204)
-async def eliminar_hijo(hijo_id: int, session: SessionDep):
+async def eliminar_hijo(
+        hijo_id: int,
+        session: SessionDep,
+        current_user: Annotated[Usuario, Depends(get_current_user)]
+):
     hijo = await session.get(Usuario, hijo_id)
-    if not hijo:
+
+    # Validar que sea hijo del usuario actual
+    if not hijo or hijo.padre_id != current_user.id:
         raise HTTPException(status_code=404, detail="Hijo no encontrado")
 
     hijo.is_active = False
@@ -213,12 +230,13 @@ async def eliminar_hijo(hijo_id: int, session: SessionDep):
 async def asociar_restriccion(
         hijo_id: int,
         restriccion_id: int,
-        session: SessionDep
+        session: SessionDep,
+        current_user: Annotated[Usuario, Depends(get_current_user)]
 ):
     """Asociar una restricción a un hijo"""
-    # Verificar que el hijo existe
+    # Verificar que el hijo existe y es del usuario
     hijo = await session.get(Usuario, hijo_id)
-    if not hijo:
+    if not hijo or hijo.padre_id != current_user.id:
         raise HTTPException(status_code=404, detail="Hijo no encontrado")
 
     # Verificar que la restricción existe
@@ -249,10 +267,15 @@ async def asociar_restriccion(
 async def desasociar_restriccion(
         hijo_id: int,
         restriccion_id: int,
-        session: SessionDep
+        session: SessionDep,
+        current_user: Annotated[Usuario, Depends(get_current_user)]
 ):
     """Desasociar una restricción de un hijo"""
-    # Buscar la asociación
+    # Verificar propiedad del hijo (aunque la query fallaría igual si no existe, es mejor validar)
+    hijo = await session.get(Usuario, hijo_id)
+    if not hijo or hijo.padre_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Hijo no encontrado")
+
     query = select(RestriccionHijo).where(
         RestriccionHijo.hijo_id == hijo_id,
         RestriccionHijo.restriccion_id == restriccion_id
@@ -271,12 +294,13 @@ async def desasociar_restriccion(
 @router.get("/{hijo_id}/restricciones", response_model=List[dict])
 async def listar_restricciones_hijo(
         hijo_id: int,
-        session: SessionDep
+        session: SessionDep,
+        current_user: Annotated[Usuario, Depends(get_current_user)]
 ):
     """Listar todas las restricciones de un hijo"""
-    # Verificar que el hijo existe
+    # Verificar propiedad
     hijo = await session.get(Usuario, hijo_id)
-    if not hijo:
+    if not hijo or hijo.padre_id != current_user.id:
         raise HTTPException(status_code=404, detail="Hijo no encontrado")
 
     # Obtener restricciones
